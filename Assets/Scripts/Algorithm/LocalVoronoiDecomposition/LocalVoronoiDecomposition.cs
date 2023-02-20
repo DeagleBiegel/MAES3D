@@ -34,7 +34,7 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
                 float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
 
                 if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored &&
-                    tempDist <= 3.75) 
+                    tempDist <= 6.75) 
                 {
                     _controller.GetLocalExplorationMap()[c.x, c.y, c.z] = CellStatus.covered;
                 }
@@ -77,16 +77,16 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
                  * GO TO CELL */
                 if (destination != null) 
                 {
+                    Debug.DrawLine(_controller.GetPosition(), destination.middle, Color.red, 5);
                     _controller.MoveToCell(destination);
                 }
-                
             }
         }
 
         private Cell ExplorationMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) 
         {
             Cell destination = null;
-            float distance = 1000f;
+            float distance = 100000f;
 
             foreach (Cell c in cells) 
             {
