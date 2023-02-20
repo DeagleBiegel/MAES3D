@@ -25,7 +25,7 @@ namespace MAES3D.Agent {
         public float ExploredRatio => _exploredTiles * 100 / _explorableTiles;
 
         public ExplorationManager() {
-            _observationLines = CalculateObservationLines(5 /*exploration radius*/); // UpdateMap
+            _observationLines = CalculateObservationLines();
 
             Chunk chunk = GameObject.FindObjectOfType(typeof(Chunk)) as Chunk;
             _voxelMap = chunk.GetVoxelMap();
@@ -49,9 +49,10 @@ namespace MAES3D.Agent {
         private void UpdateMap(SubmarineAgent agent) {
             agent.Controller.ExplorationMap.ResetCurrentView();
             Vector3 agentPosition = agent.Controller.GetPosition();
+            agent.HasBeenSeen = new bool[_voxelMap.GetLength(0), _voxelMap.GetLength(1), _voxelMap.GetLength(2)];
 
             foreach (ObservationLine observationLine in _observationLines) {
-                List<Cell> observedCells = GetObservedCellsOnLine(agentPosition, observationLine);
+                List<Cell> observedCells = GetObservedCellsOnLine(agentPosition, observationLine, agent);
 
                 foreach (Cell cell in observedCells) {
                     if (_voxelMap[cell.x, cell.y, cell.z] == true) {
@@ -159,27 +160,54 @@ namespace MAES3D.Agent {
             return gridPoints;
         }
 
-        private List<ObservationLine> CalculateObservationLines(float radius) {
-            List<Vector3> rayTargets = CalculateRayTargetPoints(radius);
+        private List<ObservationLine> CalculateObservationLines() 
+        {
+            /*
+            IcosahedronGenerator icosahedron = new IcosahedronGenerator();
+            icosahedron.Subdivide(4);
+            */
+
+            float goldenRatio = (1 + Mathf.Pow(5, 0.5f)) / 2f;
+            List<Vector3> points = new List<Vector3>();
+
+            int n = 2562 * 2;
+
+            for (int i = 0; i < n; i++) 
+            {
+                float theta = 2 * Mathf.PI * i / goldenRatio;
+                float phi = Mathf.Acos(1 - 2 * (i + 0.5f) / n);
+                points.Add
+                (
+                    new Vector3
+                    (
+                        Mathf.Cos(theta) * Mathf.Sin(phi),
+                        Mathf.Sin(theta) * Mathf.Sin(phi),
+                        Mathf.Cos(phi)
+                    )
+                );
+            }
 
             List<ObservationLine> lines = new List<ObservationLine>();
 
-            foreach (Vector3 rayTarget in rayTargets) {
+            foreach (Vector3 rayTarget in points) 
+            {
                 lines.Add(new ObservationLine(rayTarget));
             }
 
             return lines;
         }
 
-        private List<Cell> GetObservedCellsOnLine(Vector3 agentPosition, ObservationLine line) {
+        private List<Cell> GetObservedCellsOnLine(Vector3 agentPosition, ObservationLine line, SubmarineAgent agent) 
+        {
             Cell agentCell = Utility.CoordinateToCell(agentPosition);
             Cell targetCell = new Cell(agentCell.x + line.targetCellOffset.x,
-                                       agentCell.y + line.targetCellOffset.y,
-                                       agentCell.z + line.targetCellOffset.z);
+                                    agentCell.y + line.targetCellOffset.y,
+                                    agentCell.z + line.targetCellOffset.z);
 
             float manhattanDistance = Cell.ManhattanDistance(agentCell, targetCell);
 
-            Vector3 tMax = new Vector3(
+            Vector3 tMax = new Vector3
+            (
                 (line.sign[0] == 0 || line.sign[0] == 1)
                     ? (1 - agentPosition.x % 1) * line.tMaxPart.x
                     : agentPosition.x % 1 * line.tMaxPart.x,
@@ -195,47 +223,47 @@ namespace MAES3D.Agent {
             List<Cell> traversedCells = new List<Cell>();
             Cell currentCell = agentCell;
 
-            for (int i = 0; i < manhattanDistance; i++) {
-                if (tMax.x < tMax.y) {
-                    if (tMax.x < tMax.z) { // tMaxX < tMaxY og tMaxZ
+            for (int i = 0; i <= 1000; i++) 
+            {
+                if (tMax.x < tMax.y) 
+                {
+                    if (tMax.x < tMax.z) 
+                    { // tMaxX < tMaxY og tMaxZ
                         currentCell.x += line.sign[0];
                         tMax.x += line.delta.x;
                     }
-                    else { // tMaxZ < tMaxX < tMaxY 
+                    else 
+                    { // tMaxZ < tMaxX < tMaxY 
                         currentCell.z += line.sign[2];
                         tMax.z += line.delta.z;
                     }
                 }
-                else {
-                    if (tMax.y < tMax.z) { // tMaxY < tMaxX og tMaxZ 
+                else 
+                {
+                    if (tMax.y < tMax.z) 
+                    { // tMaxY < tMaxX og tMaxZ 
                         currentCell.y += line.sign[1];
                         tMax.y += line.delta.y;
                     }
-                    else { // tMaxZ < tMaxY < tMaxX 
+                    else 
+                    { // tMaxZ < tMaxY < tMaxX 
                         currentCell.z += line.sign[2];
                         tMax.z += line.delta.z;
                     }
                 }
-                
-                //Check that current cell is within the map
-                if (currentCell.x < 0 || currentCell.x > _voxelMap.GetLength(0) ||
-                    currentCell.y < 0 || currentCell.y > _voxelMap.GetLength(1) ||
-                    currentCell.z < 0 || currentCell.y > _voxelMap.GetLength(2)) {
-                    break;
+
+                if (!agent.HasBeenSeen[currentCell.x, currentCell.y, currentCell.z]) 
+                {
+                    traversedCells.Add(new Cell(currentCell.x, currentCell.y, currentCell.z));
+                    agent.HasBeenSeen[currentCell.x, currentCell.y, currentCell.z] = true;
                 }
 
-                if (IsCellViewableFromPosition(currentCell, agentPosition)) {
-                    traversedCells.Add(new Cell(
-                        currentCell.x,
-                        currentCell.y,
-                        currentCell.z)
-                    );
-                }
-                else {
+                if (_voxelMap[currentCell.x, currentCell.y, currentCell.z])
+                {
                     break;
                 }
             }
-
+            
             return traversedCells;
         }
 
@@ -382,5 +410,4 @@ namespace MAES3D.Agent {
             targetCellOffset = Utility.CoordinateToCell(ray);
         }
     }
-
 }
