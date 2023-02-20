@@ -1,0 +1,67 @@
+PopupTextElement {
+    color: rgb(0, 0, 0);
+    -unity-font-style: bold;
+}
+
+#unity-text-field {
+    display: flex;
+    visibility: visible;
+    overflow: visible;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-color: rgb(0, 0, 0);
+    top: auto;
+    bottom: 30%;
+    right: auto;
+    padding-left: 0;
+}
+
+#unity-text-input {
+    color: rgb(0, 0, 0);
+    -unity-font-style: bold;
+}
+
+#unity-progress-bar {
+    color: rgb(0, 0, 0);
+}
+
+.button {
+    width: 180px;
+    height: 50px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    background-color: rgb(56, 56, 56);
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.secTitle {
+    -unity-text-align: upper-center;
+    font-size: 18px;
+}
+
+.property {
+    align-items: stretch;
+    justify-content: flex-start;
+    width: auto;
+    height: auto;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow: visible;
+    visibility: visible;
+}
+
+.smallContainer {
+    width: 90%;
+    left: 5%;
+    -unity-font-style: normal;
+}
+
+.lightBackground {
+    -unity-font-style: bold;
+}
+
+.unity-progress-bar__progress {
+    background-color: rgba(3, 96, 0, 255);
+}

@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/StyleSheet.uss?fileID=7433441132597879392&amp;guid=03ecd5b907436a749918d813f369138e&amp;type=3#StyleSheet" />
+    <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" nested-interaction-kind="Default" focusable="false" mode="VerticalAndHorizontal" style="left: auto; width: 275px; flex-direction: row; background-color: rgba(0, 0, 0, 0.9); -unity-text-align: upper-left; align-items: center; color: rgb(255, 255, 255); flex-basis: 100%; justify-content: space-around; position: absolute; height: 100%; right: 0;">
+        <ui:Label text="MAES3D" display-tooltip-when-elided="true" name="Title" style="font-size: 45%; -unity-text-align: upper-center;" />
+        <ui:GroupBox name="Simulation" class="smallContainer">
+            <ui:Label text="Simulation" display-tooltip-when-elided="true" name="Title" enable-rich-text="false" class="secTitle" style="-unity-text-align: upper-center;" />
+            <ui:SliderInt label="Number of Agents" value="1" high-value="10" name="AgentCount" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
+            <ui:SliderInt picking-mode="Ignore" label="Duration (min)" value="30" high-value="120" name="SimDuration" show-input-field="true" low-value="1" focusable="false" class="property" />
+            <ui:DropdownField label="Algorithms" index="0" choices="Random Ballistic Walk,Local Voronoi Deco..." name="DropdownAlgorithm" focusable="false" class="property" style="align-items: flex-start;" />
+        </ui:GroupBox>
+        <ui:GroupBox name="MapGenerator" class="smallContainer" style="align-items: stretch;">
+            <ui:Label text="Map Generator" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto;" />
+            <ui:SliderInt picking-mode="Ignore" label="Map Height" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapHeight" low-value="30" focusable="false" class="property" />
+            <ui:SliderInt picking-mode="Ignore" label="Map Width" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapWidth" low-value="30" focusable="false" class="property" />
+            <ui:SliderInt picking-mode="Ignore" label="Map Depth" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapDepth" low-value="30" focusable="false" class="property" />
+            <ui:Toggle label="Random Seed?" name="ToggleRandomSeed" value="true" focusable="false" class="property" />
+            <ui:TextField picking-mode="Ignore" label="Seed" text="Random Seed" is-delayed="false" multiline="false" readonly="false" name="TxtSeed" focusable="false" class="property" style="color: rgb(255, 255, 255);" />
+        </ui:GroupBox>
+        <ui:ProgressBar title="30:00 - 0%" name="ProgressBar" class="lightBackground" style="width: 80%; left: 10%; height: auto;" />
+        <ui:GroupBox name="SimulationController" class="smallContainer" style="flex-direction: row;">
+            <ui:Button text="Play" display-tooltip-when-elided="true" name="ButtonStart" focusable="false" class="button" style="width: 30%; height: auto; background-image: none;" />
+            <ui:Button text="Stop" display-tooltip-when-elided="true" name="ButtonStop" focusable="false" class="button" style="width: 30%;" />
+            <ui:Button text="Cam" display-tooltip-when-elided="true" name="ButtonFastForward" focusable="false" class="button" style="width: 30%;" />
+        </ui:GroupBox>
+    </ui:ScrollView>
+</ui:UXML>
