@@ -1,4 +1,5 @@
 ﻿using MAES3D.Agent;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,18 +8,16 @@ using UnityEngine;
 
 namespace MAES3D {
 
-    internal class AStarCell{
-        public float gCost;
+    internal class AStarNode {
+        public int gCost;
         public float hCost;
         public float fCost => gCost + hCost;
-        public Cell cell;
-        public AStarCell parent;
 
-        public AStarCell(Cell cell, AStarCell parent = null) {
-            this.cell = cell;
-            this.parent = parent;
-            gCost = 0;
-            hCost = 0;
+        public Cell pos;
+        public AStarNode parent;
+
+        public AStarNode(Cell position) {
+            this.pos = position;
         }
     }
 
@@ -28,116 +27,119 @@ namespace MAES3D {
             Cell startCell = Utility.CoordinateToCell(startPosition);
             Cell targetCell = Utility.CoordinateToCell(targetPosition);
 
-            List<AStarCell> openList = new List<AStarCell>();
-            List<AStarCell> closedList = new List<AStarCell>();
+            List<AStarNode> openList = new List<AStarNode>();
+            List<AStarNode> closedList = new List<AStarNode>();
 
-            openList.Add(new AStarCell(startCell));
+            openList.Add(new AStarNode(startCell));
 
             int safetyLimit = 10000;
             int safetyCount = 0;
 
-            while (openList.Count != 0) {
+            while (openList.Count > 0) {
                 safetyCount++;
-
                 if (safetyCount > safetyLimit) {
                     Debug.LogWarning($"AStar Error: Going from {startPosition} to {targetPosition} hit the safetylimit of {safetyLimit}\n" + 
                                      $"\tReturning nothing");
-                    Debug.Break();
+
                     return new List<Cell>();
                 }
 
-
-                AStarCell qCell = openList[0];
+                AStarNode currentNode = openList[0];
+                int currentIndex = 0;
 
                 //Set current node as the node with lowest fcost
-                int minIndex = 0;
-                for (int i = 0; i < openList.Count; i++) {
-                    AStarCell openCell = openList[i];
-                    if (openCell.fCost < qCell.fCost) {
-                        qCell = openCell;
-                        minIndex = i;
+                for (int i = 1; i < openList.Count; i++) {
+                    if (openList[i].fCost < currentNode.fCost || (openList[i].fCost == currentNode.fCost && openList[i].hCost < currentNode.hCost)) {
+                        currentNode = openList[i];
+                        currentIndex = i;
                     }
                 }
 
                 //Remove cell from open list and add to closed list
-                openList.RemoveAt(minIndex);
-                closedList.Add(qCell);
+                openList.RemoveAt(currentIndex);
+                closedList.Add(currentNode);
 
                 //Check if cell is the goal
-                if (qCell.cell == targetCell) {
+                if (currentNode.pos.x == targetCell.x && currentNode.pos.y == targetCell.y && currentNode.pos.z == targetCell.z) {
                     //Backtrack to get path and return
                     List<Cell> path = new List<Cell>();
-                    AStarCell current = qCell;
+                    AStarNode current = currentNode;
+
                     while (current != null) {
-                        path.Add(current.cell);
+                        path.Add(current.pos);
                         current = current.parent;
                     }
                     path.Reverse();
 
-                    return path;
+                    Debug.Log(path.Count);
+                    for (int i = 1; i < path.Count; i++) {
+                        Debug.DrawLine(path[i - 1].middle, path[i].middle, Color.blue, 50);
+                    }
 
+                    return path;
                 }
 
-                List<AStarCell> successors = GetSuccesors(qCell);
-                foreach (AStarCell successor in successors) {
-                    
-                    bool shouldSkip = false;
+                List<AStarNode> neighbors = GetNeighbors(currentNode);
+                foreach (AStarNode neighbor in neighbors) {
 
-                    //Skip if successor is not discoverd or not walkable
-                    if (map[successor.cell.x, successor.cell.y, successor.cell.z] == CellStatus.unexplored
-                        || map[successor.cell.x, successor.cell.y, successor.cell.z] == CellStatus.wall) {
+                    //Skip if successor already exist in the closed list
+                    if (closedList.Contains(neighbor)) {
                         continue;
                     }
 
-                    //Skip if successor already exist in the closed list
-                    foreach (AStarCell closedCell in closedList) {
-                        if (successor.cell == closedCell.cell) {
-                            shouldSkip = true;
-                            break;
+
+                    int tentativeG = currentNode.gCost;
+                    //Skip if successor is not discoverd or not walkable
+                    if (map[neighbor.pos.x, neighbor.pos.y, neighbor.pos.z] == CellStatus.unexplored
+                        || map[neighbor.pos.x, neighbor.pos.y, neighbor.pos.z] == CellStatus.wall) {
+                        tentativeG += 1;
+                    }
+
+                    if(!openList.Contains(neighbor) || tentativeG < neighbor.gCost) {
+                        //Assign g and h costs
+                        neighbor.gCost = tentativeG;
+                        neighbor.hCost = Heuristic(neighbor.pos, targetCell);
+                        neighbor.parent = currentNode;
+
+                        if (!openList.Contains(neighbor)) {
+                            openList.Add(neighbor);
                         }
                     }
-                    if (shouldSkip) continue;
-
-                    //Assign g and h costs
-                    successor.gCost = qCell.gCost + 1;
-                    successor.hCost = Cell.ManhattanDistance(successor.cell, targetCell);
-
-                    //Skip if successor is already on the closed list with a lower g cost
-                    foreach (AStarCell openCell in openList) {
-                        if (successor.cell == openCell.cell
-                           && successor.gCost > openCell.gCost) {
-                            shouldSkip = true;
-                            break;
-                        }
-                    }
-                    if (shouldSkip) continue;
-
-                    openList.Add(successor);
                 }
             }
 
             Debug.LogWarning($"AStar Error: Could not find path between {startPosition} and {targetPosition}. Returning empty path.");
+
+            Debug.Log(closedList.Count);
+
+            foreach (AStarNode node in closedList) {
+                Debug.DrawLine(startPosition, node.pos.middle);
+            }
+            
             Debug.Break();
             return new List<Cell>();
         }
 
-        private static List<AStarCell> GetSuccesors(AStarCell parent) {
-            List<AStarCell> successors = new List<AStarCell> {
-                //x+1 sucessor
-                new AStarCell(new Cell(parent.cell.x + 1, parent.cell.y, parent.cell.z), parent),
-                //x-1 sucessor
-                new AStarCell(new Cell(parent.cell.x - 1, parent.cell.y, parent.cell.z), parent),
-                //y+1 sucessor
-                new AStarCell(new Cell(parent.cell.x, parent.cell.y + 1, parent.cell.z), parent),
-                //y-1 sucessor
-                new AStarCell(new Cell(parent.cell.x, parent.cell.y - 1, parent.cell.z), parent),
-                //z+1 sucessor
-                new AStarCell(new Cell(parent.cell.x, parent.cell.y, parent.cell.z + 1), parent),
-                //z-1 sucessor
-                new AStarCell(new Cell(parent.cell.x, parent.cell.y, parent.cell.z - 1), parent)
+        private static List<AStarNode> GetNeighbors(AStarNode parent) {
+
+            List<AStarNode> neighbors = new List<AStarNode>{
+                new AStarNode(new Cell(parent.pos.x + 1, parent.pos.y, parent.pos.z)),
+                new AStarNode(new Cell(parent.pos.x - 1, parent.pos.y, parent.pos.z)),
+                new AStarNode(new Cell(parent.pos.x, parent.pos.y + 1, parent.pos.z)),
+                new AStarNode(new Cell(parent.pos.x, parent.pos.y - 1, parent.pos.z)),
+                new AStarNode(new Cell(parent.pos.x, parent.pos.y, parent.pos.z + 1)),
+                new AStarNode(new Cell(parent.pos.x, parent.pos.y, parent.pos.z - 1))
             };
 
-            return successors;
+            return neighbors;
+        }
+
+        private static float Heuristic(Cell nodeA, Cell nodeB) {
+            int dx = nodeA.x - nodeB.x;
+            int dy = nodeA.y - nodeB.y;
+            int dz = nodeA.z - nodeB.z;
+
+            return Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
         }
 
     }

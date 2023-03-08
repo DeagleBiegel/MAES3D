@@ -6,7 +6,7 @@ public class KeepSceneViewActive : MonoBehaviour{
 
     public bool KeepSceneView;
 
-    void Start(){
+    void Awake(){
 
         if (this.KeepSceneView && Application.isEditor){
 

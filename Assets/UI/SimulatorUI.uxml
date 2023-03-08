@@ -6,15 +6,15 @@
             <ui:Label text="Simulation" display-tooltip-when-elided="true" name="Title" enable-rich-text="false" class="secTitle" style="-unity-text-align: upper-center;" />
             <ui:SliderInt label="Number of Agents" value="1" high-value="10" name="AgentCount" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
             <ui:SliderInt picking-mode="Ignore" label="Duration (min)" value="30" high-value="120" name="SimDuration" show-input-field="true" low-value="1" focusable="false" class="property" />
-            <ui:DropdownField label="Algorithms" index="0" choices="Random Ballistic Walk,Local Voronoi Deco..." name="DropdownAlgorithm" focusable="false" class="property" style="align-items: flex-start;" />
+            <ui:DropdownField label="Algorithms" index="1" choices="Random Ballistic Walk,Local Voronoi Deco..." name="DropdownAlgorithm" focusable="false" class="property" style="align-items: flex-start;" />
         </ui:GroupBox>
         <ui:GroupBox name="MapGenerator" class="smallContainer" style="align-items: stretch;">
             <ui:Label text="Map Generator" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto;" />
             <ui:SliderInt picking-mode="Ignore" label="Map Height" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapHeight" low-value="30" focusable="false" class="property" />
             <ui:SliderInt picking-mode="Ignore" label="Map Width" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapWidth" low-value="30" focusable="false" class="property" />
             <ui:SliderInt picking-mode="Ignore" label="Map Depth" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapDepth" low-value="30" focusable="false" class="property" />
-            <ui:Toggle label="Random Seed?" name="ToggleRandomSeed" value="true" focusable="false" class="property" />
-            <ui:TextField picking-mode="Ignore" label="Seed" text="Random Seed" is-delayed="false" multiline="false" readonly="false" name="TxtSeed" focusable="false" class="property" style="color: rgb(255, 255, 255);" />
+            <ui:Toggle label="Random Seed?" name="ToggleRandomSeed" value="false" focusable="false" class="property" />
+            <ui:TextField picking-mode="Ignore" label="Seed" text="14" is-delayed="false" multiline="false" readonly="false" name="TxtSeed" focusable="false" value="14" class="property" style="color: rgb(255, 255, 255);" />
         </ui:GroupBox>
         <ui:ProgressBar title="30:00 - 0%" name="ProgressBar" class="lightBackground" style="width: 80%; left: 10%; height: auto;" />
         <ui:GroupBox name="SimulationController" class="smallContainer" style="flex-direction: row;">
