@@ -36,7 +36,7 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                     float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
 
                     if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) {
-                        if (tempDist <= 3.75) {
+                        if (tempDist <= 6.75) {
                             _controller.GetLocalExplorationMap()[c.x, c.y, c.z] = CellStatus.covered;
                         }
 
@@ -49,6 +49,22 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             }
 
             if (_controller.GetCurrentStatus() == Status.Idle) {
+
+                foreach (Cell c in cells) {
+                    float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
+
+                    if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) {
+                        if (tempDist <= 6.75) {
+                            _controller.GetLocalExplorationMap()[c.x, c.y, c.z] = CellStatus.covered;
+                        }
+
+                        if (_searchMode) {
+                            _searchMode = false;
+                            _controller.MoveToCell(currentCell);
+                        }
+                    }
+                }
+
                 Cell destination = null;
                 CellStatus[,,] currentView = _controller.GetCurrentView();
                 List<Vector3> visibleAgents = _controller.GetVisibleAgentPositions();
