@@ -12,8 +12,6 @@ namespace MAES3D.Agent {
 
         private List<Vector3> _visitedPosition;
 
-        public bool[,,] HasBeenSeen;
-
         private void Awake() {
             Controller = new AgentController(transform);
             _visitedPosition = new List<Vector3>();
@@ -43,6 +41,28 @@ namespace MAES3D.Agent {
                 Vector3 c = _visitedPosition[i];
 
                 Debug.DrawLine(c, _visitedPosition[i - 1]);
+            }
+
+            CellStatus[,,] map = Controller.GetLocalExplorationMap();
+
+            for (int x = 0; x < map.GetLength(0); x++) 
+            {
+                for (int y = 0; y < map.GetLength(1); y++) 
+                {
+                    for (int z = 0; z < map.GetLength(2); z++) 
+                    {
+                        if (map[x, y, z] == CellStatus.covered) 
+                        {
+                            Gizmos.color = Color.red;
+                            Gizmos.DrawWireSphere(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), 0.2f);
+                        }
+                        else if (map[x, y, z] == CellStatus.explored) 
+                        {
+                            Gizmos.color = Color.green;
+                            Gizmos.DrawWireSphere(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), 0.2f);
+                        }
+                    }
+                }
             }
         }
     }

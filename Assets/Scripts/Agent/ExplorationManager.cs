@@ -16,6 +16,7 @@ namespace MAES3D.Agent {
 
         private bool[,,] _voxelMap;
         private bool[,,] _exploredMap; 
+        private bool[,,] _hasBeenSeen;
         
         private int _exploredTiles;
         private int _explorableTiles;
@@ -24,7 +25,8 @@ namespace MAES3D.Agent {
 
         public float ExploredRatio => _exploredTiles * 100 / _explorableTiles;
 
-        public ExplorationManager() {
+        public ExplorationManager() 
+        {
             _observationLines = CalculateObservationLines();
 
             Chunk chunk = GameObject.FindObjectOfType(typeof(Chunk)) as Chunk;
@@ -32,46 +34,112 @@ namespace MAES3D.Agent {
             _exploredMap = new bool[_voxelMap.GetLength(0), _voxelMap.GetLength(1), _voxelMap.GetLength(2)];
             _exploredTiles = 0;
             _explorableTiles = chunk.GetNumberOfExplorableTiles();
-
         }
 
-        public void UpdateMaps(List<SubmarineAgent> agents) {
-
+        public void UpdateMaps(List<SubmarineAgent> agents) 
+        {
             //Sensing
             int agentIndexToUpdate = agentTicker++ % agents.Count;
             UpdateMap(agents[agentIndexToUpdate]);
 
-            foreach (SubmarineAgent agent in agents) {
+            foreach (SubmarineAgent agent in agents) 
+            {
                 agent.Controller.ExplorationMap.LookForAgents(agent, agents);
             }
         }
 
-        private void UpdateMap(SubmarineAgent agent) {
+        private void UpdateMap(SubmarineAgent agent) 
+        {
             agent.Controller.ExplorationMap.ResetCurrentView();
             Vector3 agentPosition = agent.Controller.GetPosition();
-            agent.HasBeenSeen = new bool[_voxelMap.GetLength(0), _voxelMap.GetLength(1), _voxelMap.GetLength(2)];
+            _hasBeenSeen = new bool[_voxelMap.GetLength(0), _voxelMap.GetLength(1), _voxelMap.GetLength(2)];
 
-            foreach (ObservationLine observationLine in _observationLines) {
-                List<Cell> observedCells = GetObservedCellsOnLine(agentPosition, observationLine, agent);
-
-                foreach (Cell cell in observedCells) {
-                    if (_voxelMap[cell.x, cell.y, cell.z] == true) {
-                        agent.Controller.ExplorationMap.UpdateCell(cell, CellStatus.wall);
-                    }
-                    else {
-                        agent.Controller.ExplorationMap.UpdateCell(cell, CellStatus.explored);
-
-                        if (_exploredMap[cell.x, cell.y, cell.z] == false) {
-                            _exploredMap[cell.x, cell.y, cell.z] = true;
-                            _exploredTiles++;
-                        }
-                    }
-                }
+            foreach (ObservationLine observationLine in _observationLines) 
+            {
+                UpdateCells(agentPosition, observationLine, agent);
             }
 
             Cell currentCell = Utility.CoordinateToCell(agentPosition);
             agent.Controller.ExplorationMap.UpdateCell(currentCell, CellStatus.covered);
-            SimulationSettings.progress = (_exploredTiles*100)/_explorableTiles;
+            SimulationSettings.progress = (_exploredTiles * 100) / _explorableTiles;
+        }
+
+        private void UpdateCells(Vector3 agentPosition, ObservationLine line, SubmarineAgent agent) 
+        {
+            Cell agentCell = Utility.CoordinateToCell(agentPosition);
+            Cell targetCell = new Cell(agentCell.x + line.targetCellOffset.x,
+                                       agentCell.y + line.targetCellOffset.y,
+                                       agentCell.z + line.targetCellOffset.z);
+
+            float manhattanDistance = Cell.ManhattanDistance(agentCell, targetCell);
+
+            Vector3 tMax = new Vector3
+            (
+                (line.sign[0] == 0 || line.sign[0] == 1)
+                    ? (1 - agentPosition.x % 1) * line.tMaxPart.x
+                    : agentPosition.x % 1 * line.tMaxPart.x,
+                (line.sign[1] == 0 || line.sign[1] == 1)
+                    ? (1 - agentPosition.y % 1) * line.tMaxPart.y
+                    : agentPosition.y % 1 * line.tMaxPart.y,
+                (line.sign[2] == 0 || line.sign[2] == 1)
+                    ? (1 - agentPosition.z % 1) * line.tMaxPart.z
+                    : agentPosition.z % 1 * line.tMaxPart.z
+            );
+
+            Cell currentCell = agentCell;
+
+            for (int i = 0; i <= 1000; i++) 
+            {
+                if (tMax.x < tMax.y) 
+                {
+                    if (tMax.x < tMax.z) 
+                    { // tMaxX < tMaxY og tMaxZ
+                        currentCell.x += line.sign[0];
+                        tMax.x += line.delta.x;
+                    }
+                    else 
+                    { // tMaxZ < tMaxX < tMaxY 
+                        currentCell.z += line.sign[2];
+                        tMax.z += line.delta.z;
+                    }
+                }
+                else 
+                {
+                    if (tMax.y < tMax.z) 
+                    { // tMaxY < tMaxX og tMaxZ 
+                        currentCell.y += line.sign[1];
+                        tMax.y += line.delta.y;
+                    }
+                    else 
+                    { // tMaxZ < tMaxY < tMaxX 
+                        currentCell.z += line.sign[2];
+                        tMax.z += line.delta.z;
+                    }
+                }
+
+                Cell cell = new Cell(currentCell.x, currentCell.y, currentCell.z);
+
+                if (_hasBeenSeen[cell.x, cell.y, cell.z] == false) 
+                {
+                    if (_voxelMap[cell.x, cell.y, cell.z] == true)
+                    {
+                        agent.Controller.ExplorationMap.UpdateCell(cell, CellStatus.wall);
+                        break;
+                    }
+                    else 
+                    {
+                        agent.Controller.ExplorationMap.UpdateCell(cell, CellStatus.explored);
+
+                        if (_exploredMap[cell.x, cell.y, cell.z] == false) 
+                        {
+                            _exploredMap[cell.x, cell.y, cell.z] = true;
+                            _exploredTiles++;
+                        }
+                    }
+
+                    _hasBeenSeen[cell.x, cell.y, cell.z] = true;
+                }
+            }
         }
 
         private void UpdateMapOLD(SubmarineAgent agent) {
@@ -252,6 +320,8 @@ namespace MAES3D.Agent {
                     }
                 }
 
+                /*
+                agent.HasBeenSeen removed.
                 if (!agent.HasBeenSeen[currentCell.x, currentCell.y, currentCell.z]) 
                 {
                     traversedCells.Add(new Cell(currentCell.x, currentCell.y, currentCell.z));
@@ -262,6 +332,7 @@ namespace MAES3D.Agent {
                 {
                     break;
                 }
+                */
             }
             
             return traversedCells;

@@ -17,7 +17,8 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
 
         private bool _searchMode;
 
-        public LocalVoronoiDecomposition() {
+        public LocalVoronoiDecomposition() 
+        {
             _occlusionPoints = new Dictionary<Cell, int>();
         }
 
@@ -27,20 +28,26 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             _searchMode = false;
         }
 
-        public void UpdateLogic() {
+        public void UpdateLogic() 
+        {
             List<Cell> cells = _controller.GetVisibleCells();
             Cell currentCell = Utility.CoordinateToCell(_controller.GetPosition());
 
-            if (_previousCell != currentCell) {
-                foreach (Cell c in cells) {
+            if (_previousCell != currentCell) 
+            {
+                foreach (Cell c in cells) 
+                {
                     float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
 
-                    if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) {
-                        if (tempDist <= 7) {
+                    if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) 
+                    {
+                        if (tempDist <= 3.75) 
+                        {
                             _controller.GetLocalExplorationMap()[c.x, c.y, c.z] = CellStatus.covered;
                         }
 
-                        if (_searchMode) {
+                        if (_searchMode) 
+                        {
                             _searchMode = false;
                             _controller.MoveToCell(currentCell);
                         }
@@ -48,7 +55,8 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                 }
             }
 
-            if (_controller.GetCurrentStatus() == Status.Idle) {
+            if (_controller.GetCurrentStatus() == Status.Idle) 
+            {
                 Cell destination = null;
                 CellStatus[,,] currentView = _controller.GetCurrentView();
                 List<Vector3> visibleAgents = _controller.GetVisibleAgentPositions();
@@ -56,17 +64,14 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                 _searchMode = false;
 
                 /* EXPLORATION MODE 
-                 * FIND NEAREST AVAILABLE CELL */
+                 * FIND NEAREST AVAILABLE CELL */ 
                 destination = ExplorationMode(cells, currentView, visibleAgents) ??
-                              SearchMode(cells, currentView, visibleAgents);
-
-                if (currentCell == new Cell(85, 23, 94)) {
-                    _searchMode = false;
-                    destination = new Cell(12, 8, 8);
-                }
-
-                if (destination != null) {
-                    if (_searchMode) {
+                              SearchMode(cells, currentView, visibleAgents);        
+ 
+                if (destination != null) 
+                {
+                    if (_searchMode) 
+                    {
                         _occlusionPoints[destination]++;
                     }
 
@@ -78,22 +83,28 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             _previousCell = currentCell;
         }
 
-        private Cell ExplorationMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) {
+        private Cell ExplorationMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) 
+        {
             Cell destination = null;
             float distance = 100000f;
 
-            foreach (Cell c in cells) {
-                if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) {
+            foreach (Cell c in cells) 
+            {
+                if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) 
+                {
                     float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
                     bool isClosest = true;
 
-                    foreach (Vector3 v in visibleAgents) {
-                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) {
+                    foreach (Vector3 v in visibleAgents) 
+                    {
+                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) 
+                        {
                             isClosest = false;
                         }
                     }
 
-                    if (tempDist < distance && isClosest) {
+                    if (tempDist < distance && isClosest)
+                    {
                         destination = c;
                         distance = tempDist;
                     }
@@ -103,10 +114,11 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             return destination;
         }
 
-        private Cell SearchMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) {
+        private Cell SearchMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) 
+        {
             List<Cell> cellsToCheck = new List<Cell>();
 
-            Cell destination = null;
+            Cell destination = null;   
             Cell leastRecentlyVisited = null;
 
             float distance = 1000f;
@@ -116,39 +128,50 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
 
             _searchMode = true;
 
-            foreach (Cell currentCell in cells) {
-                if (currentView[currentCell.x, currentCell.y, currentCell.z] == CellStatus.wall) {
+            foreach(Cell currentCell in cells) 
+            {
+                if (currentView[currentCell.x, currentCell.y, currentCell.z] == CellStatus.wall) 
+                {
                     List<Cell> OcclusionPointsForCell = GetOCsForCell(currentView, currentCell);
                     cellsToCheck.AddRange(OcclusionPointsForCell);
 
-                    foreach (Cell occlusionPoint in OcclusionPointsForCell) {
-                        if (!_occlusionPoints.ContainsKey(occlusionPoint)) {
+                    foreach (Cell occlusionPoint in OcclusionPointsForCell) 
+                    {
+                        if (!_occlusionPoints.ContainsKey(occlusionPoint)) 
+                        {
                             _occlusionPoints.Add(occlusionPoint, 0);
                         }
                     }
                 }
             }
 
-            foreach (Cell c in cellsToCheck) {
-                if (currentView[c.x, c.y, c.z] != CellStatus.wall) {
+            foreach(Cell c in cellsToCheck)
+            {
+                if (currentView[c.x, c.y, c.z] != CellStatus.wall) 
+                {
                     float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
                     bool isClosest = true;
 
-                    foreach (Vector3 v in visibleAgents) {
-                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) {
+                    foreach (Vector3 v in visibleAgents) 
+                    {
+                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) 
+                        {
                             isClosest = false;
                         }
                     }
 
-                    if (isClosest) {
+                    if (isClosest) 
+                    {
                         /* Finds occlusion points that hasn't been visited yet 
                         * Otherwise find the least recently visited occlusion point */
-                        if (tempDist < distance && _occlusionPoints[c] == 0) {
+                        if (tempDist < distance && _occlusionPoints[c] == 0)
+                        {
                             distance = tempDist;
                             destination = c;
                         }
-                        else if (_occlusionPoints[c] < leastRecentlyVisitedTime ||
-                                (_occlusionPoints[c] == leastRecentlyVisitedTime && leastRecentlyVisitedDistance < tempDist)) {
+                        else if (_occlusionPoints[c] < leastRecentlyVisitedTime || 
+                                (_occlusionPoints[c] == leastRecentlyVisitedTime && leastRecentlyVisitedDistance < tempDist))
+                        {
                             leastRecentlyVisitedDistance = tempDist;
                             leastRecentlyVisited = c;
                         }
@@ -156,20 +179,22 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                 }
             }
 
-            if (destination == null) {
+            if (destination == null) 
+            {
                 destination = leastRecentlyVisited;
             }
-
+            
             return destination;
         }
-
-        private List<Cell> GetOCsForCell(CellStatus[,,] currentView, Cell currentCell) {
+        
+        private List<Cell> GetOCsForCell(CellStatus[,,] currentView, Cell currentCell) 
+        {
             Vector3 position = _controller.GetPosition();
             Cell positionCell = Utility.CoordinateToCell(position);
 
             int signX = Math.Sign(positionCell.x - currentCell.x);
             int signY = Math.Sign(positionCell.y - currentCell.y);
-            int signZ = Math.Sign(positionCell.z - currentCell.z);
+            int signZ = Math.Sign(positionCell.z -currentCell.z);
 
             int signMagnitude = Math.Abs(signX) + Math.Abs(signY) + Math.Abs(signZ);
 
@@ -280,8 +305,10 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             return occlusionCells;
         }
 
-        private bool IsCellTargetable(CellStatus cell) {
-            if (cell == CellStatus.wall || cell == CellStatus.unexplored) {
+        private bool IsCellTargetable(CellStatus cell) 
+        {
+            if (cell == CellStatus.wall || cell == CellStatus.unexplored) 
+            {
                 return false;
             }
 
@@ -289,39 +316,13 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
         }
 
 
-        private void AddOcclusionCell(List<Cell> occlusionCells, CellStatus[,,] view, Cell wallCell, int signX, int signY, int signZ) {
+        private void AddOcclusionCell(List<Cell> occlusionCells, CellStatus[,,] view, Cell wallCell, int signX, int signY, int signZ) 
+        {
             Cell cellToAdd = new Cell(wallCell.x + signX, wallCell.y + signY, wallCell.z + signZ);
-            if (IsCellTargetable(view[cellToAdd.x, cellToAdd.y, cellToAdd.z])) {
+            if (IsCellTargetable(view[cellToAdd.x, cellToAdd.y, cellToAdd.z])) 
+            {
                 occlusionCells.Add(new Cell(wallCell.x + signX, wallCell.y + signY, wallCell.z + signZ));
             }
         }
     }
 }
-
-/*
-
-OLD VERSION. WAITING FOR A STAR FIX TO TEST NEW VERSION.
-
-namespace MAES3D.Algorithm.LocalVoronoiDecomposition 
-{
-    public class LocalVoronoiDecomposition : IAlgorithm
-    {
-        private IAgentController _controller;
-
-        private Dictionary<Cell, int> _occlusionPoints;
-
-        public LocalVoronoiDecomposition() 
-        {
-            _occlusionPoints = new Dictionary<Cell, int>();
-        }
-
-        public void SetController(IAgentController controller) 
-        {
-            _controller = controller;
-        }
-
-        public void UpdateLogic() 
-        {   
-            List<Cell> cells = _controller.GetVisibleCells();
-
-            /* Mark close cells as covered */
