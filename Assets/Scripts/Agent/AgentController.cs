@@ -261,5 +261,10 @@ namespace MAES3D.Agent {
             return ExplorationMap.GetVisibleAgentPositions();
         }
 
+        public CellStatus GetExplorationStatusOfCell(Cell cell, bool GetCurrentView = false){
+            return ExplorationMap.GetCellStatus(cell, GetCurrentView);
+        }
+        
+
     }
 }
