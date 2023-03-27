@@ -1,22 +1,27 @@
 using UnityEngine;
 
 namespace MAES3D.Agent.Task {
-    public class TurnTask : ITask
-    {
-        private float _targetDegrees;
-        private float _maxTurnSpeed;
+    public class TurnTask : ITask {
+
         private float _currentTurnSpeed;
         private float _accel = 1f * Time.fixedDeltaTime;
         private float _decel = 0.5f * Time.fixedDeltaTime;
 
-
+        private float _maxTurnSpeed;
+        private float _targetDegrees;
         private float _turnedDegrees;
         private bool _isComplete = false;
 
         private float _directionModifier;
 
         public TurnTask(float targetDegrees, float maxTurnSpeed) {
-            _targetDegrees = Mathf.Abs(targetDegrees % 360);
+            if(!float.IsInfinity(targetDegrees)) { 
+                _targetDegrees = Mathf.Abs(targetDegrees % 360);
+            }
+            else {
+                _targetDegrees = targetDegrees;
+            }
+
             _maxTurnSpeed = maxTurnSpeed * Time.fixedDeltaTime;
             _turnedDegrees = 0;
 

@@ -2,19 +2,24 @@ using UnityEngine;
 
 namespace MAES3D.Agent.Task {
     public class InfiniteTurnTask : ITask {
-        private bool _isComplete = false;
-        private float _speed;
 
-        public InfiniteTurnTask(float speed) {
-            _speed = speed * Time.fixedDeltaTime;
+        private ITask _proxyTask;
+
+        public InfiniteTurnTask(float maxTurnSpeed, bool moveRight = true) {
+            if(moveRight) {
+                _proxyTask = new TurnTask(float.PositiveInfinity, maxTurnSpeed);
+            }
+            else {
+                _proxyTask = new TurnTask(float.NegativeInfinity, maxTurnSpeed);
+            }
         }
 
         public MoveInstruction GetInstruction() {
-            return new MoveInstruction(0, 0, _speed);
+            return _proxyTask.GetInstruction();
         }
 
         public bool IsComplete() {
-            return _isComplete;
+            return _proxyTask.IsComplete();
         }
     }
 }

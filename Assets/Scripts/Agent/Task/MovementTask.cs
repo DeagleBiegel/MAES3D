@@ -7,11 +7,11 @@ namespace MAES3D.Agent.Task {
 
         private Vector2 _directionVector;
 
-        private float _maxSpeed;
         private float _currentSpeed = 0;
         private float _accel = 0.01f * Time.fixedDeltaTime;
         private float _decel = 0.005f * Time.fixedDeltaTime;
 
+        private float _maxSpeed;
         private float _targetDistance;
         private float _traveledDistance;
         private float _verticalDirectionModifier;
@@ -22,8 +22,8 @@ namespace MAES3D.Agent.Task {
 
             float angleInRad = Mathf.Deg2Rad * Mathf.Abs(angle);
 
-            float forwardDistance = targetDistance * Mathf.Sin((Mathf.Deg2Rad * 90) - angleInRad) / Mathf.Sin(90);
-            float verticalDistance = targetDistance * Mathf.Sin(angleInRad) / Mathf.Sin(90);
+            float forwardDistance = Mathf.Sin((Mathf.Deg2Rad * 90) - angleInRad) / Mathf.Sin(90);
+            float verticalDistance = Mathf.Sin(angleInRad) / Mathf.Sin(90);
 
             if (angle >= 0) {
                 _verticalDirectionModifier = 1;

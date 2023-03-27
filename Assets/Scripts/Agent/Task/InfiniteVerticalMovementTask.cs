@@ -2,20 +2,24 @@ using UnityEngine;
 
 namespace MAES3D.Agent.Task {
     public class InfiniteVerticalMovementTask : ITask {
-        private bool _isComplete = false;
-        private float _speed;
 
+        private ITask _proxyTask;
 
-        public InfiniteVerticalMovementTask(float speed) {
-            _speed = speed * Time.fixedDeltaTime;
+        public InfiniteVerticalMovementTask(float maxSpeed, bool moveUp = true) {
+            if (moveUp) {
+                _proxyTask = new InfiniteMovementTask(90, maxSpeed);
+            }
+            else {
+                _proxyTask = new InfiniteMovementTask(-90, maxSpeed);
+            }
         }
 
         public MoveInstruction GetInstruction() {
-            return new MoveInstruction(0, _speed, 0);
+            return _proxyTask.GetInstruction();
         }
 
         public bool IsComplete() {
-            return _isComplete;
+            return _proxyTask.IsComplete();
         }
     }
 }
