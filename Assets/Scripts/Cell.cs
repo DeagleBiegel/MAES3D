@@ -55,5 +55,9 @@ namespace MAES3D {
             return xDistance + yDistance + zDistance;
         }
 
+        public Vector3 ToCoordinate() {
+            return new Vector3(x,y, z);
+        }
+
     }
 }

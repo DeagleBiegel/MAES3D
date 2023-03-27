@@ -1,8 +1,6 @@
 #nullable enable
 using UnityEngine;
 using MAES3D.Agent.Task;
-using System;
-using Unity.VisualScripting;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine.UIElements;
@@ -136,6 +134,9 @@ namespace MAES3D.Agent {
 
         public void MoveToCell(Cell targetCell) {
 
+            Debug.DrawLine(GetPosition(), targetCell.middle, Color.red);
+
+            //Check if target cell is explored
             if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
                 Debug.LogWarning($"An wants to move to the cell {targetCell} but it is unexplored\n" +
                                  $"\tCannot calculate path to target");
@@ -143,36 +144,57 @@ namespace MAES3D.Agent {
                 return;
             }
 
-            List<Cell> fullpath = AStar.FindPath(GetPosition(), targetCell.middle, GetLocalExplorationMap());
-
-            //Could not find a path
-            if (fullpath.Count == 0) {
+            //If agent can go directly to goal
+            Vector3 directionToGoal = targetCell.middle - GetPosition();
+            float distanceToGoal = Vector3.Distance(GetPosition(), targetCell.middle);
+            if (!Physics.SphereCast(GetPosition(), 0.4f, directionToGoal, out _, distanceToGoal)) {
+                _currentTask = new CompositeMovementTask(new List<Vector3> { directionToGoal }, _moveSpeed, _turnSpeed, _transform);
+                Debug.DrawLine(GetPosition(), targetCell.middle, Color.cyan);
+                //Debug.Break();
                 return;
             }
 
-            List<Cell> shortPath = new List<Cell>();
+            //If we cant go there directly, use AStar to find a path
+            List<Cell> fullPath = AStar.FindPath(GetPosition(), targetCell.middle, GetLocalExplorationMap());
 
+            //Could not find a path
+            if (fullPath.Count == 0) {
+                return;
+            }
+
+            //Make a more optimal shorter path
+            List<Vector3> shortPath = new List<Vector3>();
+
+            //Remove first element so the first cell is not the on the agent is in
+            fullPath.RemoveAt(0);
+
+            //!!
+            //!!SHOULD do more itterations to fix a small "issue" with points lining up!!
+            //!!
             Vector3 currentPosition = GetPosition();
-            for (int i = 1; i < fullpath.Count; i++) {
-                Cell cell = fullpath[i];
+            for (int i = 1; i < fullPath.Count; i++) {
+                Cell cell = fullPath[i];
 
                 Vector3 direction = cell.middle - currentPosition;
                 float distance = Vector3.Distance(currentPosition, cell.middle);
 
                 if (Physics.SphereCast(currentPosition, 0.4f/*HAS to be same size as agents collider*/, direction, out _, distance)) {
-                    currentPosition = fullpath[i - 1].middle;
-                    shortPath.Add(fullpath[i - 1]);
+                    currentPosition = fullPath[i - 1].middle;
+                    shortPath.Add(fullPath[i - 1].middle);
                 }
             }
-            shortPath.Add(fullpath[fullpath.Count - 1]);
+            shortPath.Add(fullPath[fullPath.Count - 1].middle);
 
-            List<Vector3> relativeTargets = new List<Vector3>();
-            foreach (Cell cell in shortPath) {
-                relativeTargets.Add(cell.middle - GetPosition());
+            //Make path into relative targets
+            List<Vector3> relativePath = new List<Vector3>();
+            relativePath.Add(shortPath[0] - GetPosition());
+            for (int i = 1; i < shortPath.Count; i++) {
+                relativePath.Add(shortPath[i] - shortPath[i - 1]);
             }
 
-            _currentTask = new CompositeMovementTask(relativeTargets, _moveSpeed, _turnSpeed, _transform);
+            _currentTask = new CompositeMovementTask(relativePath, _moveSpeed, _turnSpeed, _transform);
         }
+
 
         public void Move(float angle, float distance = 0) {
             if (distance == 0) {
