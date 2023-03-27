@@ -2,6 +2,7 @@ using MAES3D.Agent;
 using MAES3D.Algorithm;
 using MAES3D.Algorithm.RandomBalisticWalk;
 using MAES3D.Algorithm.LocalVoronoiDecomposition;
+using MAES3D.Algorithm.DualStageViewpointPlanner;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -47,22 +48,27 @@ namespace MAES3D {
             Chunk map = (Chunk) gameObject.GetComponent(typeof(Chunk));
 
             _agents = new List<SubmarineAgent>();
-            if (SimulationSettings.algorithm == 0){
-
-                for (int i = 0; i < SimulationSettings.agentCount; i++) {
-                    _agents.Add(SpawnAgent(new RandomBalisticWalk(), map.SpawnPositions[i].middle));
-                }
+            switch(SimulationSettings.algorithm) 
+            {
+                case 0:
+                    for (int i = 0; i < SimulationSettings.agentCount; i++) {
+                        _agents.Add(SpawnAgent(new RandomBalisticWalk(), map.SpawnPositions[i].middle));
+                    }
+                    break;
+                case 1:
+                    for (int i = 0; i < SimulationSettings.agentCount; i++) {
+                        _agents.Add(SpawnAgent(new LocalVoronoiDecomposition(), map.SpawnPositions[i].middle));
+                    }
+                    break;
+                case 2:
+                    for (int i = 0; i < SimulationSettings.agentCount; i++) {
+                        _agents.Add(SpawnAgent(new DualStageViewpointPlanner(), map.SpawnPositions[i].middle));
+                    }
+                    break;
+                default:
+                    Debug.Log("Selected Algorithm does not exist");
+                    break;
             }
-            else if (SimulationSettings.algorithm == 1) {
-
-                for (int i = 0; i < SimulationSettings.agentCount; i++) {
-                    _agents.Add(SpawnAgent(new LocalVoronoiDecomposition(), map.SpawnPositions[i].middle));
-                }
-            }
-            else {
-                Debug.Log("Selected Algorithm does not exist");
-            }
-
             ExplorationManager = new ExplorationManager();
             CommunicationManager = new CommunicationManager(_agents, 5);
         }

@@ -43,5 +43,7 @@ namespace MAES3D.Agent {
         void TurnTo(float targetAngle);
 
         void StopCurrentTask();
+        
+        public CellStatus GetExplorationStatusOfCell(Cell cell, bool GetCurrentView = false);
     }
 }
