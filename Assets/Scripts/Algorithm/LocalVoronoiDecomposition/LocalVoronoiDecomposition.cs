@@ -7,8 +7,10 @@ using UnityEditor;
 using Unity.VisualScripting;
 using MAES3D;
 
-namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
-    public class LocalVoronoiDecomposition : IAlgorithm {
+namespace MAES3D.Algorithm.LocalVoronoiDecomposition 
+{
+    public class LocalVoronoiDecomposition : IAlgorithm 
+    {
         private IAgentController _controller;
 
         private Dictionary<Cell, int> _occlusionPoints;
@@ -17,30 +19,37 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
 
         private bool _searchMode;
 
-        public LocalVoronoiDecomposition() {
+        public LocalVoronoiDecomposition() 
+        {
             _occlusionPoints = new Dictionary<Cell, int>();
         }
 
-        public void SetController(IAgentController controller) {
+        public void SetController(IAgentController controller) 
+        {
             _controller = controller;
             _previousCell = Utility.CoordinateToCell(_controller.GetPosition());
             _searchMode = false;
         }
 
-        public void UpdateLogic() {
+        public void UpdateLogic() 
+        {
             List<Cell> cells = _controller.GetVisibleCells();
             Cell currentCell = Utility.CoordinateToCell(_controller.GetPosition());
 
-            if (_previousCell != currentCell) {
+            if (_previousCell != currentCell || _controller.GetCurrentStatus() == Status.Idle) 
+            {
                 foreach (Cell c in cells) {
                     float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
 
-                    if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) {
-                        if (tempDist <= 6.75) {
+                    if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) 
+                    {
+                        if (tempDist <= 3.75) 
+                        {
                             _controller.GetLocalExplorationMap()[c.x, c.y, c.z] = CellStatus.covered;
                         }
 
-                        if (_searchMode) {
+                        if (_searchMode) 
+                        {
                             _searchMode = false;
                             _controller.MoveToCell(currentCell);
                         }
@@ -48,22 +57,8 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                 }
             }
 
-            if (_controller.GetCurrentStatus() == Status.Idle) {
-
-                foreach (Cell c in cells) {
-                    float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
-
-                    if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) {
-                        if (tempDist <= 6.75) {
-                            _controller.GetLocalExplorationMap()[c.x, c.y, c.z] = CellStatus.covered;
-                        }
-
-                        if (_searchMode) {
-                            _searchMode = false;
-                            _controller.MoveToCell(currentCell);
-                        }
-                    }
-                }
+            if (_controller.GetCurrentStatus() == Status.Idle) 
+            {
 
                 Cell destination = null;
                 CellStatus[,,] currentView = _controller.GetCurrentView();
@@ -76,8 +71,10 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                 destination = ExplorationMode(cells, currentView, visibleAgents) ??
                               SearchMode(cells, currentView, visibleAgents);
 
-                if (destination != null) {
-                    if (_searchMode) {
+                if (destination != null) 
+                {
+                    if (_searchMode) 
+                    {
                         _occlusionPoints[destination]++;
                     }
 
@@ -89,22 +86,28 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             _previousCell = currentCell;
         }
 
-        private Cell ExplorationMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) {
+        private Cell ExplorationMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) 
+        {
             Cell destination = null;
             float distance = 100000f;
 
-            foreach (Cell c in cells) {
-                if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) {
+            foreach (Cell c in cells) 
+            {
+                if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) 
+                {
                     float tempDist = Vector3.Distance(Utility.CoordinateToCell(_controller.GetPosition()).middle, c.middle);
                     bool isClosest = true;
 
-                    foreach (Vector3 v in visibleAgents) {
-                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) {
+                    foreach (Vector3 v in visibleAgents) 
+                    {
+                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) 
+                        {
                             isClosest = false;
                         }
                     }
 
-                    if (tempDist < distance && isClosest) {
+                    if (tempDist < distance && isClosest) 
+                    {
                         destination = c;
                         distance = tempDist;
                     }
@@ -114,7 +117,8 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             return destination;
         }
 
-        private Cell SearchMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) {
+        private Cell SearchMode(List<Cell> cells, CellStatus[,,] currentView, List<Vector3> visibleAgents) 
+        {
             List<Cell> cellsToCheck = new List<Cell>();
 
             Cell destination = null;
@@ -127,13 +131,16 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
 
             _searchMode = true;
 
-            foreach (Cell currentCell in cells) {
+            foreach (Cell currentCell in cells) 
+            {
                 if (currentView[currentCell.x, currentCell.y, currentCell.z] == CellStatus.wall) {
                     List<Cell> OcclusionPointsForCell = GetOCsForCell(currentView, currentCell);
                     cellsToCheck.AddRange(OcclusionPointsForCell);
 
-                    foreach (Cell occlusionPoint in OcclusionPointsForCell) {
-                        if (!_occlusionPoints.ContainsKey(occlusionPoint)) {
+                    foreach (Cell occlusionPoint in OcclusionPointsForCell) 
+                    {
+                        if (!_occlusionPoints.ContainsKey(occlusionPoint)) 
+                        {
                             _occlusionPoints.Add(occlusionPoint, 0);
                         }
                     }
@@ -146,7 +153,8 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                     bool isClosest = true;
 
                     foreach (Vector3 v in visibleAgents) {
-                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) {
+                        if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) 
+                        {
                             isClosest = false;
                         }
                     }
@@ -154,12 +162,14 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                     if (isClosest) {
                         /* Finds occlusion points that hasn't been visited yet 
                         * Otherwise find the least recently visited occlusion point */
-                        if (tempDist < distance && _occlusionPoints[c] == 0) {
+                        if (tempDist < distance && _occlusionPoints[c] == 0) 
+                        {
                             distance = tempDist;
                             destination = c;
                         }
                         else if (_occlusionPoints[c] < leastRecentlyVisitedTime ||
-                                (_occlusionPoints[c] == leastRecentlyVisitedTime && leastRecentlyVisitedDistance < tempDist)) {
+                                (_occlusionPoints[c] == leastRecentlyVisitedTime && leastRecentlyVisitedDistance < tempDist)) 
+                        {
                             leastRecentlyVisitedDistance = tempDist;
                             leastRecentlyVisited = c;
                         }
@@ -167,14 +177,16 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
                 }
             }
 
-            if (destination == null) {
+            if (destination == null) 
+            {
                 destination = leastRecentlyVisited;
             }
 
             return destination;
         }
 
-        private List<Cell> GetOCsForCell(CellStatus[,,] currentView, Cell currentCell) {
+        private List<Cell> GetOCsForCell(CellStatus[,,] currentView, Cell currentCell) 
+        {
             Vector3 position = _controller.GetPosition();
             Cell positionCell = Utility.CoordinateToCell(position);
 
@@ -186,76 +198,91 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
 
             List<Cell> occlusionCells = new List<Cell>();
             if (signMagnitude == 3) {
-                if (currentView[currentCell.x + signX * -1, currentCell.y, currentCell.z] != CellStatus.wall) {
+                if (currentView[currentCell.x + signX * -1, currentCell.y, currentCell.z] != CellStatus.wall) 
+                {
                     AddOcclusionCell(occlusionCells, currentView, currentCell, signX * -1, 0, signZ);
                     AddOcclusionCell(occlusionCells, currentView, currentCell, signX * -1, signY, 0);
                 }
 
-                if (currentView[currentCell.x, currentCell.y + signY * -1, currentCell.z] != CellStatus.wall) {
+                if (currentView[currentCell.x, currentCell.y + signY * -1, currentCell.z] != CellStatus.wall) 
+                {
                     AddOcclusionCell(occlusionCells, currentView, currentCell, 0, signY * -1, signZ);
                     AddOcclusionCell(occlusionCells, currentView, currentCell, signX, signY * -1, 0);
                 }
 
-                if (currentView[currentCell.x, currentCell.y, currentCell.z + signZ * -1] != CellStatus.wall) {
+                if (currentView[currentCell.x, currentCell.y, currentCell.z + signZ * -1] != CellStatus.wall) 
+                {
                     AddOcclusionCell(occlusionCells, currentView, currentCell, 0, signY, signZ * -1);
                     AddOcclusionCell(occlusionCells, currentView, currentCell, signX, 0, signZ * -1);
                 }
             }
             else if (signMagnitude == 2) {
                 if (signX == 0) {
-                    if (currentView[currentCell.x + 1, currentCell.y, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x + 1, currentCell.y, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 1, 0, signZ);
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 1, signY, 0);
                     }
 
-                    if (currentView[currentCell.x - 1, currentCell.y, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x - 1, currentCell.y, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, -1, 0, signZ);
                         AddOcclusionCell(occlusionCells, currentView, currentCell, -1, signY, 0);
                     }
 
-                    if (currentView[currentCell.x, currentCell.y + signY * -1, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y + signY * -1, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 0, signY * -1, signZ);
                     }
 
-                    if (currentView[currentCell.x, currentCell.y, currentCell.z + signZ * -1] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y, currentCell.z + signZ * -1] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 0, signY, signZ * -1);
                     }
                 }
                 else if (signY == 0) {
-                    if (currentView[currentCell.x, currentCell.y + 1, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y + 1, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 0, 1, signZ);
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, 1, 0);
                     }
 
-                    if (currentView[currentCell.x, currentCell.y - 1, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y - 1, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 0, -1, signZ);
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, -1, 0);
                     }
 
-                    if (currentView[currentCell.x + signX * -1, currentCell.y, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x + signX * -1, currentCell.y, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX * -1, 0, signZ);
                     }
 
-                    if (currentView[currentCell.x, currentCell.y, currentCell.z + signZ * -1] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y, currentCell.z + signZ * -1] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, 0, signZ * -1);
                     }
                 }
                 else if (signZ == 0) {
-                    if (currentView[currentCell.x, currentCell.y, currentCell.z + 1] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y, currentCell.z + 1] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 0, signY, 1);
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, 0, 1);
                     }
 
-                    if (currentView[currentCell.x, currentCell.y, currentCell.z - 1] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y, currentCell.z - 1] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 0, signY, -1);
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, 0, -1);
                     }
 
-                    if (currentView[currentCell.x + signX * -1, currentCell.y, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x + signX * -1, currentCell.y, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX * -1, signY, 0);
                     }
 
-                    if (currentView[currentCell.x, currentCell.y + signY * -1, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y + signY * -1, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, signY * -1, 0);
                     }
 
@@ -263,26 +290,32 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             }
             else if (signMagnitude == 1) {
                 if (signX == 0) {
-                    if (currentView[currentCell.x + 1, currentCell.y, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x + 1, currentCell.y, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, 1, signY, signZ);
                     }
-                    if (currentView[currentCell.x - 1, currentCell.y, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x - 1, currentCell.y, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, -1, signY, signZ);
                     }
                 }
                 if (signY == 0) {
-                    if (currentView[currentCell.x, currentCell.y + 1, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y + 1, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, 1, signZ);
                     }
-                    if (currentView[currentCell.x, currentCell.y - 1, currentCell.z] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y - 1, currentCell.z] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, -1, signZ);
                     }
                 }
                 if (signZ == 0) {
-                    if (currentView[currentCell.x, currentCell.y, currentCell.z + 1] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y, currentCell.z + 1] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, signY, 1);
                     }
-                    if (currentView[currentCell.x, currentCell.y, currentCell.z - 1] != CellStatus.wall) {
+                    if (currentView[currentCell.x, currentCell.y, currentCell.z - 1] != CellStatus.wall) 
+                    {
                         AddOcclusionCell(occlusionCells, currentView, currentCell, signX, signY, -1);
                     }
                 }
@@ -291,8 +324,10 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
             return occlusionCells;
         }
 
-        private bool IsCellTargetable(CellStatus cell) {
-            if (cell == CellStatus.wall || cell == CellStatus.unexplored) {
+        private bool IsCellTargetable(CellStatus cell) 
+        {
+            if (cell == CellStatus.wall || cell == CellStatus.unexplored) 
+            {
                 return false;
             }
 
@@ -300,9 +335,12 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition {
         }
 
 
-        private void AddOcclusionCell(List<Cell> occlusionCells, CellStatus[,,] view, Cell wallCell, int signX, int signY, int signZ) {
+        private void AddOcclusionCell(List<Cell> occlusionCells, CellStatus[,,] view, Cell wallCell, int signX, int signY, int signZ) 
+        {
             Cell cellToAdd = new Cell(wallCell.x + signX, wallCell.y + signY, wallCell.z + signZ);
-            if (IsCellTargetable(view[cellToAdd.x, cellToAdd.y, cellToAdd.z])) {
+
+            if (IsCellTargetable(view[cellToAdd.x, cellToAdd.y, cellToAdd.z])) 
+            {
                 occlusionCells.Add(new Cell(wallCell.x + signX, wallCell.y + signY, wallCell.z + signZ));
             }
         }
