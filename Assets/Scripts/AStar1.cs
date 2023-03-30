@@ -21,7 +21,7 @@ namespace MAES3D {
         }
     }
 
-    public static class AStar {
+    public static class AStar1 {
 
         public static List<Cell> FindPath(Vector3 startPosition, Vector3 targetPosition, CellStatus[,,] map) {            
             Cell startCell = Utility.CoordinateToCell(startPosition);
