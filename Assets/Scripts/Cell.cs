@@ -59,5 +59,12 @@ namespace MAES3D {
             return new Vector3(x,y, z);
         }
 
+        public void DrawCell(){
+                Debug.DrawLine(new Vector3(x+0.25f, y+0.25f, z+0.25f), new Vector3(x+0.75f, y+0.75f, z+0.75f), Color.red, 5000);
+                Debug.DrawLine(new Vector3(x+0.75f, y+0.25f, z+0.25f), new Vector3(x+0.25f, y+0.75f, z+0.75f), Color.red, 5000);
+                Debug.DrawLine(new Vector3(x+0.25f, y+0.25f, z+0.75f), new Vector3(x+0.75f, y+0.75f, z+0.25f), Color.red, 5000);
+                Debug.DrawLine(new Vector3(x+0.75f, y+0.25f, z+0.75f), new Vector3(x+0.25f, y+0.75f, z+0.25f), Color.red, 5000);
+        }
+
     }
 }
