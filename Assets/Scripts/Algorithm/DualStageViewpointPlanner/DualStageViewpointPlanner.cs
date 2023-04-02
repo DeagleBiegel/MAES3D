@@ -21,6 +21,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public bool done = false; // Delete Later
 
+        float lambda2 = 5;
+
         public void SetController(IAgentController controller) {
             _controller = controller;
             
@@ -149,13 +151,59 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         public RRTnode calculateGain(RRTnode treeNode, RRTnode currBestNode, float prevGain = 0, float currBestGain = 0, int branchLength = 0){
             foreach (RRTnode child in treeNode.children)
             {
-                float gain = 0;
+                float gain = VectorGain(child) * Mathf.Exp(-branchLength * lambda2); //lambda2 er bare en property, ved ikke lige hvad ellers jeg skal gøre med den
                 if (gain + prevGain > currBestGain)
                     currBestGain = gain + prevGain;
                     currBestNode = child;
                 calculateGain(child, currBestNode, gain + prevGain, currBestGain, branchLength+1);                
             }
             return currBestNode;
+        }
+
+        public float VectorGain(RRTnode node, int range = 4) {
+            Vector3 pos = node.position;
+            Cell positionCell = Utility.CoordinateToCell(pos);
+
+            float vectorGain = 0;
+            for (int x = -range; x <= range; x++) {
+                for (int y = -range; y <= range; y++) {
+                    for (int z = -range; z <= range; z++) {
+                        Cell targetCell = new Cell(x, y, z) + positionCell;
+                        if(Vector3.Distance(pos, targetCell.middle) <= range) {
+                            //TODO Add raycast check
+                            if (_controller.GetLocalExplorationMap()[targetCell.x, targetCell.y, targetCell.z] == CellStatus.unexplored) {
+                                vectorGain += 1;
+                            }
+                        }
+                    }
+                }
+            }
+            return vectorGain;
+        }
+
+        private float DTW(List<RRTnode> branch1, List<RRTnode> branch2) {
+            //Aner ikke om det virker
+            //Gør det nok 99% ikke tbh
+            //Fordi de to branches bliver sammenlignet i global space i stedet for relativt til deres træ root
+            //Ved ikke hvordan vi lige skal fikse det
+            //Man kunne bare tage vinklen fra træets root til target node og sidste træs root til den target node(hvilket vi allerede har i lastExplorationDirection) og sige at det er similarity da vi i stidste ende bare er iterreseret i om de er samme retning (tror jeg)
+
+            float[,] arr = new float[branch1.Count, branch2.Count];
+            for (int i = 0; i < arr.GetLength(0); i++) {
+                for (int j = 0; j < arr.GetLength(1); j++) {
+                    arr[i, j] = float.PositiveInfinity;
+                }
+            }
+            arr[0,0] = 0;
+
+            for (int i = 1; i <= arr.GetLength(0); i++) {
+                for (int j = 1; j <= arr.GetLength(1); j++) {
+                    float cost = Vector3.Distance(branch1[i - 1].position, branch2[j - 1].position);
+                    float lastMin = Mathf.Min(arr[i - 1, j], Mathf.Min(arr[i, j - 1], arr[i - 1, j - 1]));
+                    arr[i, j] = cost + lastMin;
+                }
+            }
+            return arr[arr.GetLength(0), arr.GetLength(1)];
         }
 
         public void BuildRRT(List<Cell> frontiers, int iterations = 500)

@@ -39,6 +39,13 @@ namespace MAES3D {
             return !(cell1 == cell2);
         }
 
+        public static Cell operator +(Cell cell1, Cell cell2) {
+            return new Cell(cell1.x + cell2.x, cell1.y + cell2.y, cell1.z + cell2.z);
+        }
+        public static Cell operator -(Cell cell1, Cell cell2) {
+            return new Cell(cell1.x - cell2.x, cell1.y - cell2.y, cell1.z - cell2.z);
+        }
+
         public override string ToString() {
             return $"({x}, {y}, {z})";
         }
