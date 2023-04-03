@@ -26,6 +26,8 @@ namespace MAES3D.Agent {
 
         void MoveToPosition(Vector3 targetPosition);
 
+        void MoveToCellAsync(Cell targetCell);
+
         void MoveToCell(Cell targetCell);
 
         void Move(float angle, float distance);

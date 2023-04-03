@@ -4,6 +4,7 @@ using MAES3D.Agent.Task;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine.UIElements;
+using System.Threading.Tasks;
 
 namespace MAES3D.Agent {
 
@@ -45,12 +46,16 @@ namespace MAES3D.Agent {
 
         public void UpdateMovement() {
 
-            if (_currentTask == null) {
+            if (_currentStatus == Status.Busy) {
+                return;
+            }
+            else if (_currentTask == null) {
                 _currentStatus = Status.Idle;
             }
             else {
                 _currentStatus = Status.Moving;
             }
+            
 
             MoveInstruction? instruction = _currentTask?.GetInstruction();
 
@@ -60,7 +65,8 @@ namespace MAES3D.Agent {
 
             var isComplete = _currentTask?.IsComplete() ?? false;
 
-            if (isComplete) {
+            if (isComplete) 
+            {
                 _currentTask = null;
             }
         }
@@ -130,6 +136,78 @@ namespace MAES3D.Agent {
             }
 
             MoveToCell(targetCell);
+        }
+
+        public async void MoveToCellAsync(Cell targetCell) 
+        {
+            var position = GetPosition();
+
+            Debug.DrawLine(position, targetCell.middle, Color.red);
+
+            //Check if target cell is explored
+            if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
+                Debug.LogWarning($"An wants to move to the cell {targetCell} but it is unexplored\n" +
+                                 $"\tCannot calculate path to target");
+                Debug.Break();
+                return;
+            }
+
+            //If agent can go directly to goal
+            Vector3 directionToGoal = targetCell.middle - position;
+            float distanceToGoal = Vector3.Distance(position, targetCell.middle);
+            if (!Physics.SphereCast(position, 0.4f, directionToGoal, out _, distanceToGoal)) {
+                _currentTask = new CompositeMovementTask(new List<Vector3> { directionToGoal }, _moveSpeed, _turnSpeed, _transform);
+                Debug.DrawLine(position, targetCell.middle, Color.cyan);
+                //Debug.Break();
+                return;
+            }
+
+            // Enters busy status while calculating AStar Path
+            _currentStatus = Status.Busy;
+
+
+            //If we cant go there directly, use AStar to find a path
+            List<Cell> fullPath = await System.Threading.Tasks.Task.Run(() => AStar.FindPath(position, targetCell.middle, GetLocalExplorationMap()));
+
+            // Path found, can start moving
+            _currentStatus = Status.Moving;
+
+            //Could not find a path
+            if (fullPath.Count == 0) {
+                return;
+            }
+
+            //Make a more optimal shorter path
+            List<Vector3> shortPath = new List<Vector3>();
+
+            //Remove first element so the first cell is not the on the agent is in
+            fullPath.RemoveAt(0);
+
+            //!!
+            //!!SHOULD do more itterations to fix a small "issue" with points lining up!!
+            //!!
+            Vector3 currentPosition = position;
+            for (int i = 1; i < fullPath.Count; i++) {
+                Cell cell = fullPath[i];
+
+                Vector3 direction = cell.middle - currentPosition;
+                float distance = Vector3.Distance(currentPosition, cell.middle);
+
+                if (Physics.SphereCast(currentPosition, 0.4f/*HAS to be same size as agents collider*/, direction, out _, distance)) {
+                    currentPosition = fullPath[i - 1].middle;
+                    shortPath.Add(fullPath[i - 1].middle);
+                }
+            }
+            shortPath.Add(fullPath[fullPath.Count - 1].middle);
+
+            //Make path into relative targets
+            List<Vector3> relativePath = new List<Vector3>();
+            relativePath.Add(shortPath[0] - position);
+            for (int i = 1; i < shortPath.Count; i++) {
+                relativePath.Add(shortPath[i] - shortPath[i - 1]);
+            }
+
+            _currentTask = new CompositeMovementTask(relativePath, _moveSpeed, _turnSpeed, _transform);
         }
 
         public void MoveToCell(Cell targetCell) {
