@@ -59,6 +59,15 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
 
             if (_controller.GetCurrentStatus() == Status.Idle) 
             {
+                /*
+                * Used for testing using Seed 1 with a single drone and tempDist set to 10
+                if (Utility.CoordinateToCell(_controller.GetPosition()) == Utility.CoordinateToCell(new Vector3(17, 40, 94))) 
+                {
+                    Debug.Log("Moving back to start!");
+                    _controller.MoveToCellAsync(new Cell(10, 8, 8));
+                    return;
+                }*/
+
 
                 Cell destination = null;
                 CellStatus[,,] currentView = _controller.GetCurrentView();
@@ -79,7 +88,7 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
                     }
 
                     Debug.DrawLine(_controller.GetPosition(), destination.middle, Color.red, 5);
-                    _controller.MoveToCell(destination);
+                    _controller.MoveToCellAsync(destination);
                 }
             }
 
