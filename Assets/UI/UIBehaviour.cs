@@ -79,7 +79,10 @@ public class UIBehaviour : MonoBehaviour
             SimulationSettings.agentCount = agentCount.value;
             SimulationSettings.duration = duration.value*60; // in minutes
             SimulationSettings.useRandomSeed = toggleSeed.value;
-            SimulationSettings.seed = txtSeed.value;
+            if (!SimulationSettings.useRandomSeed)
+            {
+                SimulationSettings.seed = Int32.Parse(txtSeed.value);
+            }
             SimulationSettings.Height = mapHeight.value;
             SimulationSettings.Width = mapWidth.value;
             SimulationSettings.Depth = mapDepth.value;
@@ -89,8 +92,13 @@ public class UIBehaviour : MonoBehaviour
             timeLeft = SimulationSettings.duration;
 
             // Start Taking Results
-            TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/result{SimulationSettings.Instance}.csv", false);
-            textWriter.WriteLine("Timestamp, Progress");
+            TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{AlgorithmIndexToString(SimulationSettings.algorithm)}_x{SimulationSettings.Width}y{SimulationSettings.Height}z{SimulationSettings.Depth}_I{SimulationSettings.Instance}.csv", false);
+            textWriter.WriteLine($"Algorithm,{AlgorithmIndexToString(SimulationSettings.algorithm)}");
+            textWriter.WriteLine($"MapSize,x={SimulationSettings.Width},y={SimulationSettings.Height},z={SimulationSettings.Depth}");
+            textWriter.WriteLine($"AgentAmount,{SimulationSettings.agentCount}");
+            textWriter.WriteLine($"Duration(min),{SimulationSettings.duration/60}");
+            textWriter.WriteLine($"Seed,{SimulationSettings.seed}");
+            textWriter.WriteLine("Timestamp(s),Progress(%),");
             if (SimulationSettings.Instance == 0)
                 textWriter.WriteLine("0, 0");
             textWriter.Close();
@@ -146,10 +154,23 @@ public class UIBehaviour : MonoBehaviour
     }
 
     private void AddResults(int duration, int progress, int instance){
-        TextWriter tw = new StreamWriter(Application.dataPath + $"/Results/result{instance}.csv", true);
+        TextWriter tw = new StreamWriter(Application.dataPath + $"/Results/{AlgorithmIndexToString(SimulationSettings.algorithm)}_x{SimulationSettings.Width}y{SimulationSettings.Height}z{SimulationSettings.Depth}_I{SimulationSettings.Instance}.csv", true);
         tw.WriteLine($"{duration},{progress}");
         tw.Close();
+    }
 
+    private String AlgorithmIndexToString(int algorithmIndex){
+        switch (algorithmIndex)
+        {
+            case 0:
+                return "RBW";
+            case 1:
+                return "LVD";
+            case 2: 
+                return "DSVP";
+            default:
+                return "No AlgorithmIndex Given";
+        }
 
     }
 

@@ -15,7 +15,7 @@ namespace MAES3D {
         private int smoothingIterations;
 
         private bool useRandomSeed = true;
-        private string seed;
+        private int seed;
 
         private MeshRenderer meshRenderer;
         private MeshFilter meshFilter;
@@ -84,10 +84,11 @@ namespace MAES3D {
         private void PopulateVoxelMap() {
 
             if (useRandomSeed) {
-                seed = System.DateTime.Now.ToString();
+                seed = Mathf.Abs((int)System.DateTime.Now.Ticks);
+                SimulationSettings.seed = seed;
             }
 
-            Random.InitState(seed.GetHashCode());
+            Random.InitState((seed.GetHashCode()));
 
             for (int y = 0; y < ChunkHeight; y++) {
                 for (int x = 0; x < ChunkWidth; x++) {
