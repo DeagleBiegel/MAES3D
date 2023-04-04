@@ -24,6 +24,9 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         private RRT RRTmap;
 
         public bool done = false; // Delete Later
+        
+        public Dictionary<RRTnode, float> gainilizer5000 = new Dictionary<RRTnode, float>();
+
 
         float lambda2 = 5;
 
@@ -111,68 +114,22 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         public RRTnode FindBestGainViewpoint(RRTnode rootNode){
-            RRTnode n = CalculateBestGainViewpoint(rootNode);
+            CalculateBestGainViewpoint(rootNode);
+            RRTnode n = gainilizer5000.OrderByDescending(x => x.Value).First().Key;
             Debug.Log($"the best: {n.position}");
             return n;
         }
 
-        public RRTnode CalculateBestGainViewpoint2(RRTnode root, int branchLength = 0) {
-            if(root == null) {
-                Debug.Log($"oopsie {root.position}");
-                return null;
-            }
-
-            if (Utility.CoordinateToCell(root.position) == new Cell(9, 16, 15)) {
-                Debug.Log($"oopsie daisy {root.position}");
-            }
-
-            RRTnode maxNode = root;
-            float maxGain = GetBranchGain(maxNode, branchLength);
-
-            foreach (RRTnode child in root.children) {
-                RRTnode childMaxNode = CalculateBestGainViewpoint2(child, branchLength + 1);
-                float childMaxGain = childMaxNode != null ? GetBranchGain(childMaxNode, branchLength) : float.NegativeInfinity;
-
-                Debug.Log($"gain: {childMaxGain} > {maxGain} \t{childMaxNode.position} \t{branchLength}");
-
-                if(childMaxGain > maxGain) {
-                    maxNode = childMaxNode;
-                    maxGain = childMaxGain;
-                }
-
-            }
-
-            return maxNode;
-        }
-
-        public RRTnode CalculateBestGainViewpoint(RRTnode treeNode, RRTnode currBestNode = null, float currBestGain = 0, int branchLength = 0){
-
-            if (currBestNode == null) {
-                currBestNode = treeNode;
-            }
-
-            float bestGain = currBestGain;
-            RRTnode bestNode = currBestNode;
-            int branch = branchLength;
+        public void CalculateBestGainViewpoint(RRTnode treeNode, int branchLength = 0){
 
             foreach (RRTnode child in treeNode.children)
             {
-                float childBestGain = GetBranchGain(child, branch);
+                float childBestGain = GetBranchGain(child, branchLength);
 
-                if (childBestGain > bestGain) {
-                    Debug.Log($"A NEW KING! {childBestGain}>{bestGain} \t{branch}");
-
-                    bestGain = childBestGain;
-                    bestNode = child;
-                }
-
-                RRTnode result = CalculateBestGainViewpoint(child, bestNode, bestGain, branch + 1);
-                if (result != null) {
-                    bestNode = result;
-                }
+                CalculateBestGainViewpoint(child, branchLength + 1);
+                gainilizer5000.Add(child, childBestGain);
             }
-
-            return bestNode;
+            
         }
 
         public float GetBranchGain(RRTnode node, int currentBranchLength) {
@@ -193,7 +150,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public float GetViewPointGain(RRTnode node, int currentBranchLength) {
             float gain = VectorGain(node);
-            return VectorGain(node);// * currentBranchLength;// * Mathf.Exp(-currentBranchLength * lambda2);
+            return VectorGain(node) * -currentBranchLength;// * Mathf.Exp(-currentBranchLength * lambda2);
         }
 
         public float VectorGain(RRTnode node, int range = 2) {
