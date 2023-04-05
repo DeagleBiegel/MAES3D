@@ -22,11 +22,13 @@ namespace MAES3D.Agent {
 
             _visitedPosition.Add(Controller.GetPosition());
             
+            /*
             for (int i = 1; i < _visitedPosition.Count; i++) {
                 Vector3 c = _visitedPosition[i];
 
                 Debug.DrawLine(c, _visitedPosition[i - 1]);
             }
+            */
         }
 
         public void MovementUpdate() {

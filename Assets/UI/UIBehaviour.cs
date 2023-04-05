@@ -133,9 +133,9 @@ public class UIBehaviour : MonoBehaviour
         GetComponent<UIDocument>().rootVisualElement.Q<ProgressBar>("ProgressBar").value = MathF.Floor(SimulationSettings.progress);
         GetComponent<UIDocument>().rootVisualElement.Q<ProgressBar>("ProgressBar").title = string.Format("{0:00}:{1:00}",MathF.Floor(timeLeft/60),MathF.Floor(timeLeft)%60) + $" - {SimulationSettings.progress}%";
         if(timeLeft > 0){
-            timeLeft -= Time.deltaTime;
+            timeLeft -= Time.fixedDeltaTime;
             if(saveResultTimer < 10)
-                saveResultTimer += Time.deltaTime;
+                saveResultTimer += Time.fixedDeltaTime;
             else{
                 saveResultTimer = 0;
                 AddResults((int)(SimulationSettings.duration - timeLeft), (int)SimulationSettings.progress, SimulationSettings.Instance);
