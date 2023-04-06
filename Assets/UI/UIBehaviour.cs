@@ -77,7 +77,7 @@ public class UIBehaviour : MonoBehaviour
             // Adds values from VisualElements to SimulationSettings
             SimulationSettings.algorithm = dropdownAlgorithm.index;
             SimulationSettings.agentCount = agentCount.value;
-            SimulationSettings.duration = duration.value*60; // in minutes
+            SimulationSettings.duration = duration.value * 60; // in minutes
             SimulationSettings.useRandomSeed = toggleSeed.value;
             if (!SimulationSettings.useRandomSeed)
             {
@@ -88,10 +88,11 @@ public class UIBehaviour : MonoBehaviour
             SimulationSettings.Depth = mapDepth.value;
             
             // Starts the simulation
-            Sim.SetupSimulation(SimulationSettings.duration);
+            Sim.SetupSimulation();
             timeLeft = SimulationSettings.duration;
 
             // Start Taking Results
+            /*
             TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{AlgorithmIndexToString(SimulationSettings.algorithm)}_x{SimulationSettings.Width}y{SimulationSettings.Height}z{SimulationSettings.Depth}_I{SimulationSettings.Instance}.csv", false);
             textWriter.WriteLine($"Algorithm,{AlgorithmIndexToString(SimulationSettings.algorithm)}");
             textWriter.WriteLine($"MapSize,x={SimulationSettings.Width},y={SimulationSettings.Height},z={SimulationSettings.Depth}");
@@ -99,9 +100,9 @@ public class UIBehaviour : MonoBehaviour
             textWriter.WriteLine($"Duration(min),{SimulationSettings.duration/60}");
             textWriter.WriteLine($"Seed,{SimulationSettings.seed}");
             textWriter.WriteLine("Timestamp(s),Progress(%),");
-            if (SimulationSettings.Instance == 0)
-                textWriter.WriteLine("0, 0");
+            textWriter.WriteLine("0, 0");
             textWriter.Close();
+            */
 
             GameObject mainCamera = cameras[0];
             mainCamera.transform.position = new Vector3(-(mapWidth.value * 0.25f), mapHeight.value * 1.25f, -(mapDepth.value * 0.25f));
@@ -132,6 +133,7 @@ public class UIBehaviour : MonoBehaviour
     void FixedUpdate(){
         GetComponent<UIDocument>().rootVisualElement.Q<ProgressBar>("ProgressBar").value = MathF.Floor(SimulationSettings.progress);
         GetComponent<UIDocument>().rootVisualElement.Q<ProgressBar>("ProgressBar").title = string.Format("{0:00}:{1:00}",MathF.Floor(timeLeft/60),MathF.Floor(timeLeft)%60) + $" - {SimulationSettings.progress}%";
+        /*
         if(timeLeft > 0){
             timeLeft -= Time.fixedDeltaTime;
             if(saveResultTimer < 10)
@@ -147,10 +149,7 @@ public class UIBehaviour : MonoBehaviour
             timeLeft = 0;
             AddResults((int)(SimulationSettings.duration - timeLeft), (int)SimulationSettings.progress, SimulationSettings.Instance-1);
         }
-
-
-
-
+        */
     }
 
     private void AddResults(int duration, int progress, int instance){
@@ -159,7 +158,7 @@ public class UIBehaviour : MonoBehaviour
         tw.Close();
     }
 
-    private String AlgorithmIndexToString(int algorithmIndex){
+    private static String AlgorithmIndexToString(int algorithmIndex){
         switch (algorithmIndex)
         {
             case 0:
