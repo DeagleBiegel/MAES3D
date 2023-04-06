@@ -14,7 +14,7 @@ public static class SimulationSettings
     public static int agentCount = 1;
     public static int algorithm = 1; // 0 = RBW, 1 = LVD
 
-    public static float duration = 30*60; // in minutes
+    public static float duration = 30 * 60; // in minutes
 
     public static float progress = 0;
 }
