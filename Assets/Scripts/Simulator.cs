@@ -11,6 +11,7 @@ public class Simulator : MonoBehaviour{
     float elapsedTime = 0;
     float saveTimer = 0;
     List<GeneratedSettings> settingsList;
+    GeneratedSettings previousSettings;
     int currentSettingsIndex = 0;
 
     private void Start() {
@@ -18,6 +19,8 @@ public class Simulator : MonoBehaviour{
         ApplySettings();
         SetupSimulation();
         StatWriter.InitializeStatFile(currentSettingsIndex);
+
+        JsonWriter.InitFile(100);
     }
 
     void FixedUpdate() {
@@ -26,17 +29,34 @@ public class Simulator : MonoBehaviour{
 
             elapsedTime += Time.fixedDeltaTime;
             saveTimer += Time.fixedDeltaTime;
-            if(saveTimer > 10) {
+
+            if(saveTimer >= 10) {
                 StatWriter.AddResults(currentSettingsIndex, elapsedTime, _simulation.ExplorationManager.ExploredRatio);
-                saveTimer = 0;
+                JsonWriter.AddData((int) elapsedTime, _simulation.ExplorationManager.ExploredRatio);
+                saveTimer %= 10;
             }
         }
         else {
             DestroySimulation();
-            if (currentSettingsIndex < settingsList.Count) {
+            if (currentSettingsIndex < settingsList.Count) 
+            {
                 ApplySettings();
                 SetupSimulation();
-                StatWriter.InitializeStatFile(currentSettingsIndex);
+            
+                if (settingsList[currentSettingsIndex - 2].algorithm == SimulationSettings.algorithm &&
+                    settingsList[currentSettingsIndex - 2].Height == SimulationSettings.Height &&
+                    settingsList[currentSettingsIndex - 2].agentCount == SimulationSettings.agentCount) 
+                {
+                    JsonWriter.InitTest();
+                    previousSettings = settingsList[currentSettingsIndex - 1];
+                }
+                else 
+                {
+                    JsonWriter.TerminateFile(previousSettings);
+                    JsonWriter.InitFile(100);
+                }
+
+                currentSettingsIndex++;
             }
         }
 
@@ -61,9 +81,9 @@ public class Simulator : MonoBehaviour{
     public List<GeneratedSettings> GenerateAutomatedTests() {
         int[] algos = { 0, 1 };
         int[] sizes = { 50, 75, 100 };
-        int[] agentCounts = { 2, 3, 5, 10 };
-        string[] seeds = { Random.value.ToString(), Random.value.ToString(), Random.value.ToString() };
-        int duration = 1 * 60;
+        int[] agentCounts = { 2, 3, 4 };
+        string[] seeds = { Random.value.ToString(), Random.value.ToString() };
+        int duration = 1 * 10;
 
         float timeScale = 4f;
 
