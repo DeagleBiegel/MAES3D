@@ -36,7 +36,7 @@ public class JsonWriter
 
         if (!initialTest) 
         {
-            textWriter.Write($",\t\t\t\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"freeCells\" : {discoverableCells},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
+            textWriter.WriteLine($",\t\t\t\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"freeCells\" : {discoverableCells},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
         }
         else 
         {
@@ -47,7 +47,7 @@ public class JsonWriter
         textWriter.Close();
     }
 
-    public void AddData(int time, float progress) 
+    public void AddData(int time, float progress, bool shouldEnd) 
     {
         TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", true);
 
@@ -55,9 +55,9 @@ public class JsonWriter
         textWriter.WriteLine($"\t\t\t\t\t\t\"timestamp\" : {time},");
         textWriter.WriteLine($"\t\t\t\t\t\t\"progress\" : {progress}");
 
-        if (time >= SimulationSettings.duration) 
+        if (shouldEnd) 
         {
-            textWriter.Write($"\t\t\t\t\t}}\n\t\t\t\t]\n\t\t\t}}");
+            textWriter.WriteLine($"\t\t\t\t\t}}\n\t\t\t\t]\n\t\t\t}}");
         }
         else 
         {

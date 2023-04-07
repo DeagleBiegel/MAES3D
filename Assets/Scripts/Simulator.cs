@@ -14,7 +14,7 @@ public class Simulator : MonoBehaviour{
     int currentSettingsIndex = 0;
     bool finished = false;
 
-    private JsonWriter _jsonWriter;
+    private JsonWriter2 _jsonWriter;
 
     private void Start() {
         settingsList = GenerateAutomatedTests();
@@ -22,8 +22,9 @@ public class Simulator : MonoBehaviour{
         SetupSimulation();
         // StatWriter.InitializeStatFile(currentSettingsIndex);
 
-        _jsonWriter = new JsonWriter(settingsList[currentSettingsIndex], _simulation.map.GetNumberOfExplorableTiles());
-        _jsonWriter.AddData(0, 0);
+        _jsonWriter = new JsonWriter2(settingsList[currentSettingsIndex]);
+        _jsonWriter.InitTest(_simulation.map.GetNumberOfExplorableTiles(), settingsList[currentSettingsIndex].seed);
+        _jsonWriter.AddData(0, 0, false);
 
         currentSettingsIndex++;
     }
@@ -32,16 +33,26 @@ public class Simulator : MonoBehaviour{
 
         if (finished) return;
 
-        if (elapsedTime < SimulationSettings.duration) {
+        bool finishedExploring = false;
+        if (_simulation.ExplorationManager.ExploredRatio >= 99.7f || elapsedTime > SimulationSettings.duration) {
+            finishedExploring = true;
+            _jsonWriter.AddData((int)System.Math.Round(elapsedTime), _simulation.ExplorationManager.ExploredRatio, true);
+        }
+
+        if (!finishedExploring) {
             _simulation?.ExecuteStep();
 
             elapsedTime += Time.fixedDeltaTime;
             saveTimer += Time.fixedDeltaTime;
 
-            if(saveTimer >= 10) {
+            if(saveTimer >= 10 || finishedExploring) {
                 // StatWriter.AddResults(currentSettingsIndex, elapsedTime, _simulation.ExplorationManager.ExploredRatio);
-                _jsonWriter.AddData((int) elapsedTime, _simulation.ExplorationManager.ExploredRatio);
+                _jsonWriter.AddData((int)System.Math.Round(elapsedTime), _simulation.ExplorationManager.ExploredRatio, false);
                 saveTimer %= 10;
+            }
+
+            if(finishedExploring) {
+                elapsedTime = SimulationSettings.duration;
             }
         }
         else {
@@ -56,14 +67,16 @@ public class Simulator : MonoBehaviour{
                     settingsList[currentSettingsIndex - 1].agentCount == SimulationSettings.agentCount) 
                 {
                     _jsonWriter.InitTest(_simulation.map.GetNumberOfExplorableTiles(), settingsList[currentSettingsIndex].seed);
-                    _jsonWriter.AddData(0, 0);
+                    _jsonWriter.AddData(0, 0, false);
                 }
                 else 
                 {
                     _jsonWriter.EndFile();
-                    _jsonWriter = new JsonWriter(settingsList[currentSettingsIndex], _simulation.map.GetNumberOfExplorableTiles());
+                    _jsonWriter = new JsonWriter2(settingsList[currentSettingsIndex]);
                 }
 
+                elapsedTime = 0;
+                saveTimer = 0;
                 currentSettingsIndex++;
             }
             else 
@@ -91,10 +104,16 @@ public class Simulator : MonoBehaviour{
 
     public List<GeneratedSettings> GenerateAutomatedTests() {
         int[] algos = { 0 };
-        int[] sizes = { 50 };
-        int[] agentCounts = { 2, 3 };
-        string[] seeds = { Random.value.ToString(), Random.value.ToString() };
-        int duration = 1 * 20;
+        int[] sizes = { 100 };
+        int[] agentCounts = { 2,5,10 };
+
+        List<int> seeds = new List<int>();
+        int seedAmount = 20;
+        for (int i = 0; i < seedAmount; i++) {
+            seeds.Add(Random.Range(100000, 1000000));
+        }
+        
+        int duration = 30 * 60;
 
         float timeScale = 4f;
 
@@ -103,14 +122,14 @@ public class Simulator : MonoBehaviour{
         foreach (int algo in algos) { 
             foreach (int size in sizes) {
                 foreach(int agentCount in agentCounts) {
-                    foreach (string seed in seeds) {
+                    foreach (int seed in seeds) {
                         retList.Add(new GeneratedSettings() {
                             Height = size,
                             Width = size,
                             Depth = size,
                             smoothingIterations = 20,
                             useRandomSeed = false,
-                            seed = seed.GetHashCode(),
+                            seed = seed,
                             agentCount = agentCount,
                             algorithm = algo,
                             duration = duration,
@@ -134,6 +153,7 @@ public class Simulator : MonoBehaviour{
         _simulation = _simulationGameObject.GetComponent<Simulation>();
         //Destroy(_simulationGameObject, duration); 
         _simulation.SetupScenario();
+        Time.timeScale = SimulationSettings.timeScale;
     }
 
     public void DestroySimulation() {

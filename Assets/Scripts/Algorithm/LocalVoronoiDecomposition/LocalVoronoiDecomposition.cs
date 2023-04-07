@@ -82,7 +82,7 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
 
                 Cell destination = null;
                 CellStatus[,,] currentView = _controller.GetCurrentView();
-                List<Vector3> visibleAgents = _controller.GetVisibleAgentPositions();
+                //List<Vector3> visibleAgents = _controller.GetVisibleAgentPositions();
 
                 _searchMode = false;
 
