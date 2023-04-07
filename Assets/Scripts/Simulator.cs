@@ -18,7 +18,7 @@ public class Simulator : MonoBehaviour{
         _simulation = _simulationGameObject.GetComponent<Simulation>();
         Destroy(_simulationGameObject, duration); 
         _simulation.SetupScenario();
-        Time.timeScale = 1f;
+        Time.timeScale = 4f;
     }
 
     public void DestroySimulation() {

@@ -44,6 +44,11 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public void UpdateLogic()
         {   
+            if (done)
+            {
+                return;
+            }
+
             if (firstTick)
             {
                 localGraph = new RRT(_controller.GetPosition());
@@ -60,7 +65,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             {
 
                 RRTnode newdestination = ExplorationStage(location);
-                if (location != newdestination)
+                if (location != newdestination && localFrontiers.Count != 0)
                 {
                     newdestination.DrawNode(Color.magenta);
                     _controller.MoveToCellAsync(Utility.CoordinateToCell(newdestination.position));
@@ -71,10 +76,11 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     if (globalFrontiers.Count == 0) // If there are no more global frontiers after exploration stage
                     {    
                         Debug.Log("Simulation Over: Cannot find any more frontiers");
-                        Debug.Break();
+                        done = true;
                     }
                     else
                     {
+                        Debug.Log("Relocation Stage");
                         Cell globalFrontierDestination = RelocationStage();
                         globalFrontierDestination.DrawCell(Color.magenta);
                         _controller.MoveToCellAsync(globalFrontierDestination);
@@ -120,7 +126,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         public void DynamicExpansion(RRTnode newLocation){ //Changes Rootnode to given RRTnode, Prunes the local planning horizon, rebuilds the graph from the new root
             if (newLocation != null)
             {    
-                Debug.Log("NewRoot + Prune");
+                //Debug.Log("NewRoot + Prune");
                 // Set Slb, root position Prob and FS
                 SetNewRootPosition(localGraph, newLocation); // Set new root position, if newLocation == null it does nothing
                 // Prune(Previous Tree)
@@ -138,11 +144,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             end
             */
             BuildRRT(FindFrontiers(5));
-            globalGraph.DrawTree(localGraph.root); // Draws the localGraph Tree
-            globalGraph.root.DrawNode(Color.blue);
+            localGraph.DrawTree(localGraph.root); // Draws the localGraph Tree
+            localGraph.root.DrawNode(Color.blue);
+            globalGraph.DrawTree2(localGraph.root); // Draws the globalGraph Tree
+            globalGraph.root.DrawNode(Color.cyan);
         }   
 
         public Cell RelocationStage(){
+            UpdateGlobalFrontiers();
+
             float dist = float.PositiveInfinity;
             Cell bestFrontier = null;
             foreach (Cell frontier in globalFrontiers)
@@ -158,10 +168,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
         
         public RRTnode RelocationStage2(){ // When there is no local frontiers within the planning horizon, the planner switches from the exploration stage to the relocation stage
-            /*
-            Update Fglobal and G // This is being updated in 
-            Flag ← False and Dist ← 0
-            */
+            
+            //Update Fglobal and G // This is being updated in 
+            UpdateGlobalFrontiers();
+
+            //Flag ← False and Dist ← 0
+            
             bool flag = false; // Has a frontier and a viewpoint within line of sight of each other been found? 
             float dist = 0; // Distance between selected viewpoint and selected frontier
 
@@ -239,6 +251,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
         }
 
+        private void UpdateGlobalFrontiers(){
+            for (int i = globalFrontiers.Count-1; i >= 0; i--)
+            {
+                if (!ValidFrontier(globalFrontiers[i]))
+                {
+                    globalFrontiers.RemoveAt(i);
+                }
+            }
+        }
         private RRTnode CalculateBestDestination(){
             // ---Det her for Stack Overflow---
             RRTnode bestBranch = FindBestGainViewpoint(localGraph.root);
@@ -264,7 +285,6 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 */
                 if (!IsInPlanningHorizon(viewpoint))
                 {
-                    Debug.Log(viewpoint.position);
                     viewpoint.DrawNode();
                     if (!(viewpoint.parent == null))
                     {
@@ -431,7 +451,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             for (int i = 0; i < iterations; i++)
             {
                 Vector3 targetPoint; 
-                if (UnityEngine.Random.Range(0f,1f) < threshold)
+                if (UnityEngine.Random.Range(0f,1f) < threshold && frontiers.Count != 0)
                 {
                     Cell selectedFrontier = frontiers[UnityEngine.Random.Range(0,frontiers.Count)];
                     targetPoint = selectedFrontier.middle + new Vector3(UnityEngine.Random.Range(-frontierRadius, frontierRadius), UnityEngine.Random.Range(-frontierRadius, frontierRadius), UnityEngine.Random.Range(-frontierRadius, frontierRadius));//Random.insideUnitSphere * frontierRadius;
@@ -458,7 +478,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
             /*---Find and add node to global tree---*/
             RRTnode closestGlobalNode = globalGraph.FindNearestNode(closestNode.position);
-            RRTnode newglobalNode = new RRTnode(localGraph.Steer(closestGlobalNode, p));
+            RRTnode newglobalNode = new RRTnode(globalGraph.Steer(closestGlobalNode, p));
             if(_controller.GetExplorationStatusOfCell(Utility.CoordinateToCell(newglobalNode.position)) == CellStatus.explored){
                 // Add p as a child of the closest node
                 //Debug.Log(newglobalNode.position);
@@ -467,17 +487,13 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         public List<Cell> FindFrontiers(int frontierAmount){
+            localFrontiers = new List<Cell>();
             List<Cell> viewableCells = _controller.GetVisibleCells();
             foreach (Cell cell in viewableCells)
             {
                 if (_controller.GetExplorationStatusOfCell(cell) == CellStatus.explored)
                 {    
-                    if (_controller.GetExplorationStatusOfCell(new Cell(cell.x + 1, cell.y, cell.z), true) == CellStatus.unexplored ||
-                        _controller.GetExplorationStatusOfCell(new Cell(cell.x - 1, cell.y, cell.z), true) == CellStatus.unexplored ||
-                        _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y + 1, cell.z), true) == CellStatus.unexplored ||
-                        _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y - 1, cell.z), true) == CellStatus.unexplored ||
-                        _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y, cell.z + 1), true) == CellStatus.unexplored ||
-                        _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y, cell.z - 1), true) == CellStatus.unexplored)
+                    if (ValidFrontier(cell))
                     {
                         bool clusterCheck = false; // Checks if another frontier is nearby
                         foreach (Cell frontier in localFrontiers)  
@@ -485,16 +501,35 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                             if ((cell.toVector - frontier.toVector).magnitude < 5) // Checks if another frontier is nearby
                                 clusterCheck = true;
                         }
-                        if(!clusterCheck)
+                        if(!clusterCheck && !globalFrontiers.Contains(cell))
                             localFrontiers.Add(cell);
                     }
                 }
             } 
-            foreach (Cell c in FindBestFrontiers(localFrontiers, frontierAmount)) // FindBestFrontiers(localFrontiers, frontierAmount) || localFrontiers
+
+            List<Cell> bestFrontiers = FindBestFrontiers(localFrontiers, frontierAmount);
+            foreach (Cell c in bestFrontiers) // FindBestFrontiers(localFrontiers, frontierAmount) || localFrontiers
             {
                 c.DrawCell(Color.green);
             }
-            return FindBestFrontiers(localFrontiers, frontierAmount);
+            return bestFrontiers;
+        }
+
+        private bool ValidFrontier(Cell cell){
+            if (_controller.GetExplorationStatusOfCell(new Cell(cell.x + 1, cell.y, cell.z), false) == CellStatus.unexplored ||
+                _controller.GetExplorationStatusOfCell(new Cell(cell.x - 1, cell.y, cell.z), false) == CellStatus.unexplored ||
+                _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y + 1, cell.z), false) == CellStatus.unexplored ||
+                _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y - 1, cell.z), false) == CellStatus.unexplored ||
+                _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y, cell.z + 1), false) == CellStatus.unexplored ||
+                _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y, cell.z - 1), false) == CellStatus.unexplored)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
 
         public List<Cell> FindBestFrontiers(List<Cell> frontiers, int amount){ // find x best cells in the drone's direction and store rest of the frontiers in global frontiers
@@ -529,6 +564,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
                 if (!selectedFrontiers.Contains(frontier))
                 {
+                    
                     globalFrontiers.Add(frontier);
                 }
              
@@ -671,6 +707,19 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 else
                     Debug.DrawLine(node.position, child.position, Color.black, duration);
                 DrawTree(child, !alternate);
+            }
+            // Traverse the right subtree
+            // Not applicable since this is a tree, not a binary tree
+        }
+        public void DrawTree2(RRTnode node, bool alternate = true, float duration = 10){
+            if(node == null) return;
+            // Visit the current node
+            foreach(RRTnode child in node.children){
+                if(alternate)
+                    Debug.DrawLine(node.position, child.position, Color.yellow, duration);
+                else
+                    Debug.DrawLine(node.position, child.position, Color.grey, duration);
+                DrawTree2(child, !alternate);
             }
             // Traverse the right subtree
             // Not applicable since this is a tree, not a binary tree
