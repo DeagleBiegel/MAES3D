@@ -11,16 +11,19 @@ public class Simulator : MonoBehaviour{
     float elapsedTime = 0;
     float saveTimer = 0;
     List<GeneratedSettings> settingsList;
-    GeneratedSettings previousSettings;
     int currentSettingsIndex = 0;
+
+    private JsonWriter _jsonWriter;
 
     private void Start() {
         settingsList = GenerateAutomatedTests();
         ApplySettings();
         SetupSimulation();
-        StatWriter.InitializeStatFile(currentSettingsIndex);
+        // StatWriter.InitializeStatFile(currentSettingsIndex);
 
-        JsonWriter.InitFile(100);
+        _jsonWriter = new JsonWriter(settingsList[currentSettingsIndex], _simulation.map.GetNumberOfExplorableTiles());
+
+        currentSettingsIndex++;
     }
 
     void FixedUpdate() {
@@ -31,8 +34,8 @@ public class Simulator : MonoBehaviour{
             saveTimer += Time.fixedDeltaTime;
 
             if(saveTimer >= 10) {
-                StatWriter.AddResults(currentSettingsIndex, elapsedTime, _simulation.ExplorationManager.ExploredRatio);
-                JsonWriter.AddData((int) elapsedTime, _simulation.ExplorationManager.ExploredRatio);
+                // StatWriter.AddResults(currentSettingsIndex, elapsedTime, _simulation.ExplorationManager.ExploredRatio);
+                _jsonWriter.AddData((int) elapsedTime, _simulation.ExplorationManager.ExploredRatio);
                 saveTimer %= 10;
             }
         }
@@ -43,17 +46,16 @@ public class Simulator : MonoBehaviour{
                 ApplySettings();
                 SetupSimulation();
             
-                if (settingsList[currentSettingsIndex - 2].algorithm == SimulationSettings.algorithm &&
-                    settingsList[currentSettingsIndex - 2].Height == SimulationSettings.Height &&
-                    settingsList[currentSettingsIndex - 2].agentCount == SimulationSettings.agentCount) 
+                if (settingsList[currentSettingsIndex - 1].algorithm == SimulationSettings.algorithm &&
+                    settingsList[currentSettingsIndex - 1].Height == SimulationSettings.Height &&
+                    settingsList[currentSettingsIndex - 1].agentCount == SimulationSettings.agentCount) 
                 {
-                    JsonWriter.InitTest();
-                    previousSettings = settingsList[currentSettingsIndex - 1];
+                    _jsonWriter.InitTest(settingsList[currentSettingsIndex].seed);
                 }
                 else 
                 {
-                    JsonWriter.TerminateFile(previousSettings);
-                    JsonWriter.InitFile(100);
+                    _jsonWriter.EndFile();
+                    _jsonWriter = new JsonWriter(settingsList[currentSettingsIndex], _simulation.map.GetNumberOfExplorableTiles());
                 }
 
                 currentSettingsIndex++;
@@ -75,7 +77,6 @@ public class Simulator : MonoBehaviour{
         SimulationSettings.algorithm = current.algorithm;
         SimulationSettings.duration = current.duration;
         SimulationSettings.timeScale = current.timeScale;
-        currentSettingsIndex++;
     }
 
     public List<GeneratedSettings> GenerateAutomatedTests() {
@@ -83,7 +84,7 @@ public class Simulator : MonoBehaviour{
         int[] sizes = { 50, 75, 100 };
         int[] agentCounts = { 2, 3, 4 };
         string[] seeds = { Random.value.ToString(), Random.value.ToString() };
-        int duration = 1 * 10;
+        int duration = 1 * 60;
 
         float timeScale = 4f;
 

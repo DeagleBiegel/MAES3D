@@ -5,6 +5,80 @@ using UnityEngine;
 
 public class JsonWriter
 {
+    private string _fileName;
+
+    public JsonWriter(GeneratedSettings settings, int discoverableCells) 
+    {
+        _fileName = $"{AlgorithmIndexToString(settings.algorithm)}_{settings.Width}x{settings.Height}x{settings.Depth}_{settings.agentCount}";
+
+        InitFile(settings, discoverableCells);
+        InitTest(settings.seed, true);
+    }
+
+    private void InitFile(GeneratedSettings settings, int discoverableCells) 
+    {
+        TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", false);
+
+        string header = $"{{\n\t\"scenario\" : \n\t{{\n\t\t\"algorithm\" : \"{AlgorithmIndexToString(settings.algorithm)}\",\n"
+                      + $"\t\t\"mapX\" : {settings.Width},\n"
+                      + $"\t\t\"mapY\" : {settings.Height},\n"
+                      + $"\t\t\"mapZ\" : {settings.Depth},\n"
+                      + $"\t\t\"duration\" : {settings.duration},\n"
+                      + $"\t\t\"agents\" : {settings.agentCount},\n"
+                      + $"\t\t\"discoverableCells\" : {discoverableCells},";
+
+        textWriter.WriteLine(header); 
+        textWriter.Close();
+    }
+
+    public void InitTest(int seed, bool initialTest = false) 
+    {
+        TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", true);
+
+        if (!initialTest) 
+        {
+           textWriter.Write($",\t\t\t\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
+        }
+        else 
+        {
+            textWriter.WriteLine($"\t\t\"simulations\": \n\t\t[\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
+        }
+
+
+        textWriter.Close();
+    }
+
+    public void AddData(int time, float progress) 
+    {
+        TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", true);
+
+        textWriter.WriteLine($"\t\t\t\t\t{{");
+        textWriter.WriteLine($"\t\t\t\t\t\t\"timestamp\" : {time},");
+        textWriter.WriteLine($"\t\t\t\t\t\t\"progress\" : {progress}");
+
+        if (time >= SimulationSettings.duration) 
+        {
+            textWriter.Write($"\t\t\t\t\t}}\n\t\t\t\t]\n\t\t\t}}");
+        }
+        else 
+        {
+            textWriter.WriteLine($"\t\t\t\t\t}},");
+        }
+        
+        textWriter.Close();
+    }
+
+    public void EndFile() 
+    {
+        TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", true);
+
+        textWriter.Write($"\n\t\t]\n\t}}\n}}");
+
+        textWriter.Close();
+    }
+
+    /*
+
     public static void InitFile(int discoverableCells) 
     {
         string fileName = $"{SimulationSettings.Width}_{AlgorithmIndexToString(SimulationSettings.algorithm)}_{SimulationSettings.agentCount}";  
@@ -73,6 +147,8 @@ public class JsonWriter
 
         textWriter.Close();
     }
+
+    */
 
     private static string AlgorithmIndexToString(int algorithmIndex) 
     {

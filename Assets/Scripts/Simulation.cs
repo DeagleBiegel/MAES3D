@@ -19,6 +19,8 @@ namespace MAES3D {
         
         private bool disabled = false;
 
+        public Chunk map { get; private set; }
+
         public void ExecuteStep() {
             if (!disabled){
                 //Perform every LCCM step for each agent in a synchroized manner
@@ -45,7 +47,7 @@ namespace MAES3D {
 
         public void SetupScenario() {
             GameObject gameObject = Instantiate(MapPrefab, parent: transform);
-            Chunk map = (Chunk) gameObject.GetComponent(typeof(Chunk));
+            map = (Chunk) gameObject.GetComponent(typeof(Chunk));
 
             _agents = new List<SubmarineAgent>();
             switch(SimulationSettings.algorithm) 
