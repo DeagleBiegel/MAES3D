@@ -26,7 +26,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private RRT localGraph;
 
-        private RRTnode destination = null;
+        private RRTnode location = null;
 
         private bool firstTick = true;
 
@@ -58,9 +58,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
-                destination = ExplorationStage(destination);
-                _controller.MoveToCellAsync(Utility.CoordinateToCell(CalculateBestDestination().position));
-                if (localFrontiers.Count == 0) // If there are no more local frontiers after exploration stage
+
+                RRTnode newdestination = ExplorationStage(location);
+                if (location != newdestination)
+                {
+                    newdestination.DrawNode(Color.magenta);
+                    _controller.MoveToCellAsync(Utility.CoordinateToCell(newdestination.position));
+                    location = newdestination;
+                }
+                else if (localFrontiers.Count == 0) // If there are no more local frontiers after exploration stage
                 {
                     if (globalFrontiers.Count == 0) // If there are no more global frontiers after exploration stage
                     {    
@@ -69,14 +75,16 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     }
                     else
                     {
-                        RelocationStage();
+                        Debug.Log("Simulation Over: Cannot find any more frontiers");
+                        newdestination = RelocationStage();
+                        newdestination.DrawNode(Color.magenta);
+                        _controller.MoveToCellAsync(Utility.CoordinateToCell(newdestination.position));
+                        location = newdestination;
                     }
                 }
-            }
-            else if (_controller.GetCurrentStatus() == Status.Idle)
-            {
 
             }
+
             
             /*
             if(_controller.GetCurrentStatus() == Status.Idle){
@@ -113,6 +121,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         public void DynamicExpansion(RRTnode newLocation){ //Changes Rootnode to given RRTnode, Prunes the local planning horizon, rebuilds the graph from the new root
             if (newLocation != null)
             {    
+                Debug.Log("NewRoot + Prune");
                 // Set Slb, root position Prob and FS
                 SetNewRootPosition(localGraph, newLocation); // Set new root position, if newLocation == null it does nothing
                 // Prune(Previous Tree)
@@ -134,7 +143,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             localGraph.root.DrawNode(Color.blue);
         }   
 
-        public void RelocationStage(){ // When there is no local frontiers within the planning horizon, the planner switches from the exploration stage to the relocation stage
+        public RRTnode RelocationStage(){ // When there is no local frontiers within the planning horizon, the planner switches from the exploration stage to the relocation stage
             /*
             Update Fglobal and G // This is being updated in 
             Flag ← False and Dist ← 0
@@ -207,11 +216,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             */
             if (!(selectedViewpoint == null))
             {
-                _controller.MoveToCellAsync(Utility.CoordinateToCell(selectedViewpoint.position));
+                return selectedViewpoint;
             }
             else
             {
                 Debug.Log("Algorithm Completed");
+                return selectedViewpoint;
             }
         }
 
@@ -304,7 +314,6 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             CalculateBestGainViewpoint(rootNode, viewpointGains);
 
             RRTnode n = viewpointGains.OrderByDescending(x => x.Value).First().Key;
-            //Debug.Log($"the best: {n.position}");
             return n;
         }
 
@@ -340,8 +349,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             float gain = VectorGain(node);
             float gainmod = Mathf.Exp(-currentBranchLength * 0.01f);
 
-            if(gain != 0 && gain * currentBranchLength != 0)
-                Debug.Log($"\tnode: {node.position}\n\t\tgRaw: {gain} * {gainmod} \n\t\tleng: {currentBranchLength}\n\t\tgRet: {gain * gainmod}");
+            //if(gain != 0 && gain * currentBranchLength != 0)
+            //    Debug.Log($"\tnode: {node.position}\n\t\tgRaw: {gain} * {gainmod} \n\t\tleng: {currentBranchLength}\n\t\tgRet: {gain * gainmod}");
 
             return gain * gainmod;
             //return VectorGain(node) * currentBranchLength;// * Mathf.Exp(-currentBranchLength * lambda2);
@@ -349,14 +358,18 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public float VectorGain(RRTnode node, int range = 1) {
             Vector3 pos = node.position;
+            Cell posCell = Utility.CoordinateToCell(pos);
             Cell positionCell = Utility.CoordinateToCell(pos);
 
             float vectorGain = 0;
             for (int x = -range; x <= range; x++) {
                 for (int y = -range; y <= range; y++) {
                     for (int z = -range; z <= range; z++) {
-                        Cell targetCell = new Cell(x, y, z) + positionCell;
-                        if(Vector3.Distance(pos, targetCell.middle) <= range) {
+                        if (x == 0 && y == 0 && z == 0) break;
+
+                        Cell targetCell = new Cell(x + positionCell.x, y + positionCell.y, z + positionCell.z);
+
+                        if(Vector3.Distance(posCell.middle, targetCell.middle) <= range) {
                             // TODO Add raycast check
                             CellStatus status = _controller.GetLocalExplorationMap()[targetCell.x, targetCell.y, targetCell.z];
                             if (status == CellStatus.unexplored) {
