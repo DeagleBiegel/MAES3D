@@ -75,7 +75,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
             else if (_controller.GetCurrentStatus() == Status.Idle)
             {
-                
+
             }
             
             /*
@@ -302,6 +302,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         public RRTnode FindBestGainViewpoint(RRTnode rootNode){
             Dictionary<RRTnode, float> viewpointGains = new Dictionary<RRTnode, float>();
             CalculateBestGainViewpoint(rootNode, viewpointGains);
+
             RRTnode n = viewpointGains.OrderByDescending(x => x.Value).First().Key;
             //Debug.Log($"the best: {n.position}");
             return n;
@@ -337,7 +338,13 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public float GetViewPointGain(RRTnode node, int currentBranchLength) {
             float gain = VectorGain(node);
-            return VectorGain(node) * currentBranchLength;// * Mathf.Exp(-currentBranchLength * lambda2);
+            float gainmod = Mathf.Exp(-currentBranchLength * 0.01f);
+
+            if(gain != 0 && gain * currentBranchLength != 0)
+                Debug.Log($"\tnode: {node.position}\n\t\tgRaw: {gain} * {gainmod} \n\t\tleng: {currentBranchLength}\n\t\tgRet: {gain * gainmod}");
+
+            return gain * gainmod;
+            //return VectorGain(node) * currentBranchLength;// * Mathf.Exp(-currentBranchLength * lambda2);
         }
 
         public float VectorGain(RRTnode node, int range = 1) {
@@ -351,8 +358,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                         Cell targetCell = new Cell(x, y, z) + positionCell;
                         if(Vector3.Distance(pos, targetCell.middle) <= range) {
                             // TODO Add raycast check
-                            if (_controller.GetLocalExplorationMap()[targetCell.x, targetCell.y, targetCell.z] == CellStatus.unexplored) {
-                                vectorGain += 1;
+                            CellStatus status = _controller.GetLocalExplorationMap()[targetCell.x, targetCell.y, targetCell.z];
+                            if (status == CellStatus.unexplored) {
+                                vectorGain += 10;
+                            }
+                            else if (status == CellStatus.wall) {
+                                vectorGain -= 1;
                             }
                         }
                     }
