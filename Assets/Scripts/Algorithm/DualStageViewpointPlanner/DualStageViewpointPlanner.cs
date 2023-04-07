@@ -75,10 +75,9 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     }
                     else
                     {
-                        Debug.Log("Simulation Over: Cannot find any more frontiers");
-                        newdestination = RelocationStage();
-                        newdestination.DrawNode(Color.magenta);
-                        _controller.MoveToCellAsync(Utility.CoordinateToCell(newdestination.position));
+                        Cell globalFrontierDestination = RelocationStage();
+                        globalFrontierDestination.DrawCell(Color.magenta);
+                        _controller.MoveToCellAsync(globalFrontierDestination);
                         location = newdestination;
                     }
                 }
@@ -139,11 +138,26 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             end
             */
             BuildRRT(FindFrontiers(5));
-            localGraph.DrawTree(localGraph.root); // Draws the localGraph Tree
-            localGraph.root.DrawNode(Color.blue);
+            globalGraph.DrawTree(localGraph.root); // Draws the localGraph Tree
+            globalGraph.root.DrawNode(Color.blue);
         }   
 
-        public RRTnode RelocationStage(){ // When there is no local frontiers within the planning horizon, the planner switches from the exploration stage to the relocation stage
+        public Cell RelocationStage(){
+            float dist = float.PositiveInfinity;
+            Cell bestFrontier = null;
+            foreach (Cell frontier in globalFrontiers)
+            {
+                float newdist = (_controller.GetPosition() - frontier.toVector).magnitude;
+                if (newdist < dist)
+                {
+                    newdist = dist;
+                    bestFrontier = frontier;
+                }
+            }
+            return bestFrontier;
+        }
+        
+        public RRTnode RelocationStage2(){ // When there is no local frontiers within the planning horizon, the planner switches from the exploration stage to the relocation stage
             /*
             Update Fglobal and G // This is being updated in 
             Flag ← False and Dist ← 0
@@ -159,7 +173,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 for j from M to 1 do
                     if Fi in FOV(vi) then
                         vS ← vi, FGS ← Fi
-                        Dist ← Dist(Fi, vi), Flag ← T rue
+                        Dist ← Dist(Fi, vi), Flag ← True
                         break;
                     end
                     if Flag is True then
@@ -431,6 +445,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
         
         public void AddPointToClosestNode(Vector3 p){
+            /*--- Find and add node to local tree---*/
             // Find the closest node in the tree to p
             RRTnode closestNode = localGraph.FindNearestNode(p);
 
@@ -439,6 +454,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 // Add p as a child of the closest node
                 //Debug.Log(newNode.position);
                 closestNode.AddChild(newNode);
+            }
+
+            /*---Find and add node to global tree---*/
+            RRTnode closestGlobalNode = globalGraph.FindNearestNode(closestNode.position);
+            RRTnode newglobalNode = new RRTnode(localGraph.Steer(closestGlobalNode, p));
+            if(_controller.GetExplorationStatusOfCell(Utility.CoordinateToCell(newglobalNode.position)) == CellStatus.explored){
+                // Add p as a child of the closest node
+                //Debug.Log(newglobalNode.position);
+                closestGlobalNode.AddChild(newglobalNode);
             }
         }
 
