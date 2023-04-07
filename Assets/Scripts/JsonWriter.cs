@@ -11,11 +11,11 @@ public class JsonWriter
     {
         _fileName = $"{AlgorithmIndexToString(settings.algorithm)}_{settings.Width}x{settings.Height}x{settings.Depth}_{settings.agentCount}";
 
-        InitFile(settings, discoverableCells);
-        InitTest(settings.seed, true);
+        InitFile(settings);
+        InitTest(discoverableCells, settings.seed, true);
     }
 
-    private void InitFile(GeneratedSettings settings, int discoverableCells) 
+    private void InitFile(GeneratedSettings settings) 
     {
         TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", false);
 
@@ -24,24 +24,23 @@ public class JsonWriter
                       + $"\t\t\"mapY\" : {settings.Height},\n"
                       + $"\t\t\"mapZ\" : {settings.Depth},\n"
                       + $"\t\t\"duration\" : {settings.duration},\n"
-                      + $"\t\t\"agents\" : {settings.agentCount},\n"
-                      + $"\t\t\"discoverableCells\" : {discoverableCells},";
+                      + $"\t\t\"agents\" : {settings.agentCount},";
 
         textWriter.WriteLine(header); 
         textWriter.Close();
     }
 
-    public void InitTest(int seed, bool initialTest = false) 
+    public void InitTest(int discoverableCells, int seed, bool initialTest = false) 
     {
         TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", true);
 
         if (!initialTest) 
         {
-           textWriter.Write($",\t\t\t\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
+           textWriter.WriteLine($",\t\t\t\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"freeCells\" : {discoverableCells},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
         }
         else 
         {
-            textWriter.WriteLine($"\t\t\"simulations\": \n\t\t[\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
+            textWriter.WriteLine($"\t\t\"simulations\": \n\t\t[\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"freeCells\" : {discoverableCells},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
         }
 
 

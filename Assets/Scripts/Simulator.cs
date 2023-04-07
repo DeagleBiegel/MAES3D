@@ -12,6 +12,7 @@ public class Simulator : MonoBehaviour{
     float saveTimer = 0;
     List<GeneratedSettings> settingsList;
     int currentSettingsIndex = 0;
+    bool finished = false;
 
     private JsonWriter _jsonWriter;
 
@@ -22,11 +23,15 @@ public class Simulator : MonoBehaviour{
         // StatWriter.InitializeStatFile(currentSettingsIndex);
 
         _jsonWriter = new JsonWriter(settingsList[currentSettingsIndex], _simulation.map.GetNumberOfExplorableTiles());
+        _jsonWriter.AddData(0, 0);
 
         currentSettingsIndex++;
     }
 
     void FixedUpdate() {
+
+        if (finished) return;
+
         if (elapsedTime < SimulationSettings.duration) {
             _simulation?.ExecuteStep();
 
@@ -50,7 +55,8 @@ public class Simulator : MonoBehaviour{
                     settingsList[currentSettingsIndex - 1].Height == SimulationSettings.Height &&
                     settingsList[currentSettingsIndex - 1].agentCount == SimulationSettings.agentCount) 
                 {
-                    _jsonWriter.InitTest(settingsList[currentSettingsIndex].seed);
+                    _jsonWriter.InitTest(_simulation.map.GetNumberOfExplorableTiles(), settingsList[currentSettingsIndex].seed);
+                    _jsonWriter.AddData(0, 0);
                 }
                 else 
                 {
@@ -60,8 +66,12 @@ public class Simulator : MonoBehaviour{
 
                 currentSettingsIndex++;
             }
+            else 
+            {
+                _jsonWriter.EndFile();
+                finished = true;
+            }
         }
-
     }
 
     private void ApplySettings() {
@@ -80,11 +90,11 @@ public class Simulator : MonoBehaviour{
     }
 
     public List<GeneratedSettings> GenerateAutomatedTests() {
-        int[] algos = { 0, 1 };
-        int[] sizes = { 50, 75, 100 };
-        int[] agentCounts = { 2, 3, 4 };
+        int[] algos = { 0 };
+        int[] sizes = { 50 };
+        int[] agentCounts = { 2, 3 };
         string[] seeds = { Random.value.ToString(), Random.value.ToString() };
-        int duration = 1 * 60;
+        int duration = 1 * 20;
 
         float timeScale = 4f;
 
