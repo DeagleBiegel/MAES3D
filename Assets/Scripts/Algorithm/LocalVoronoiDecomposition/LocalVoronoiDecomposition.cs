@@ -35,6 +35,7 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
         {
             List<Cell> cells = _controller.GetVisibleCells();
             Cell currentCell = Utility.CoordinateToCell(_controller.GetPosition());
+            List<Vector3> visibleAgents = _controller.GetVisibleAgentPositions();
 
             if (_previousCell != currentCell || _controller.GetCurrentStatus() == Status.Idle) 
             {
@@ -43,15 +44,25 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
 
                     if (_controller.GetLocalExplorationMap()[c.x, c.y, c.z] == CellStatus.explored) 
                     {
-                        if (tempDist <= 3.75) 
+                        if (tempDist <= 6.75) 
                         {
                             _controller.GetLocalExplorationMap()[c.x, c.y, c.z] = CellStatus.covered;
                         }
 
-                        if (_searchMode) 
+                        bool isClosest = true;
+
+                        foreach (Vector3 v in visibleAgents) 
+                        {
+                            if (Vector3.Distance(Utility.CoordinateToCell(v).middle, c.middle) < tempDist) 
+                            {
+                                isClosest = false;
+                            }
+                        }
+
+                        if (_searchMode && isClosest) 
                         {
                             _searchMode = false;
-                            _controller.MoveToCell(currentCell);
+                            _controller.MoveToCellAsync(currentCell);
                         }
                     }
                 }
