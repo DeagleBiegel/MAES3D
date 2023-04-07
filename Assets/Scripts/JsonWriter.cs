@@ -36,7 +36,7 @@ public class JsonWriter
 
         if (!initialTest) 
         {
-           textWriter.WriteLine($",\t\t\t\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"freeCells\" : {discoverableCells},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
+            textWriter.Write($",\t\t\t\n\t\t\t{{\n\t\t\t\t\"seed\" : {seed},\n\t\t\t\t\"freeCells\" : {discoverableCells},\n\t\t\t\t\"data\" : \n\t\t\t\t[");
         }
         else 
         {
