@@ -30,6 +30,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private bool firstTick = true;
 
+        private bool relocated = false;
+
         private bool done = false; // delete later
 
         private int count = 0; // delete later
@@ -55,21 +57,18 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 globalGraph = new RRT(_controller.GetPosition());
                 firstTick = false;
             }
-
-
-            /*
-            */
-            //Cell currentCell = Utility.CoordinateToCell(_controller.GetPosition());
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
 
-                RRTnode newdestination = ExplorationStage(location);
-                if (location != newdestination && localFrontiers.Count != 0)
+
+                RRTnode newDestination = ExplorationStage(location, relocated);
+
+                if (location != newDestination && localFrontiers.Count != 0)
                 {
-                    newdestination.DrawNode(Color.magenta);
-                    _controller.MoveToCellAsync(Utility.CoordinateToCell(newdestination.position));
-                    location = newdestination;
+                    newDestination.DrawNode(Color.magenta);
+                    _controller.MoveToCellAsync(Utility.CoordinateToCell(newDestination.position));
+                    location = newDestination;
                 }
                 else if (localFrontiers.Count == 0) // If there are no more local frontiers after exploration stage
                 {
@@ -84,7 +83,9 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                         Cell globalFrontierDestination = RelocationStage();
                         globalFrontierDestination.DrawCell(Color.magenta);
                         _controller.MoveToCellAsync(globalFrontierDestination);
-                        location = newdestination;
+                        newDestination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
+                        location = newDestination;
+                        relocated = true;
                     }
                 }
 
@@ -102,13 +103,13 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             
         }
 
-        public RRTnode ExplorationStage(RRTnode destination = null){
+        public RRTnode ExplorationStage(RRTnode location = null, bool relocated = false){
             
             // Set S_lb, root position P_rob and F_local
             // Update F_LS
             // V <- DynamicRRT()
 
-            DynamicExpansion(destination); // <- Mangler ny rootLocation
+            DynamicExpansion(location, relocated); // <- Mangler ny rootLocation
 
             // BestGain <- 0
             // for i from 1 to N do
@@ -123,14 +124,21 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             return CalculateBestDestination(); // destination 
         }
 
-        public void DynamicExpansion(RRTnode newLocation){ //Changes Rootnode to given RRTnode, Prunes the local planning horizon, rebuilds the graph from the new root
-            if (newLocation != null)
+        public void DynamicExpansion(RRTnode location, bool relocated = false){ //Changes Rootnode to given RRTnode, Prunes the local planning horizon, rebuilds the graph from the new root
+            if (location != null)
             {    
+                if (relocated)
+                {
+                    localGraph = globalGraph.DeepCopy();
+                    location = localGraph.FindNearestNode(location.position);
+                }
+
                 //Debug.Log("NewRoot + Prune");
                 // Set Slb, root position Prob and FS
-                SetNewRootPosition(localGraph, newLocation); // Set new root position, if newLocation == null it does nothing
+                SetNewRootPosition(localGraph, location); // Set new root position, if newLocation == null it does nothing
                 // Prune(Previous Tree)
                 PruneGraph(localGraph);
+
             }
             /*
             Rebuild(Previous Tree)
@@ -144,9 +152,9 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             end
             */
             BuildRRT(FindFrontiers(5));
-            localGraph.DrawTree(localGraph.root); // Draws the localGraph Tree
+            localGraph.DrawTree(localGraph.root, true, 10); // Draws the localGraph Tree
             localGraph.root.DrawNode(Color.blue);
-            globalGraph.DrawTree2(localGraph.root); // Draws the globalGraph Tree
+            globalGraph.DrawTree2(globalGraph.root, true, 5); // Draws the globalGraph Tree
             globalGraph.root.DrawNode(Color.cyan);
         }   
 
@@ -283,7 +291,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 RRTnode viewpoint = graph.viewPoints[i];
                 /*
                 */
-                if (!IsInPlanningHorizon(viewpoint))
+                if (!IsInPlanningHorizon(graph, viewpoint))
                 {
                     viewpoint.DrawNode();
                     if (!(viewpoint.parent == null))
@@ -294,10 +302,16 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
         }
 
-        private void SetNewRootPosition(RRT graph, RRTnode newRoot){
+        private void SetNewRootPosition(RRT graph, RRTnode newRoot, bool relocated = false){
             List<RRTnode> branch = new List<RRTnode>();
             RRTnode currNode = newRoot;
             RRTnode target = graph.root;
+            /*
+            if (relocated)
+            {
+                currNode = globalGraph.FindNearestNode(newRoot.position);
+            }
+            */
 
             while (currNode != target) // Find the entire branch from new root location to old root location
             {
@@ -315,10 +329,10 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             graph.root = newRoot;
         }
 
-        private bool IsInPlanningHorizon(RRTnode node){
-            if (node.position.x - _controller.GetPosition().x > planningHorizon || node.position.x - _controller.GetPosition().x < -planningHorizon ||
-                node.position.y - _controller.GetPosition().y > planningHorizon || node.position.y - _controller.GetPosition().y < -planningHorizon ||
-                node.position.z - _controller.GetPosition().z > planningHorizon || node.position.z - _controller.GetPosition().z < -planningHorizon)
+        private bool IsInPlanningHorizon(RRT graph, RRTnode node){
+            if (node.position.x - graph.root.position.x > planningHorizon || node.position.x - graph.root.position.x < -planningHorizon ||
+                node.position.y - graph.root.position.y > planningHorizon || node.position.y - graph.root.position.y < -planningHorizon ||
+                node.position.z - graph.root.position.z > planningHorizon || node.position.z - graph.root.position.z < -planningHorizon)
             {
                 return false;
             }
@@ -674,8 +688,28 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             return node.position + dir.normalized * length;
         }
 
-        private void IsInWall(){
+        public RRT DeepCopy(){
+            RRT copy = (RRT)this.MemberwiseClone();
+            
+            // create new instances of reference types
+            copy.root = new RRTnode(this.root.position);
+            copy.root.graph = copy;
+            copy.viewPoints = new List<RRTnode>();
+            
+            // recursively copy the tree structure
+            CopyTree(copy.root, this.root);
+            
+            return copy;
+        }
 
+        private void CopyTree(RRTnode copyNode, RRTnode originalNode)
+        {
+            foreach (RRTnode child in originalNode.children)
+            {
+                RRTnode copyChild = new RRTnode(child.position);
+                copyNode.AddChild(copyChild);
+                CopyTree(copyChild, child);
+            }
         }
 
         public RRTnode FindNearestNode(Vector3 p){
@@ -706,7 +740,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     Debug.DrawLine(node.position, child.position, Color.white, duration);
                 else
                     Debug.DrawLine(node.position, child.position, Color.black, duration);
-                DrawTree(child, !alternate);
+                DrawTree(child, !alternate, duration);
             }
             // Traverse the right subtree
             // Not applicable since this is a tree, not a binary tree
@@ -719,7 +753,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     Debug.DrawLine(node.position, child.position, Color.yellow, duration);
                 else
                     Debug.DrawLine(node.position, child.position, Color.grey, duration);
-                DrawTree2(child, !alternate);
+                DrawTree2(child, !alternate, duration);
             }
             // Traverse the right subtree
             // Not applicable since this is a tree, not a binary tree
