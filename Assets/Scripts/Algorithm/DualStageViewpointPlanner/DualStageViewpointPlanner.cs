@@ -66,7 +66,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
                 if (location != newDestination && localFrontiers.Count != 0)
                 {
-                    newDestination.DrawNode(Color.magenta);
+                    //newDestination.DrawNode(Color.magenta);
                     _controller.MoveToCellAsync(Utility.CoordinateToCell(newDestination.position));
                     location = newDestination;
                 }
@@ -81,7 +81,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     {
                         Debug.Log("Relocation Stage");
                         Cell globalFrontierDestination = RelocationStage();
-                        globalFrontierDestination.DrawCell(Color.magenta);
+                        //globalFrontierDestination.DrawCell(Color.magenta);
                         _controller.MoveToCellAsync(globalFrontierDestination);
                         newDestination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
                         location = newDestination;
@@ -152,10 +152,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             end
             */
             BuildRRT(FindFrontiers(5));
+            /*
             localGraph.DrawTree(localGraph.root, true, 10); // Draws the localGraph Tree
             localGraph.root.DrawNode(Color.blue);
             globalGraph.DrawTree2(globalGraph.root, true, 5); // Draws the globalGraph Tree
             globalGraph.root.DrawNode(Color.cyan);
+            */
         }   
 
         public Cell RelocationStage(){
@@ -293,7 +295,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 */
                 if (!IsInPlanningHorizon(graph, viewpoint))
                 {
-                    viewpoint.DrawNode();
+                    //viewpoint.DrawNode();
                     if (!(viewpoint.parent == null))
                     {
                         viewpoint.RemoveChildFromParent();
@@ -522,10 +524,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             } 
 
             List<Cell> bestFrontiers = FindBestFrontiers(localFrontiers, frontierAmount);
+            /*
             foreach (Cell c in bestFrontiers) // FindBestFrontiers(localFrontiers, frontierAmount) || localFrontiers
             {
                 c.DrawCell(Color.green);
             }
+            */
             return bestFrontiers;
         }
 
