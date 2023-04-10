@@ -148,6 +148,7 @@ namespace MAES3D.Agent {
             if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
                 Debug.LogWarning($"An wants to move to the cell {targetCell} but it is unexplored\n" +
                                  $"\tCannot calculate path to target");
+                Debug.DrawLine(this.GetPosition(), targetCell.toVector);
                 Debug.Break();
                 return;
             }

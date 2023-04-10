@@ -77,7 +77,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
             
             
-            if (_controller.GetCurrentStatus() == Status.Idle && time > 1)
+            if (_controller.GetCurrentStatus() == Status.Idle)
             {
                 time = 0;
                 RRTnode newDestination = ExplorationStage(location, relocated);
