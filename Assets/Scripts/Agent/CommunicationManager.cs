@@ -70,14 +70,6 @@ namespace MAES3D.Agent {
                     //Check if the agents maps should be combined
                     if (shallMerge[agentIndex][seenAgentIndex] == true) {
 
-                        /* This agent */
-                        DualStageViewpointPlanner agent = agents[agentIndex].Algorithm as DualStageViewpointPlanner;
-
-                        /* Seen agent */
-                        DualStageViewpointPlanner seenAgent = agents[seenAgentIndex].Algorithm as DualStageViewpointPlanner;
-
-                        agent.GetFrontiersFromAgent(seenAgent.globalFrontiers);
-
                         CellStatus[,,] agentMap = agents[agentIndex].Controller.ExplorationMap.GetMap();
                         CellStatus[,,] seenAgentMap = agents[seenAgentIndex].Controller.ExplorationMap.GetMap();
 
@@ -121,6 +113,15 @@ namespace MAES3D.Agent {
                                 }
                             }
                         }
+
+                        /* This agent */
+                        DualStageViewpointPlanner agent = agents[agentIndex].Algorithm as DualStageViewpointPlanner;
+
+                        /* Seen agent */
+                        DualStageViewpointPlanner seenAgent = agents[seenAgentIndex].Algorithm as DualStageViewpointPlanner;
+
+                        agent.GetFrontiersFromAgent(seenAgent.globalFrontiers);
+                        seenAgent.GetFrontiersFromAgent(agent.globalFrontiers);
                         
                         //Avoid merging again when the seen agent is the current agent
                         shallMerge[agentIndex][seenAgentIndex] = false;
