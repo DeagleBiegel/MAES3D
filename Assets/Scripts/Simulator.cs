@@ -104,9 +104,9 @@ public class Simulator : MonoBehaviour{
     public List<GeneratedSettings> GenerateAutomatedTests() {
         int[] algos = { 2 };
         int[] sizes = { 50, 75 };
-        int[] agentCounts = { 2, 5, 10 };
+        int[] agentCounts = { 5, 10 };
 
-        int[] setSeeds = { 688446, 881082, 715672, 360565, 402211, 
+        int[] setSeeds = { 881082, 715672, 360565, 402211, 
                            781547, 234175, 510916, 902487, 103226, 
                            718267, 140175, 423719, 622131, 278169, 
                            517123, 595283, 415280, 204763, 664104 };
