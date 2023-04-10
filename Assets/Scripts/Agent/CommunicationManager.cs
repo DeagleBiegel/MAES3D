@@ -120,7 +120,10 @@ namespace MAES3D.Agent {
                         /* Seen agent */
                         DualStageViewpointPlanner seenAgent = agents[seenAgentIndex].Algorithm as DualStageViewpointPlanner;
 
+                        seenAgent.UpdateGlobalFrontiers();
                         agent.GetFrontiersFromAgent(seenAgent.globalFrontiers);
+
+                        agent.UpdateGlobalFrontiers();
                         seenAgent.GetFrontiersFromAgent(agent.globalFrontiers);
                         
                         //Avoid merging again when the seen agent is the current agent

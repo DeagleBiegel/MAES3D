@@ -129,20 +129,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public void GetFrontiersFromAgent(List<Cell> frontiers) 
         {
-            bool updated = false;
-
             foreach(Cell cell in frontiers) 
             {
                 if (!globalFrontiers.Contains(cell)) 
                 {
                     globalFrontiers.Add(cell);
-                    updated = true;
                 }
-            }
-
-            if (updated) 
-            {
-                UpdateGlobalFrontiers();
             }
         }
 
@@ -333,7 +325,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
         }
 
-        private void UpdateGlobalFrontiers(){
+        public void UpdateGlobalFrontiers(){
             for (int i = globalFrontiers.Count-1; i >= 0; i--)
             {
                 if (!ValidFrontier(globalFrontiers[i]))
