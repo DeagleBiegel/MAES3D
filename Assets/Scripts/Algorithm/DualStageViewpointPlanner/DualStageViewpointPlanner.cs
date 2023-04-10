@@ -40,6 +40,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private bool initializing = true;
 
+        private float time;
+
         float lambda2 = 5;
         float frontierRadius = 1f;
         float planningHorizon = 15f;
@@ -49,9 +51,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         public void UpdateLogic()
-        {   
-            if (done) return;
-            
+        {               
+            time += Time.fixedDeltaTime;
             Cell currCell = Utility.CoordinateToCell(_controller.GetPosition());
 
             if (_controller.GetVisibleCells().Count == 0) 
@@ -72,13 +73,13 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
             if (currCell != prevCell)
             {
-                CheckOtherAgentsFrontiers();
                 FindFrontiersWhileMoving();
             }
             
             
-            if (_controller.GetCurrentStatus() == Status.Idle)
+            if (_controller.GetCurrentStatus() == Status.Idle && time > 1)
             {
+                time = 0;
                 RRTnode newDestination = ExplorationStage(location, relocated);
 
                 if (location != newDestination && localFrontiers.Count != 0)

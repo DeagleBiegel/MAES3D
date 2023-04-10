@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Unity.VisualScripting.FullSerializer;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using MAES3D.Algorithm.DualStageViewpointPlanner;
 
 namespace MAES3D.Agent {
     public class CommunicationManager {
@@ -123,6 +124,14 @@ namespace MAES3D.Agent {
             //As every map has been shared, clear temporary values
             mapCopies.Clear();
             _agentSeenMap = shallMerge.Clone() as bool[][];
+            
+            foreach (SubmarineAgent agent in agents)
+            {
+                DualStageViewpointPlanner algo = agent.Algorithm as DualStageViewpointPlanner;
+
+                algo.CheckOtherAgentsFrontiers();
+            }
+
         }
 
         private void UpdateSeenAgents() {
