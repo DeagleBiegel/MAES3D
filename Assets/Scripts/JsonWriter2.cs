@@ -9,8 +9,9 @@ public class JsonWriter2 {
     private string _fileName;
     private string dethele = "";
 
-    public JsonWriter2(GeneratedSettings settings) {
+    public JsonWriter2(GeneratedSettings settings, int discoverableCells, int seed) {
         InitFile(settings);
+        InitTest(discoverableCells, seed);
     }
 
     public void InitFile(GeneratedSettings settings) {
@@ -24,24 +25,23 @@ public class JsonWriter2 {
                    + $"\"agents\" : {settings.agentCount},"
                    + $"\"simulations\" : [";
 
+        Debug.Log($"Starting test | size:{settings.Width} | agents:{settings.agentCount} ({_fileName})");
+
     }
     public void InitTest(int discoverableCells, int seed) {
         dethele += $"{{ \"seed\" : {seed}, " +
                       $"\"freeCells\" : {discoverableCells}, " +
                       $"\"data\" : [";
+        Debug.Log($"\tStarting seed {seed}");
     }
 
     public void AddData(int time, float progress, bool shouldEnd) {
         dethele += $"{{ \"timestamp\" : {time}, " +
-                      $"\"progress\" : {progress} }},";
+                      $"\"progress\" : {progress:0.00} }},";
 
         if (shouldEnd) {
-            Debug.Log("Ending");
             dethele = dethele.Remove(dethele.Length - 1, 1);
             dethele += "]},";
-        }
-        else {
-            Debug.Log("Not ending");
         }
     }
 
@@ -49,13 +49,12 @@ public class JsonWriter2 {
         dethele = dethele.Remove(dethele.Length - 1, 1);
         dethele += "]}}";
 
-        Debug.Log($"test {dethele.Length}");
+        Debug.Log($"\t File {_fileName} is done");
 
         TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", false);
         textWriter.Write(dethele);
         textWriter.Close();
     }
-
 
     private string AlgorithmIndexToString(int algorithmIndex) {
         switch (algorithmIndex) {

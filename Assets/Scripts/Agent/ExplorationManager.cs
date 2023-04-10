@@ -23,7 +23,7 @@ namespace MAES3D.Agent {
 
         private int agentTicker = 0;
 
-        public float ExploredRatio => _exploredTiles * 100 / _explorableTiles;
+        public float ExploredRatio => _exploredTiles * 100f / _explorableTiles;
 
         public ExplorationManager() 
         {

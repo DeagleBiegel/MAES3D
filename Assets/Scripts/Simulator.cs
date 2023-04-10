@@ -22,8 +22,7 @@ public class Simulator : MonoBehaviour{
         SetupSimulation();
         // StatWriter.InitializeStatFile(currentSettingsIndex);
 
-        _jsonWriter = new JsonWriter2(settingsList[currentSettingsIndex]);
-        _jsonWriter.InitTest(_simulation.map.GetNumberOfExplorableTiles(), settingsList[currentSettingsIndex].seed);
+        _jsonWriter = new JsonWriter2(settingsList[currentSettingsIndex], _simulation.map.GetNumberOfExplorableTiles(), settingsList[currentSettingsIndex].seed);
         _jsonWriter.AddData(0, 0, false);
 
         currentSettingsIndex++;
@@ -45,10 +44,10 @@ public class Simulator : MonoBehaviour{
             elapsedTime += Time.fixedDeltaTime;
             saveTimer += Time.fixedDeltaTime;
 
-            if(saveTimer >= 10 || finishedExploring) {
+            if(saveTimer >= 5 || finishedExploring) {
                 // StatWriter.AddResults(currentSettingsIndex, elapsedTime, _simulation.ExplorationManager.ExploredRatio);
                 _jsonWriter.AddData((int)System.Math.Round(elapsedTime), _simulation.ExplorationManager.ExploredRatio, false);
-                saveTimer %= 10;
+                saveTimer %= 5;
             }
 
             if(finishedExploring) {
@@ -72,7 +71,7 @@ public class Simulator : MonoBehaviour{
                 else 
                 {
                     _jsonWriter.EndFile();
-                    _jsonWriter = new JsonWriter2(settingsList[currentSettingsIndex]);
+                    _jsonWriter = new JsonWriter2(settingsList[currentSettingsIndex], _simulation.map.GetNumberOfExplorableTiles(), settingsList[currentSettingsIndex].seed);
                 }
 
                 elapsedTime = 0;
@@ -103,19 +102,21 @@ public class Simulator : MonoBehaviour{
     }
 
     public List<GeneratedSettings> GenerateAutomatedTests() {
-        int[] algos = { 0 };
-        int[] sizes = { 100 };
+        int[] algos = { 1 };
+        int[] sizes = { 100, 50, 25 };
         int[] agentCounts = { 2,5,10 };
 
-        List<int> seeds = new List<int>();
-        int seedAmount = 20;
-        for (int i = 0; i < seedAmount; i++) {
-            seeds.Add(Random.Range(100000, 1000000));
-        }
-        
+        int[] setSeeds = { 688446, 881082, 715672, 360565, 402211, 781547, 234175, 510916, 902487, 103226, 718267, 140175, 423719, 622131, 278169, 517123, 595283, 415280, 204763, 664104 };
+
+        List<int> seeds = new List<int>(setSeeds);
+        //int seedAmount = 20;
+        //for (int i = 0; i < seedAmount; i++) {
+        //    seeds.Add(Random.Range(100000, 1000000));
+        //}
+
         int duration = 30 * 60;
 
-        float timeScale = 4f;
+        float timeScale = 8f;
 
         List<GeneratedSettings> retList = new List<GeneratedSettings>();
 
