@@ -38,6 +38,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private int count = 0; // delete later
 
+        private bool initializing = true;
+
         float lambda2 = 5;
         float frontierRadius = 1f;
         float planningHorizon = 15f;
@@ -48,11 +50,17 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public void UpdateLogic()
         {   
+            if (done) return;
+            
             Cell currCell = Utility.CoordinateToCell(_controller.GetPosition());
 
-            if (done)
+            if (_controller.GetVisibleCells().Count == 0) 
             {
                 return;
+            }
+            else 
+            {
+                initializing = false;
             }
 
             if (firstTick)
@@ -64,14 +72,13 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
             if (currCell != prevCell)
             {
+                CheckOtherAgentsFrontiers();
                 FindFrontiersWhileMoving();
             }
             
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
-
-
                 RRTnode newDestination = ExplorationStage(location, relocated);
 
                 if (location != newDestination && localFrontiers.Count != 0)
@@ -83,10 +90,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 else if (localFrontiers.Count == 0) // If there are no more local frontiers after exploration stage
                 {
                     UpdateGlobalFrontiers();
+
                     if (globalFrontiers.Count == 0) // If there are no more global frontiers after exploration stage
                     {    
                         Debug.Log("Simulation Over: Cannot find any more frontiers");
-                        done = true;
+
+                        //CheckOtherAgentsFrontiers();
+
+                        if (globalFrontiers.Count == 0) 
+                            done = true;
                     }
                     else
                     {
@@ -112,6 +124,37 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             */
             //Debug.Break();
             
+        }
+
+        public void CheckOtherAgentsFrontiers() 
+        {
+               List<SubmarineAgent> agents = new List<SubmarineAgent>(GameObject.FindObjectsOfType<SubmarineAgent>());
+               bool updated = false;
+               
+               foreach(SubmarineAgent agent in agents) 
+               {
+                    if (_controller.GetPosition() == agent.Controller.GetPosition())
+                        continue;
+
+                    if (!Physics.Raycast(_controller.GetPosition(), agent.Controller.GetPosition(), out RaycastHit hit, (_controller.GetPosition() - agent.Controller.GetPosition()).magnitude)) 
+                    {
+                        DualStageViewpointPlanner algo = agent.Algorithm as DualStageViewpointPlanner;
+
+                        foreach(Cell cell in algo.globalFrontiers) 
+                        {
+                            if (!globalFrontiers.Contains(cell)) 
+                            {
+                                globalFrontiers.Add(cell);
+                                updated = true;
+                            }
+                        }
+                    }
+               }
+
+               if(updated) 
+               {
+                    UpdateGlobalFrontiers();
+               }
         }
 
         public RRTnode ExplorationStage(RRTnode location = null, bool relocated = false){
@@ -369,11 +412,17 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 */
 
         public RRTnode FindBestGainViewpoint(RRTnode rootNode){
-            Dictionary<RRTnode, float> viewpointGains = new Dictionary<RRTnode, float>();
-            CalculateBestGainViewpoint(rootNode, viewpointGains);
-
-            RRTnode n = viewpointGains.OrderByDescending(x => x.Value).First().Key;
-            return n;
+            try 
+            {
+                Dictionary<RRTnode, float> viewpointGains = new Dictionary<RRTnode, float>();
+                CalculateBestGainViewpoint(rootNode, viewpointGains);
+                RRTnode n = viewpointGains.OrderByDescending(x => x.Value).First().Key;
+                return n;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public void CalculateBestGainViewpoint(RRTnode treeNode, Dictionary<RRTnode, float> dictViewpointGains, int branchLength = 0){
@@ -551,6 +600,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             {
                 return false;
             }
+
             if (_controller.GetExplorationStatusOfCell(new Cell(cell.x + 1, cell.y, cell.z), false) == CellStatus.unexplored ||
                 _controller.GetExplorationStatusOfCell(new Cell(cell.x - 1, cell.y, cell.z), false) == CellStatus.unexplored ||
                 _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y + 1, cell.z), false) == CellStatus.unexplored ||

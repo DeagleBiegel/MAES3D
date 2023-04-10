@@ -21,12 +21,16 @@ namespace MAES3D {
 
         public Chunk map { get; private set; }
 
+        int index = 0;
+
         public void ExecuteStep() {
             if (!disabled){
                 //Perform every LCCM step for each agent in a synchroized manner
 
                 //Look
                 ExplorationManager.UpdateMaps(_agents);
+
+                _agents[index % _agents.Count].LogicUpdate();
 
                 //Compute
                 foreach (SubmarineAgent agent in _agents) {
@@ -41,6 +45,7 @@ namespace MAES3D {
                     agent.MovementUpdate();
                 }
 
+                index++;
             }
 
         }

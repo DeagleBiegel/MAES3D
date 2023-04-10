@@ -77,7 +77,7 @@ namespace MAES3D.Agent {
 
             Cell cellBefore = Utility.CoordinateToCell(_transform.position);
 
-            if (Physics.SphereCast(GetPosition(), 0.4f, vel.normalized, out RaycastHit hit, vel.magnitude)) {
+            if (Physics.SphereCast(GetPosition(), 0.4f, vel.normalized, out RaycastHit hit, vel.magnitude, 6)) {
 
                 CollisionType colType;
                 if (hit.normal.y < Mathf.Sin(Mathf.Deg2Rad * -45)) {
