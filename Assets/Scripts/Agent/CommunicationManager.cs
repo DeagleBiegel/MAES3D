@@ -70,6 +70,14 @@ namespace MAES3D.Agent {
                     //Check if the agents maps should be combined
                     if (shallMerge[agentIndex][seenAgentIndex] == true) {
 
+                        /* This agent */
+                        DualStageViewpointPlanner agent = agents[agentIndex].Algorithm as DualStageViewpointPlanner;
+
+                        /* Seen agent */
+                        DualStageViewpointPlanner seenAgent = agents[seenAgentIndex].Algorithm as DualStageViewpointPlanner;
+
+                        agent.GetFrontiersFromAgent(seenAgent.globalFrontiers);
+
                         CellStatus[,,] agentMap = agents[agentIndex].Controller.ExplorationMap.GetMap();
                         CellStatus[,,] seenAgentMap = agents[seenAgentIndex].Controller.ExplorationMap.GetMap();
 
@@ -124,14 +132,6 @@ namespace MAES3D.Agent {
             //As every map has been shared, clear temporary values
             mapCopies.Clear();
             _agentSeenMap = shallMerge.Clone() as bool[][];
-            
-            foreach (SubmarineAgent agent in agents)
-            {
-                DualStageViewpointPlanner algo = agent.Algorithm as DualStageViewpointPlanner;
-
-                algo.CheckOtherAgentsFrontiers();
-            }
-
         }
 
         private void UpdateSeenAgents() {

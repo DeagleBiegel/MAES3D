@@ -127,6 +127,25 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             
         }
 
+        public void GetFrontiersFromAgent(List<Cell> frontiers) 
+        {
+            bool updated = false;
+
+            foreach(Cell cell in frontiers) 
+            {
+                if (!globalFrontiers.Contains(cell)) 
+                {
+                    globalFrontiers.Add(cell);
+                    updated = true;
+                }
+            }
+
+            if (updated) 
+            {
+                UpdateGlobalFrontiers();
+            }
+        }
+
         public void CheckOtherAgentsFrontiers() 
         {
                List<SubmarineAgent> agents = new List<SubmarineAgent>(GameObject.FindObjectsOfType<SubmarineAgent>());
