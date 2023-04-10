@@ -20,7 +20,7 @@ namespace MAES3D.Agent {
         public void LogicUpdate() {
             Algorithm.UpdateLogic();
 
-            _visitedPosition.Add(Controller.GetPosition());
+            //_visitedPosition.Add(Controller.GetPosition());
             
             /*
             for (int i = 1; i < _visitedPosition.Count; i++) {
@@ -39,29 +39,40 @@ namespace MAES3D.Agent {
         {
             Gizmos.color = Color.white;
 
-            for (int i = 1; i < _visitedPosition.Count; i++) {
-                Vector3 c = _visitedPosition[i];
+            if (_visitedPosition != null)
+            {
+                for (int i = 1; i < _visitedPosition.Count; i++) {
+                    Vector3 c = _visitedPosition[i];
 
-                Debug.DrawLine(c, _visitedPosition[i - 1]);
+                    Debug.DrawLine(c, _visitedPosition[i - 1]);
+                }
             }
 
             CellStatus[,,] map = Controller.GetLocalExplorationMap();
 
-            for (int x = 0; x < map.GetLength(0); x++) 
+            for (int x = 1; x < map.GetLength(0)-1; x++) 
             {
-                for (int y = 0; y < map.GetLength(1); y++) 
+                for (int y = 1; y < map.GetLength(1)-1; y++) 
                 {
-                    for (int z = 0; z < map.GetLength(2); z++) 
+                    for (int z = 1; z < map.GetLength(2)-1; z++) 
                     {
                         if (map[x, y, z] == CellStatus.covered) 
                         {
                             Gizmos.color = Color.red;
                             Gizmos.DrawWireSphere(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), 0.2f);
                         }
-                        else if (map[x, y, z] == CellStatus.explored) 
+                        else if (map[x, y, z] == CellStatus.unexplored) 
                         {
-                            Gizmos.color = Color.green;
-                            Gizmos.DrawWireSphere(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), 0.2f);
+                            if (map[x + 1, y, z] == CellStatus.explored ||
+                                map[x - 1, y, z] == CellStatus.explored ||
+                                map[x, y + 1, z] == CellStatus.explored ||
+                                map[x, y - 1, z] == CellStatus.explored ||
+                                map[x, y, z + 1] == CellStatus.explored ||
+                                map[x, y, z - 1] == CellStatus.explored)
+                            {                                
+                                Gizmos.color = Color.green;
+                                Gizmos.DrawWireSphere(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f), 0.2f);
+                            }
                         }
                     }
                 }

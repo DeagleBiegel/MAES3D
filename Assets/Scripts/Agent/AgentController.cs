@@ -173,7 +173,7 @@ namespace MAES3D.Agent {
             _currentStatus = Status.Moving;
 
             //Could not find a path
-            if (fullPath.Count == 0) {
+            if (fullPath == null) {
                 return;
             }
 
