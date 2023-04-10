@@ -88,7 +88,7 @@ namespace MAES3D {
                 SimulationSettings.seed = seed;
             }
 
-            Random.InitState((seed.GetHashCode()));
+            Random.InitState((seed));
 
             for (int y = 0; y < ChunkHeight; y++) {
                 for (int x = 0; x < ChunkWidth; x++) {
