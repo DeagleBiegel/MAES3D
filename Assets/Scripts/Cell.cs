@@ -69,10 +69,10 @@ namespace MAES3D {
         public void DrawCell(Color? c = null){
                 Color color = c ?? Color.red;
 
-                Debug.DrawLine(new Vector3(x+0.25f, y+0.25f, z+0.25f), new Vector3(x+0.75f, y+0.75f, z+0.75f), color, 5000);
-                Debug.DrawLine(new Vector3(x+0.75f, y+0.25f, z+0.25f), new Vector3(x+0.25f, y+0.75f, z+0.75f), color, 5000);
-                Debug.DrawLine(new Vector3(x+0.25f, y+0.25f, z+0.75f), new Vector3(x+0.75f, y+0.75f, z+0.25f), color, 5000);
-                Debug.DrawLine(new Vector3(x+0.75f, y+0.25f, z+0.75f), new Vector3(x+0.25f, y+0.75f, z+0.25f), color, 5000);
+                Debug.DrawLine(new Vector3(x+0.25f, y+0.25f, z+0.25f), new Vector3(x+0.75f, y+0.75f, z+0.75f), color, 5);
+                Debug.DrawLine(new Vector3(x+0.75f, y+0.25f, z+0.25f), new Vector3(x+0.25f, y+0.75f, z+0.75f), color, 5);
+                Debug.DrawLine(new Vector3(x+0.25f, y+0.25f, z+0.75f), new Vector3(x+0.75f, y+0.75f, z+0.25f), color, 5);
+                Debug.DrawLine(new Vector3(x+0.75f, y+0.25f, z+0.75f), new Vector3(x+0.25f, y+0.75f, z+0.25f), color, 5);
         }
 
     }

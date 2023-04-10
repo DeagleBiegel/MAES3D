@@ -14,7 +14,7 @@
             <ui:SliderInt picking-mode="Ignore" label="Map Width" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapWidth" low-value="30" focusable="false" class="property" />
             <ui:SliderInt picking-mode="Ignore" label="Map Depth" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapDepth" low-value="30" focusable="false" class="property" />
             <ui:Toggle label="Random Seed?" name="ToggleRandomSeed" value="false" focusable="false" class="property" />
-            <ui:TextField picking-mode="Ignore" label="Seed" text="1" is-delayed="false" multiline="false" readonly="false" name="TxtSeed" focusable="false" value="1" class="property" style="color: rgb(255, 255, 255);" />
+            <ui:TextField picking-mode="Ignore" label="Seed" text="3" is-delayed="false" multiline="false" readonly="false" name="TxtSeed" focusable="false" value="3" class="property" style="color: rgb(255, 255, 255);" />
         </ui:GroupBox>
         <ui:ProgressBar title="30:00 - 0%" name="ProgressBar" class="lightBackground" style="width: 80%; left: 10%; height: auto;" />
         <ui:GroupBox name="SimulationController" class="smallContainer" style="flex-direction: row;">
