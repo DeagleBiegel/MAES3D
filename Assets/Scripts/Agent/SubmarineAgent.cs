@@ -20,7 +20,7 @@ namespace MAES3D.Agent {
         public void LogicUpdate() {
             Algorithm.UpdateLogic();
 
-            _visitedPosition.Add(Controller.GetPosition());
+            //_visitedPosition.Add(Controller.GetPosition());
             
             /*
             for (int i = 1; i < _visitedPosition.Count; i++) {
@@ -39,10 +39,13 @@ namespace MAES3D.Agent {
         {
             Gizmos.color = Color.white;
 
-            for (int i = 1; i < _visitedPosition.Count; i++) {
-                Vector3 c = _visitedPosition[i];
+            if (_visitedPosition != null)
+            {
+                for (int i = 1; i < _visitedPosition.Count; i++) {
+                    Vector3 c = _visitedPosition[i];
 
-                Debug.DrawLine(c, _visitedPosition[i - 1]);
+                    Debug.DrawLine(c, _visitedPosition[i - 1]);
+                }
             }
 
             CellStatus[,,] map = Controller.GetLocalExplorationMap();

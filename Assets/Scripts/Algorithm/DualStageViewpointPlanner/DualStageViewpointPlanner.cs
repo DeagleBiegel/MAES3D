@@ -28,6 +28,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private RRTnode location = null;
 
+        private Cell prevCell;
+
         private bool firstTick = true;
 
         private bool relocated = false;
@@ -46,6 +48,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public void UpdateLogic()
         {   
+            Cell currCell = Utility.CoordinateToCell(_controller.GetPosition());
+
             if (done)
             {
                 return;
@@ -57,6 +61,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 globalGraph = new RRT(_controller.GetPosition());
                 firstTick = false;
             }
+
+            if (currCell != prevCell)
+            {
+                FindFrontiersWhileMoving();
+            }
+            
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
@@ -72,6 +82,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 }
                 else if (localFrontiers.Count == 0) // If there are no more local frontiers after exploration stage
                 {
+                    UpdateGlobalFrontiers();
                     if (globalFrontiers.Count == 0) // If there are no more global frontiers after exploration stage
                     {    
                         Debug.Log("Simulation Over: Cannot find any more frontiers");
@@ -91,7 +102,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
             }
 
-            
+            prevCell = currCell;
             /*
             if(_controller.GetCurrentStatus() == Status.Idle){
                 ExplorationStage(destination);
@@ -161,8 +172,6 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }   
 
         public Cell RelocationStage(){
-            UpdateGlobalFrontiers();
-
             float dist = float.PositiveInfinity;
             Cell bestFrontier = null;
             foreach (Cell frontier in globalFrontiers)
@@ -461,7 +470,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             return arr[arr.GetLength(0), arr.GetLength(1)];
         }
 
-        public void BuildRRT(List<Cell> frontiers, int iterations = 50)
+        public void BuildRRT(List<Cell> frontiers, int iterations = 200)
         {   
             float threshold = 0.30f; // x% chance to select a point next to frontier
             for (int i = 0; i < iterations; i++)
@@ -502,6 +511,17 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
         }
 
+        public void FindFrontiersWhileMoving(){
+            List<Cell> viewableCells = _controller.GetVisibleCells();
+            foreach (Cell frontier in viewableCells)
+            {
+                if (ValidFrontier(frontier) && !globalFrontiers.Contains(frontier))
+                {
+                    globalFrontiers.Add(frontier);
+                }
+            }
+        }
+
         public List<Cell> FindFrontiers(int frontierAmount){
             localFrontiers = new List<Cell>();
             List<Cell> viewableCells = _controller.GetVisibleCells();
@@ -511,14 +531,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 {    
                     if (ValidFrontier(cell))
                     {
-                        bool clusterCheck = false; // Checks if another frontier is nearby
-                        foreach (Cell frontier in localFrontiers)  
-                        {
-                            if ((cell.toVector - frontier.toVector).magnitude < 5) // Checks if another frontier is nearby
-                                clusterCheck = true;
-                        }
-                        if(!clusterCheck && !globalFrontiers.Contains(cell))
-                            localFrontiers.Add(cell);
+                        localFrontiers.Add(cell);
                     }
                 }
             } 
@@ -534,6 +547,10 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         private bool ValidFrontier(Cell cell){
+            if (_controller.GetLocalExplorationMap()[cell.x, cell.y, cell.z] == CellStatus.wall)
+            {
+                return false;
+            }
             if (_controller.GetExplorationStatusOfCell(new Cell(cell.x + 1, cell.y, cell.z), false) == CellStatus.unexplored ||
                 _controller.GetExplorationStatusOfCell(new Cell(cell.x - 1, cell.y, cell.z), false) == CellStatus.unexplored ||
                 _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y + 1, cell.z), false) == CellStatus.unexplored ||
