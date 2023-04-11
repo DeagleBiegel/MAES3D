@@ -40,7 +40,6 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private bool initializing = true;
 
-        private float time;
 
         float lambda2 = 5;
         float frontierRadius = 1f;
@@ -52,7 +51,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public void UpdateLogic()
         {               
-            time += Time.fixedDeltaTime;
+            if (done && globalFrontiers.Count == 0)
+            {
+                return;
+            }
+            else
+            {
+                done = false;
+            }
+
             Cell currCell = Utility.CoordinateToCell(_controller.GetPosition());
 
             if (_controller.GetVisibleCells().Count == 0) 
@@ -79,7 +86,6 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
-                time = 0;
                 RRTnode newDestination = ExplorationStage(location, relocated);
 
                 if (location != newDestination && localFrontiers.Count != 0)
@@ -94,20 +100,27 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
                     if (globalFrontiers.Count == 0) // If there are no more global frontiers after exploration stage
                     {    
-                        Debug.Log("Simulation Over: Cannot find any more frontiers");
+                        Debug.Log("Simulation Over: Cannot find any more frontiers, while in exploration stage");
 
                         //CheckOtherAgentsFrontiers();
-
-                        if (globalFrontiers.Count == 0) 
-                            done = true;
+                        done = true;
                     }
                     else
                     {
                         Debug.Log("Relocation Stage");
-                        Cell globalFrontierDestination = RelocationStage();
-                        //globalFrontierDestination.DrawCell(Color.magenta);
-                        _controller.MoveToCellAsync(globalFrontierDestination);
-                        newDestination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
+                        while (_controller.GetCurrentStatus() == Status.Idle) // If the global frontier is unreachable run again with a new one
+                        {
+                            Cell globalFrontierDestination = RelocationStage();
+                            //globalFrontierDestination.DrawCell(Color.magenta);
+                            _controller.MoveToCellAsync(globalFrontierDestination);
+                            newDestination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
+                            if (globalFrontiers.Count == 0)
+                            {
+                                Debug.Log("Simulation Over: Cannot find any more frontiers, while in relocation stage");
+                                done = true;
+                                return;
+                            }
+                        }
                         location = newDestination;
                         relocated = true;
                     }
@@ -238,6 +251,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     bestFrontier = frontier;
                 }
             }
+            globalFrontiers.Remove(bestFrontier);
             return bestFrontier;
         }
         

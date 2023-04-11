@@ -130,7 +130,7 @@ namespace MAES3D.Agent {
             Cell targetCell = Utility.CoordinateToCell(targetPosition);
 
             if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
-                Debug.LogWarning($"An wants to move to the position {targetPosition} but it is unexplored\n" +
+                Debug.LogWarning($"An agent wants to move to the position {targetPosition} but it is unexplored\n" +
                                  $"\tCannot perform movement");
                 return;
             }
@@ -146,10 +146,11 @@ namespace MAES3D.Agent {
 
             //Check if target cell is explored
             if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
-                Debug.LogWarning($"An wants to move to the cell {targetCell} but it is unexplored\n" +
-                                 $"\tCannot calculate path to target");
-                Debug.DrawLine(this.GetPosition(), targetCell.toVector);
-                Debug.Break();
+                Debug.LogWarning("Cannot calclate path");
+                //Debug.LogWarning($"An agent wants to move to the cell {targetCell} but it is unexplored\n" +
+                //                 $"\tCannot calculate path to target");
+                Debug.DrawLine(this.GetPosition(), targetCell.middle, Color.magenta, 5);
+                //Debug.Break();
                 return;
             }
 
@@ -217,7 +218,7 @@ namespace MAES3D.Agent {
 
             //Check if target cell is explored
             if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
-                Debug.LogWarning($"An wants to move to the cell {targetCell} but it is unexplored\n" +
+                Debug.LogWarning($"An agent wants to move to the cell {targetCell} but it is unexplored\n" +
                                  $"\tCannot calculate path to target");
                 Debug.Break();
                 return;
