@@ -30,7 +30,7 @@ namespace MAES3D {
                 //Look
                 ExplorationManager.UpdateMaps(_agents);
 
-                _agents[index % _agents.Count].LogicUpdate();
+                //_agents[index % _agents.Count].LogicUpdate();
 
                 //Compute
                 foreach (SubmarineAgent agent in _agents) {

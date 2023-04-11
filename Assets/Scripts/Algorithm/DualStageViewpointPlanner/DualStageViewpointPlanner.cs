@@ -622,7 +622,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         private bool ValidFrontier(Cell cell){
-            if (_controller.GetLocalExplorationMap()[cell.x, cell.y, cell.z] == CellStatus.wall)
+            if (_controller.GetLocalExplorationMap()[cell.x, cell.y, cell.z] == CellStatus.wall ||
+                _controller.GetLocalExplorationMap()[cell.x, cell.y, cell.z] == CellStatus.unexplored)
             {
                 return false;
             }
