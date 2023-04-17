@@ -42,6 +42,14 @@ public class JsonWriter2 {
         if (shouldEnd) {
             dethele = dethele.Remove(dethele.Length - 1, 1);
             dethele += "]},";
+
+            string detHeleTemp = dethele;
+            detHeleTemp = detHeleTemp.Remove(dethele.Length - 1, 1);
+            detHeleTemp += "]}}";
+
+            TextWriter textWriter = new StreamWriter(Application.dataPath + $"/Results/{_fileName}.json", false);
+            textWriter.Write(detHeleTemp);
+            textWriter.Close();
         }
     }
 
