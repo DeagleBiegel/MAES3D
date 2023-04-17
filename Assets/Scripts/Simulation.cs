@@ -47,6 +47,15 @@ namespace MAES3D {
             GameObject gameObject = Instantiate(MapPrefab, parent: transform);
             Chunk map = (Chunk) gameObject.GetComponent(typeof(Chunk));
 
+            GameObject cameraObject = GameObject.FindWithTag("MainCamera");
+            CameraController cameraController;
+
+            if (cameraObject != null)
+            {
+                cameraController = cameraObject.GetComponent<CameraController>();
+                cameraController.SetTargetOffset(map.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+            }
+
             _agents = new List<SubmarineAgent>();
             switch(SimulationSettings.algorithm) 
             {

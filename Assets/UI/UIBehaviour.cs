@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MAES3D.Agent;
+using MAES3D;
 using UnityEngine.UIElements;
 
 
@@ -10,15 +12,16 @@ public class UIBehaviour : MonoBehaviour
 {
     public Simulator Sim;
     public GameObject[] cameras;
-    private int cameraIndex = 0;
 
     private float timeLeft = 0;
     private float saveResultTimer = 0;
 
+    private List<SubmarineAgent> agents;
+    private int agentIndex;
+
     private void OnEnable(){
 
         Sim = (Simulator)FindObjectOfType(typeof(Simulator));    
-
 
         VisualElement root = GetComponent<UIDocument>().rootVisualElement;
 
@@ -38,11 +41,6 @@ public class UIBehaviour : MonoBehaviour
         Button btnStart = root.Q<Button>("ButtonStart");
         Button btnStop = root.Q<Button>("ButtonStop");
         Button btnFastForward = root.Q<Button>("ButtonFastForward");
-
-
-
-
-
 
         // Fixing TextFieldBugs
         List<VisualElement> textFields = new UQueryBuilder<VisualElement>(root).Name("unity-text-field").ToList();
@@ -108,24 +106,37 @@ public class UIBehaviour : MonoBehaviour
             mainCamera.transform.LookAt(new Vector3(mapWidth.value * 0.5f, mapHeight.value * 0.5f, mapDepth.value * 0.5f));
             mainCamera.transform.Translate(Vector3.right * (Mathf.Sqrt(mapWidth.value ^ 2 * mapDepth.value ^ 2) * 0.2f), Space.Self);
 
+            agents = new List<SubmarineAgent>(FindObjectsOfType<SubmarineAgent>());
+            agentIndex = 0;
+
         };
         btnStop.clickable.clicked += () => {
             timeLeft = 0;
             Sim.DestroySimulation();
 
         };
-        btnFastForward.clickable.clicked += () => {
-            if(cameraIndex < cameras.Length - 1){
-                cameras[cameraIndex].SetActive(false);
-                cameraIndex++;
-                cameras[cameraIndex].SetActive(true);
-            }
-            else{
-                cameras[cameraIndex].SetActive(false);
-                cameraIndex = 0;
-                cameras[cameraIndex].SetActive(true);
-            }
+        btnFastForward.clickable.clicked += () => 
+        {
+            GameObject cameraObject = GameObject.FindWithTag("MainCamera");
+            CameraController cameraController;
 
+            if (cameraObject != null)
+            {
+                cameraController = cameraObject.GetComponent<CameraController>();
+
+                if (agentIndex == agents.Count) 
+                {
+                    GameObject chunk = GameObject.Find("Chunk(Clone)");
+                    cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+
+                    agentIndex = 0;
+                }
+                else 
+                {
+                    cameraController.SetTarget(agents[agentIndex].transform);
+                    agentIndex++;
+                }
+            }
         };        
     }
 
@@ -171,7 +182,5 @@ public class UIBehaviour : MonoBehaviour
             default:
                 return "No AlgorithmIndex Given";
         }
-
     }
-
 }
