@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MAES3D.Agent;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -42,12 +43,28 @@ public class CameraController : MonoBehaviour
         }
 
         // Rotate camera around drone
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(1))
         {
             currentYRotation += Input.GetAxis("Mouse X") * rotationSpeed;
             currentXRotation -= Input.GetAxis("Mouse Y") * rotationSpeed;
 
-            currentXRotation = Mathf.Clamp(currentXRotation, 10, 80);
+            currentXRotation = Mathf.Clamp(currentXRotation, 0, 90);
+        }
+
+        // Click on a drone to make it the target
+        if (Input.GetMouseButton(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                SubmarineAgent hitDrone = hit.transform.GetComponent<SubmarineAgent>();
+                if (hitDrone != null)
+                {
+                    SetTarget(hit.transform);
+                }
+            }
         }
 
         // Zoom in/out using scroll wheel
