@@ -165,7 +165,6 @@ namespace MAES3D.Agent {
             // Enters busy status while calculating AStar Path
             _currentStatus = Status.Busy;
 
-
             //If we cant go there directly, use AStar to find a path
             List<Cell> fullPath = await System.Threading.Tasks.Task.Run(() => AStar.FindPath(position, targetCell.middle, GetLocalExplorationMap()));
 
@@ -173,7 +172,7 @@ namespace MAES3D.Agent {
             _currentStatus = Status.Moving;
 
             //Could not find a path
-            if (fullPath.Count == 0) {
+            if (fullPath == null) {
                 return;
             }
 
