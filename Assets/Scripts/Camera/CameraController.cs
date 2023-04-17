@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public Transform droneTarget;
+    public Transform target;
     public Vector3 offset;
     public Vector3 centerOffset;
 
@@ -28,17 +28,18 @@ public class CameraController : MonoBehaviour
         minZoomDistance = 2.0f;
         maxZoomDistance = 100.0f;
 
-        droneTarget.transform.position = new Vector3(droneTarget.transform.position.x, droneTarget.transform.position.y, droneTarget.transform.position.z);
-        currentZoom = Vector3.Distance(transform.position, droneTarget.position);
+        target.transform.position = new Vector3(target.transform.position.x, target.transform.position.y, target.transform.position.z);
+        currentZoom = Vector3.Distance(transform.position, target.position);
         currentYRotation = transform.eulerAngles.y;
         currentXRotation = transform.eulerAngles.x;
     }
 
     private void Update()
     {
-        if (droneTarget == null) 
+        // Default camera to 'Simulator' in case there is no target
+        if (target == null) 
         {
-            GameObject light = GameObject.Find("Directional Light");
+            GameObject light = GameObject.Find("Simulator");
             SetTarget(light.transform);  
         }
 
@@ -78,14 +79,14 @@ public class CameraController : MonoBehaviour
     private void ApplyCameraTransform()
     {
         Quaternion rotation = Quaternion.Euler(currentXRotation, currentYRotation, 0);
-        Vector3 targetPosition = droneTarget.position + centerOffset;
+        Vector3 targetPosition = target.position + centerOffset;
         transform.position = targetPosition - (rotation * offset * currentZoom);
         transform.LookAt(targetPosition);
     }
 
     public void SetTarget(Transform newTarget)
     {
-        droneTarget = newTarget;
+        target = newTarget;
         centerOffset = new Vector3(0, 0, 0);
 
         /* Camera settings for a drone */
@@ -95,7 +96,7 @@ public class CameraController : MonoBehaviour
 
     public void SetTargetOffset(Transform newTarget, Vector3 newCenterOffset) 
     {
-        droneTarget = newTarget;
+        target = newTarget;
         centerOffset = newCenterOffset;
 
 
