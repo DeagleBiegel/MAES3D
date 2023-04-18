@@ -72,6 +72,11 @@ public class UIBehaviour : MonoBehaviour
         });
 
         btnStart.clickable.clicked += () => {
+            if ((Simulation)FindObjectOfType(typeof(Simulation)) != null)
+            {
+                Debug.Log("Tried to start a simulation while another simulation is running.");
+                return;
+            }
             // Adds values from VisualElements to SimulationSettings
             SimulationSettings.algorithm = dropdownAlgorithm.index;
             SimulationSettings.agentCount = agentCount.value;
