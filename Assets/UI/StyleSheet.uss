@@ -6,13 +6,12 @@ PopupTextElement {
 #unity-text-field {
     display: flex;
     visibility: visible;
-    overflow: visible;
+    overflow: hidden;
     color: rgb(255, 255, 255);
     -unity-text-outline-color: rgb(0, 0, 0);
-    top: auto;
-    bottom: 30%;
-    right: auto;
-    padding-left: 0;
+    bottom: 5%;
+    font-size: 16px;
+    -unity-text-align: middle-left;
 }
 
 #unity-text-input {
@@ -63,5 +62,5 @@ PopupTextElement {
 }
 
 .unity-progress-bar__progress {
-    background-color: rgba(3, 96, 0, 255);
+    background-color: rgb(3, 96, 0);
 }
