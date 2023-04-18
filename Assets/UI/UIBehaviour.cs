@@ -11,39 +11,47 @@ using UnityEngine.UIElements;
 public class UIBehaviour : MonoBehaviour
 {
     public Simulator Sim;
-    public GameObject[] cameras;
+    public GameObject mainCamera;
 
     private float timeLeft = 0;
     private float saveResultTimer = 0;
 
+    public UIDocument CaveUI;
+    public UIDocument AgentUI;
+    public UIDocument CameraControls;
+
     private List<SubmarineAgent> agents;
     private int agentIndex;
 
+
     private void OnEnable(){
 
-        Sim = (Simulator)FindObjectOfType(typeof(Simulator));    
+        VisualElement CaveRoot = CaveUI.rootVisualElement;
 
-        VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+        DropdownField dropdownAlgorithm = CaveRoot.Q<DropdownField>("DropdownAlgorithm");
 
-        DropdownField dropdownAlgorithm = root.Q<DropdownField>("DropdownAlgorithm");
+        SliderInt agentCount = CaveRoot.Q<SliderInt>("AgentCount");
+        SliderInt duration = CaveRoot.Q<SliderInt>("SimDuration");
+        SliderInt mapHeight = CaveRoot.Q<SliderInt>("MapHeight");
+        SliderInt mapWidth = CaveRoot.Q<SliderInt>("MapWidth");
+        SliderInt mapDepth = CaveRoot.Q<SliderInt>("MapDepth");
 
-        SliderInt agentCount = root.Q<SliderInt>("AgentCount");
-        SliderInt duration = root.Q<SliderInt>("SimDuration");
-        SliderInt mapHeight = root.Q<SliderInt>("MapHeight");
-        SliderInt mapWidth = root.Q<SliderInt>("MapWidth");
-        SliderInt mapDepth = root.Q<SliderInt>("MapDepth");
+        Toggle toggleSeed = CaveRoot.Q<Toggle>("ToggleRandomSeed");
+        TextField txtSeed = CaveRoot.Q<TextField>("TxtSeed");
 
-        Toggle toggleSeed = root.Q<Toggle>("ToggleRandomSeed");
-        TextField txtSeed = root.Q<TextField>("TxtSeed");
+        ProgressBar progBar = CaveRoot.Q<ProgressBar>("ProgressBar");
 
-        ProgressBar progBar = root.Q<ProgressBar>("ProgressBar");
+        Button btnStart = CaveRoot.Q<Button>("ButtonStart");
+        Button btnStop = CaveRoot.Q<Button>("ButtonStop");
 
-        Button btnStart = root.Q<Button>("ButtonStart");
-        Button btnStop = root.Q<Button>("ButtonStop");
-        Button btnFastForward = root.Q<Button>("ButtonFastForward");
+        Button btnPrevCam = CameraControls.rootVisualElement.Q<Button>("ButtonPrev");
+        Button btnCave = CameraControls.rootVisualElement.Q<Button>("ButtonCave");
+        Button btnNextCam = CameraControls.rootVisualElement.Q<Button>("ButtonNext");
+
 
         // Fixing TextFieldBugs
-        List<VisualElement> textFields = new UQueryBuilder<VisualElement>(root).Name("unity-text-field").ToList();
+        /**/
+        List<VisualElement> textFields = new UQueryBuilder<VisualElement>(CaveRoot).Name("unity-text-field").ToList();
         foreach (TextField tf in textFields){
             tf.label = tf.value;
         }
@@ -77,6 +85,8 @@ public class UIBehaviour : MonoBehaviour
                 Debug.Log("Tried to start a simulation while another simulation is running.");
                 return;
             }
+            CameraControls.enabled = true; // Enables the camera controls UI
+
             // Adds values from VisualElements to SimulationSettings
             SimulationSettings.algorithm = dropdownAlgorithm.index;
             SimulationSettings.agentCount = agentCount.value;
@@ -106,7 +116,6 @@ public class UIBehaviour : MonoBehaviour
                 textWriter.WriteLine("0, 0");
             textWriter.Close();
 
-            GameObject mainCamera = cameras[0];
             mainCamera.transform.position = new Vector3(-(mapWidth.value * 0.25f), mapHeight.value * 1.25f, -(mapDepth.value * 0.25f));
             mainCamera.transform.LookAt(new Vector3(mapWidth.value * 0.5f, mapHeight.value * 0.5f, mapDepth.value * 0.5f));
             mainCamera.transform.Translate(Vector3.right * (Mathf.Sqrt(mapWidth.value ^ 2 * mapDepth.value ^ 2) * 0.2f), Space.Self);
@@ -116,38 +125,51 @@ public class UIBehaviour : MonoBehaviour
 
         };
         btnStop.clickable.clicked += () => {
+            CameraControls.enabled = false; // Disables the camera controls UI
+
             timeLeft = 0;
             Sim.DestroySimulation();
 
         };
-        btnFastForward.clickable.clicked += () => 
+
+        btnPrevCam.clickable.clicked += () => 
         {
-            GameObject cameraObject = GameObject.FindWithTag("MainCamera");
-            CameraController cameraController;
+            Debug.Log("Prev Clicked");
 
-            if (cameraObject != null)
-            {
-                cameraController = cameraObject.GetComponent<CameraController>();
+            ChangeCam(-1);
+        };
 
-                if (agentIndex == agents.Count) 
-                {
-                    GameObject chunk = GameObject.Find("Chunk(Clone)");
-                    cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+        btnCave.clickable.clicked += () => 
+        {
+            Debug.Log("Cave Clicked");
 
-                    agentIndex = 0;
-                }
-                else 
-                {
-                    cameraController.SetTarget(agents[agentIndex].transform);
-                    agentIndex++;
-                }
-            }
-        };        
+            ChangeCam(0);
+        };
+
+        btnNextCam.clickable.clicked += () => 
+        {
+            Debug.Log("Next Clicked");
+
+            ChangeCam(1);
+        };
     }
 
     void FixedUpdate(){
-        GetComponent<UIDocument>().rootVisualElement.Q<ProgressBar>("ProgressBar").value = MathF.Floor(SimulationSettings.progress);
-        GetComponent<UIDocument>().rootVisualElement.Q<ProgressBar>("ProgressBar").title = string.Format("{0:00}:{1:00}",MathF.Floor(timeLeft/60),MathF.Floor(timeLeft)%60) + $" - {SimulationSettings.progress}%";
+        if (CaveUI.enabled)
+        {
+            CaveUI.rootVisualElement.Q<ProgressBar>("ProgressBar").value = MathF.Floor(SimulationSettings.progress);
+            CaveUI.rootVisualElement.Q<ProgressBar>("ProgressBar").title = string.Format("{0:00}:{1:00}",MathF.Floor(timeLeft/60),MathF.Floor(timeLeft)%60) + $" - {SimulationSettings.progress}%";
+        }
+        else if (AgentUI.enabled)
+        {
+            AgentUI.rootVisualElement.Q<ProgressBar>("ProgressBar").value = MathF.Floor(SimulationSettings.progress);
+            AgentUI.rootVisualElement.Q<ProgressBar>("ProgressBar").title = string.Format("{0:00}:{1:00}",MathF.Floor(timeLeft/60),MathF.Floor(timeLeft)%60) + $" - {SimulationSettings.progress}%";    
+        }
+        else
+        {
+            Debug.LogWarning("No UI is enabled");
+        }
+
         if(timeLeft > 0){
             timeLeft -= Time.fixedDeltaTime;
             if(saveResultTimer < 10)
@@ -169,10 +191,93 @@ public class UIBehaviour : MonoBehaviour
 
     }
 
+
+    private void ChangeCam(int movement){
+
+        if (mainCamera != null)
+        {
+            //Debug.Log($"click: agentIndex = {agentIndex}");
+            CameraController cameraController = mainCamera.GetComponent<CameraController>();
+            GameObject chunk = GameObject.Find("Chunk(Clone)");
+
+
+            switch (movement)
+            {
+                case 0:
+                    ChangeToUI(CaveUI);
+                    cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+                    agentIndex = 0;
+                    return;
+
+                case 1:
+                    agentIndex++;
+                    if (agentIndex > agents.Count)
+                    {
+                        agentIndex = 0;
+                        cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+                        ChangeToUI(CaveUI);
+                    }
+                    else
+                    {
+                        cameraController.SetTarget(agents[agentIndex-1].transform);
+                        ChangeToUI(AgentUI);
+                    }
+                    return;
+
+                case -1:
+                    agentIndex--;
+                    if (agentIndex == 0)
+                    {
+                        cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+                        ChangeToUI(CaveUI);
+                    }
+                    else if (agentIndex > 0)
+                    {
+                        cameraController.SetTarget(agents[agentIndex-1].transform);
+                        ChangeToUI(AgentUI);
+                    }
+                    else
+                    {
+                        agentIndex = agents.Count;
+                        cameraController.SetTarget(agents[agentIndex-1].transform);
+                        ChangeToUI(AgentUI);
+                    }
+                    return;
+                default:
+                    Debug.LogError("Invalid CameraMovement");
+                    Debug.Break();
+                    return;
+            }
+        }
+    }
+
+    private void ChangeToUI(UIDocument newUI){
+        if (newUI == AgentUI)
+        {
+            CaveUI.enabled = false;
+            AgentUI.enabled = true;
+        }
+        else if (newUI == CaveUI)
+        {
+            AgentUI.enabled = false;
+            CaveUI.enabled = true;
+        }
+        else
+        {
+            Debug.LogError("Not Valid UI Selected");
+            Debug.Break();
+        }
+    }
+
     private void AddResults(int duration, int progress, int instance){
         TextWriter tw = new StreamWriter(Application.dataPath + $"/Results/{AlgorithmIndexToString(SimulationSettings.algorithm)}_x{SimulationSettings.Width}y{SimulationSettings.Height}z{SimulationSettings.Depth}_I{SimulationSettings.Instance}.csv", true);
         tw.WriteLine($"{duration},{progress}");
         tw.Close();
+    }
+
+    private void UpdateAgentUI(int agentID, String task, Vector3 position, Vector3 target, string algoInfo = null){
+        
+
     }
 
     private String AlgorithmIndexToString(int algorithmIndex){

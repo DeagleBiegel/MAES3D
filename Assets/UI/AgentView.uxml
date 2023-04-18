@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/StyleSheet.uss?fileID=7433441132597879392&amp;guid=03ecd5b907436a749918d813f369138e&amp;type=3#StyleSheet" />
+    <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" nested-interaction-kind="Default" focusable="false" mode="VerticalAndHorizontal" style="left: auto; width: 275px; flex-direction: row; background-color: rgba(0, 0, 0, 0.9); -unity-text-align: upper-left; align-items: center; color: rgb(255, 255, 255); flex-basis: 100%; justify-content: space-around; position: absolute; height: 100%; right: 0;">
+        <ui:Label text="MAES3D" display-tooltip-when-elided="true" name="Title" style="font-size: 45%; -unity-text-align: upper-center;" />
+        <ui:GroupBox name="AgentInformation" class="smallContainer" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+            <ui:Label text="Agent Information" display-tooltip-when-elided="true" name="Title" enable-rich-text="false" class="secTitle" style="-unity-text-align: upper-center; height: 22px;" />
+            <ui:GroupBox name="Id" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+                <ui:Label text="Agent ID:" display-tooltip-when-elided="true" name="title" />
+                <ui:Label text="Label" display-tooltip-when-elided="true" name="value" />
+            </ui:GroupBox>
+            <ui:GroupBox name="Task" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+                <ui:Label text="Task:" display-tooltip-when-elided="true" name="title" />
+                <ui:Label text="Label" display-tooltip-when-elided="true" name="value" />
+            </ui:GroupBox>
+            <ui:GroupBox name="Position" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+                <ui:Label text="Position:" display-tooltip-when-elided="true" name="title" />
+                <ui:Label text="Label" display-tooltip-when-elided="true" name="value" />
+            </ui:GroupBox>
+            <ui:GroupBox name="Target" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+                <ui:Label text="Target:" display-tooltip-when-elided="true" name="title" />
+                <ui:Label text="Label" display-tooltip-when-elided="true" name="value" />
+            </ui:GroupBox>
+        </ui:GroupBox>
+        <ui:GroupBox name="AlgorithmInformation" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+            <ui:Label text="Algorithm Information" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; margin-top: 5%;" />
+            <ui:GroupBox name="Information" text="Custon text &#10;text1&#10;text2&#10;text3&#10;text4&#10;text5" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 2%; padding-bottom: 0; background-color: rgb(81, 81, 81); -unity-text-align: upper-left;" />
+        </ui:GroupBox>
+        <ui:GroupBox name="Controls" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+            <ui:ProgressBar title="30:00 - 0%" name="ProgressBar" class="lightBackground" style="width: 80%; left: 10%; height: auto; margin-left: 0; margin-right: 0; margin-top: 5%; margin-bottom: 5%; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />
+        </ui:GroupBox>
+    </ui:ScrollView>
+</ui:UXML>

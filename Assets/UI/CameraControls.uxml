@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/StyleSheet.uss?fileID=7433441132597879392&amp;guid=03ecd5b907436a749918d813f369138e&amp;type=3#StyleSheet" />
+    <ui:GroupBox name="CameraController" style="width: 250px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; position: absolute; right: 285px; bottom: 10px; align-items: stretch;">
+        <ui:VisualElement style="background-color: rgb(6, 6, 6); border-top-left-radius: 15px; border-bottom-left-radius: 15px; border-top-right-radius: 15px; border-bottom-right-radius: 15px; align-items: center; justify-content: flex-start;">
+            <ui:Label text="Camera Controls" display-tooltip-when-elided="true" name="CameraControls" class="secTitle" style="color: rgb(255, 255, 255); padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />
+            <ui:GroupBox name="CameraButtons" class="smallContainer" style="flex-direction: row; position: relative; left: auto; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 5%; padding-right: 5%; padding-top: 0; padding-bottom: 5%; justify-content: space-around; align-items: stretch; width: 100%;">
+                <ui:Button text="Prev" display-tooltip-when-elided="true" name="ButtonPrev" focusable="false" class="button" />
+                <ui:Button text="Cave" display-tooltip-when-elided="true" name="ButtonCave" focusable="false" class="button" />
+                <ui:Button text="Next" display-tooltip-when-elided="true" name="ButtonNext" focusable="false" class="button" />
+            </ui:GroupBox>
+        </ui:VisualElement>
+    </ui:GroupBox>
+</ui:UXML>
