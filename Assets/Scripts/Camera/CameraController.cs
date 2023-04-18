@@ -73,12 +73,14 @@ public class CameraController : MonoBehaviour
                 }
                 else 
                 {
-                   Chunk hitCave = hit.transform.GetComponent<Chunk>();
+                    /*
+                    Chunk hitCave = hit.transform.GetComponent<Chunk>();
 
                     if (hitCave != null)
                     {
                         SetTargetOffset(hit.transform, Vector3.zero);
                     }
+                    */
                 }
             }
         }
