@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using MAES3D.Agent;
+using MAES3D;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -13,7 +14,9 @@ public class CameraController : MonoBehaviour
     public float zoomSpeed;
     public float minZoomDistance;
     public float maxZoomDistance;
+    public float transitionDuration;
 
+    private bool isTransitioning;
     private float currentZoom;
     private float currentYRotation;
     private float currentXRotation;
@@ -27,6 +30,9 @@ public class CameraController : MonoBehaviour
         zoomSpeed = 1.0f;
         minZoomDistance = 2.0f;
         maxZoomDistance = 100.0f;
+
+        transitionDuration = 0.5f;
+        isTransitioning = false;
 
         target.transform.position = new Vector3(target.transform.position.x, target.transform.position.y, target.transform.position.z);
         currentZoom = Vector3.Distance(transform.position, target.position);
@@ -65,6 +71,15 @@ public class CameraController : MonoBehaviour
                 {
                     SetTarget(hit.transform);
                 }
+                else 
+                {
+                   Chunk hitCave = hit.transform.GetComponent<Chunk>();
+
+                    if (hitCave != null)
+                    {
+                        SetTargetOffset(hit.transform, Vector3.zero);
+                    }
+                }
             }
         }
 
@@ -76,6 +91,8 @@ public class CameraController : MonoBehaviour
         ApplyCameraTransform();
     }
 
+
+
     private void ApplyCameraTransform()
     {
         Quaternion rotation = Quaternion.Euler(currentXRotation, currentYRotation, 0);
@@ -84,24 +101,53 @@ public class CameraController : MonoBehaviour
         transform.LookAt(targetPosition);
     }
 
+    private IEnumerator SmoothTransition(Transform newTarget, Vector3 newCenterOffset, float newZoom)
+    {
+        isTransitioning = true;
+        float transitionTime = 0;
+
+        Vector3 startPosition = transform.position;
+        Quaternion startRotation = transform.rotation;
+        Vector3 startCenterOffset = centerOffset;
+        float startZoom = currentZoom;
+
+        while (transitionTime < transitionDuration)
+        {
+            transitionTime += Time.deltaTime;
+            float t = transitionTime / transitionDuration;
+
+            target = newTarget;
+            centerOffset = Vector3.Lerp(startCenterOffset, newCenterOffset, t);
+            currentZoom = Mathf.Lerp(startZoom, newZoom, t);
+
+            ApplyCameraTransform();
+
+            transform.position = Vector3.Lerp(startPosition, transform.position, t);
+            transform.rotation = Quaternion.Slerp(startRotation, transform.rotation, t);
+
+            yield return null;
+        }
+
+        isTransitioning = false;
+    }
+
     public void SetTarget(Transform newTarget)
     {
-        target = newTarget;
-        centerOffset = new Vector3(0, 0, 0);
-
-        /* Camera settings for a drone */
-        currentZoom = 5;
-        zoomSpeed = 3f;
+        if (!isTransitioning)
+        {
+            zoomSpeed = 2f;
+            float newZoom = 5;
+            StartCoroutine(SmoothTransition(newTarget, Vector3.zero, newZoom));
+        }
     }
 
     public void SetTargetOffset(Transform newTarget, Vector3 newCenterOffset) 
     {
-        target = newTarget;
-        centerOffset = newCenterOffset;
-
-
-        /* Camera settings for chunk */
-        currentZoom = (SimulationSettings.Width + SimulationSettings.Height + SimulationSettings.Depth) / 3;
-        zoomSpeed = 20F;
+        if (!isTransitioning)
+        {
+            zoomSpeed = 10f;
+            float newZoom = (SimulationSettings.Width + SimulationSettings.Height + SimulationSettings.Depth) / 3;
+            StartCoroutine(SmoothTransition(newTarget, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2), newZoom));
+        }
     }
 }
