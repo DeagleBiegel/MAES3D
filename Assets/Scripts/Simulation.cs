@@ -61,17 +61,17 @@ namespace MAES3D {
             {
                 case 0:
                     for (int i = 0; i < SimulationSettings.agentCount; i++) {
-                        _agents.Add(SpawnAgent(new RandomBalisticWalk(), map.SpawnPositions[i].middle));
+                        _agents.Add(SpawnAgent(new RandomBalisticWalk(), map.SpawnPositions[i].middle, i));
                     }
                     break;
                 case 1:
                     for (int i = 0; i < SimulationSettings.agentCount; i++) {
-                        _agents.Add(SpawnAgent(new LocalVoronoiDecomposition(), map.SpawnPositions[i].middle));
+                        _agents.Add(SpawnAgent(new LocalVoronoiDecomposition(), map.SpawnPositions[i].middle, i));
                     }
                     break;
                 case 2:
                     for (int i = 0; i < SimulationSettings.agentCount; i++) {
-                        _agents.Add(SpawnAgent(new DualStageViewpointPlanner(), map.SpawnPositions[i].middle));
+                        _agents.Add(SpawnAgent(new DualStageViewpointPlanner(), map.SpawnPositions[i].middle, i));
                     }
                     break;
                 default:
@@ -82,10 +82,11 @@ namespace MAES3D {
             CommunicationManager = new CommunicationManager(_agents, 5);
         }
 
-        private SubmarineAgent SpawnAgent(IAlgorithm algorithm, Vector3 position) {
+        private SubmarineAgent SpawnAgent(IAlgorithm algorithm, Vector3 position, int id) {
             GameObject agentGameObject = Instantiate(AgentPrefab, parent: transform);
             SubmarineAgent agent = agentGameObject.GetComponent<SubmarineAgent>();
 
+            agent.Id = id;
             agent.Algorithm = algorithm;
             agent.Algorithm.SetController(agent.Controller);
 

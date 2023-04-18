@@ -9,6 +9,7 @@ namespace MAES3D.Agent {
 
         public AgentController Controller;
         public IAlgorithm Algorithm;
+        public int Id;
 
         private List<Vector3> _visitedPosition;
 
