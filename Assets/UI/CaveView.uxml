@@ -4,7 +4,7 @@
         <ui:Label text="MAES3D" display-tooltip-when-elided="true" name="Title" style="font-size: 45%; -unity-text-align: upper-center;" />
         <ui:GroupBox name="Simulation" class="smallContainer" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
             <ui:Label text="Simulation" display-tooltip-when-elided="true" name="Title" enable-rich-text="false" class="secTitle" style="-unity-text-align: upper-center; height: 22px;" />
-            <ui:SliderInt label="Number of Agents" value="1" high-value="10" name="AgentCount" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
+            <ui:SliderInt label="Number of Agents" value="3" high-value="10" name="AgentCount" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
             <ui:SliderInt picking-mode="Ignore" label="Duration (min)" value="30" high-value="120" name="SimDuration" show-input-field="true" low-value="1" focusable="false" class="property" />
             <ui:DropdownField label="Algorithms" index="0" choices="Random Ballistic Walk,Local Voronoi Deco...,Dual-Stage Viewpo..." name="DropdownAlgorithm" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />
         </ui:GroupBox>
