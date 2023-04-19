@@ -71,8 +71,8 @@ public class CameraController : MonoBehaviour
                 {
                     SetTarget(hit.transform);
                     UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();
-                    UI.SetAgentIndex(hitDrone.Id+1);
-                    UI.ChangeToUI(UI.AgentUI);
+                    UI.SetAgentIndex(hitDrone.Id);
+                    UI.ChangeCam();
 
                 }
                 else 

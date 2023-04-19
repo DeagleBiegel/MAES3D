@@ -28,6 +28,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private RRTnode location = null;
 
+        private Cell prevCell;
+
         private bool firstTick = true;
 
         private bool relocated = false;
@@ -35,6 +37,9 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         private bool done = false; // delete later
 
         private int count = 0; // delete later
+
+        private bool initializing = true;
+
 
         float lambda2 = 5;
         float frontierRadius = 1f;
@@ -45,10 +50,25 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         public void UpdateLogic()
-        {   
-            if (done)
+        {               
+            if (done && globalFrontiers.Count == 0)
             {
                 return;
+            }
+            else
+            {
+                done = false;
+            }
+
+            Cell currCell = Utility.CoordinateToCell(_controller.GetPosition());
+
+            if (_controller.GetVisibleCells().Count == 0) 
+            {
+                return;
+            }
+            else 
+            {
+                initializing = false;
             }
 
             if (firstTick)
@@ -57,11 +77,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 globalGraph = new RRT(_controller.GetPosition());
                 firstTick = false;
             }
+
+            if (currCell != prevCell)
+            {
+                FindFrontiersWhileMoving();
+            }
+            
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
-
-
                 RRTnode newDestination = ExplorationStage(location, relocated);
 
                 if (location != newDestination && localFrontiers.Count != 0)
@@ -72,18 +96,31 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 }
                 else if (localFrontiers.Count == 0) // If there are no more local frontiers after exploration stage
                 {
+                    UpdateGlobalFrontiers();
+
                     if (globalFrontiers.Count == 0) // If there are no more global frontiers after exploration stage
                     {    
-                        Debug.Log("Simulation Over: Cannot find any more frontiers");
+                        Debug.Log("Simulation Over: Cannot find any more frontiers, while in exploration stage");
+
+                        //CheckOtherAgentsFrontiers();
                         done = true;
                     }
                     else
                     {
                         Debug.Log("Relocation Stage");
-                        Cell globalFrontierDestination = RelocationStage();
-                        //globalFrontierDestination.DrawCell(Color.magenta);
-                        _controller.MoveToCellAsync(globalFrontierDestination);
-                        newDestination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
+                        while (_controller.GetCurrentStatus() == Status.Idle) // If the global frontier is unreachable run again with a new one
+                        {
+                            Cell globalFrontierDestination = RelocationStage();
+                            //globalFrontierDestination.DrawCell(Color.magenta);
+                            _controller.MoveToCellAsync(globalFrontierDestination);
+                            newDestination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
+                            if (globalFrontiers.Count == 0)
+                            {
+                                Debug.Log("Simulation Over: Cannot find any more frontiers, while in relocation stage");
+                                done = true;
+                                return;
+                            }
+                        }
                         location = newDestination;
                         relocated = true;
                     }
@@ -91,7 +128,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
             }
 
-            
+            prevCell = currCell;
             /*
             if(_controller.GetCurrentStatus() == Status.Idle){
                 ExplorationStage(destination);
@@ -101,6 +138,48 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             */
             //Debug.Break();
             
+        }
+
+        public void GetFrontiersFromAgent(List<Cell> frontiers) 
+        {
+            foreach(Cell cell in frontiers) 
+            {
+                if (!globalFrontiers.Contains(cell)) 
+                {
+                    globalFrontiers.Add(cell);
+                }
+            }
+        }
+
+        public void CheckOtherAgentsFrontiers() 
+        {
+               List<SubmarineAgent> agents = new List<SubmarineAgent>(GameObject.FindObjectsOfType<SubmarineAgent>());
+               bool updated = false;
+               
+               foreach(SubmarineAgent agent in agents) 
+               {
+                    if (_controller.GetPosition() == agent.Controller.GetPosition())
+                        continue;
+
+                    if (!Physics.Raycast(_controller.GetPosition(), agent.Controller.GetPosition(), out RaycastHit hit, (_controller.GetPosition() - agent.Controller.GetPosition()).magnitude)) 
+                    {
+                        DualStageViewpointPlanner algo = agent.Algorithm as DualStageViewpointPlanner;
+
+                        foreach(Cell cell in algo.globalFrontiers) 
+                        {
+                            if (!globalFrontiers.Contains(cell)) 
+                            {
+                                globalFrontiers.Add(cell);
+                                updated = true;
+                            }
+                        }
+                    }
+               }
+
+               if(updated) 
+               {
+                    UpdateGlobalFrontiers();
+               }
         }
 
         public RRTnode ExplorationStage(RRTnode location = null, bool relocated = false){
@@ -161,8 +240,6 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }   
 
         public Cell RelocationStage(){
-            UpdateGlobalFrontiers();
-
             float dist = float.PositiveInfinity;
             Cell bestFrontier = null;
             foreach (Cell frontier in globalFrontiers)
@@ -174,6 +251,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                     bestFrontier = frontier;
                 }
             }
+            globalFrontiers.Remove(bestFrontier);
             return bestFrontier;
         }
         
@@ -261,7 +339,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
         }
 
-        private void UpdateGlobalFrontiers(){
+        public void UpdateGlobalFrontiers(){
             for (int i = globalFrontiers.Count-1; i >= 0; i--)
             {
                 if (!ValidFrontier(globalFrontiers[i]))
@@ -360,11 +438,17 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 */
 
         public RRTnode FindBestGainViewpoint(RRTnode rootNode){
-            Dictionary<RRTnode, float> viewpointGains = new Dictionary<RRTnode, float>();
-            CalculateBestGainViewpoint(rootNode, viewpointGains);
-
-            RRTnode n = viewpointGains.OrderByDescending(x => x.Value).First().Key;
-            return n;
+            try 
+            {
+                Dictionary<RRTnode, float> viewpointGains = new Dictionary<RRTnode, float>();
+                CalculateBestGainViewpoint(rootNode, viewpointGains);
+                RRTnode n = viewpointGains.OrderByDescending(x => x.Value).First().Key;
+                return n;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public void CalculateBestGainViewpoint(RRTnode treeNode, Dictionary<RRTnode, float> dictViewpointGains, int branchLength = 0){
@@ -461,7 +545,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             return arr[arr.GetLength(0), arr.GetLength(1)];
         }
 
-        public void BuildRRT(List<Cell> frontiers, int iterations = 50)
+        public void BuildRRT(List<Cell> frontiers, int iterations = 200)
         {   
             float threshold = 0.30f; // x% chance to select a point next to frontier
             for (int i = 0; i < iterations; i++)
@@ -502,6 +586,17 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             }
         }
 
+        public void FindFrontiersWhileMoving(){
+            List<Cell> viewableCells = _controller.GetVisibleCells();
+            foreach (Cell frontier in viewableCells)
+            {
+                if (ValidFrontier(frontier) && !globalFrontiers.Contains(frontier))
+                {
+                    globalFrontiers.Add(frontier);
+                }
+            }
+        }
+
         public List<Cell> FindFrontiers(int frontierAmount){
             localFrontiers = new List<Cell>();
             List<Cell> viewableCells = _controller.GetVisibleCells();
@@ -511,14 +606,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                 {    
                     if (ValidFrontier(cell))
                     {
-                        bool clusterCheck = false; // Checks if another frontier is nearby
-                        foreach (Cell frontier in localFrontiers)  
-                        {
-                            if ((cell.toVector - frontier.toVector).magnitude < 5) // Checks if another frontier is nearby
-                                clusterCheck = true;
-                        }
-                        if(!clusterCheck && !globalFrontiers.Contains(cell))
-                            localFrontiers.Add(cell);
+                        localFrontiers.Add(cell);
                     }
                 }
             } 
@@ -534,6 +622,12 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         private bool ValidFrontier(Cell cell){
+            if (_controller.GetLocalExplorationMap()[cell.x, cell.y, cell.z] == CellStatus.wall ||
+                _controller.GetLocalExplorationMap()[cell.x, cell.y, cell.z] == CellStatus.unexplored)
+            {
+                return false;
+            }
+
             if (_controller.GetExplorationStatusOfCell(new Cell(cell.x + 1, cell.y, cell.z), false) == CellStatus.unexplored ||
                 _controller.GetExplorationStatusOfCell(new Cell(cell.x - 1, cell.y, cell.z), false) == CellStatus.unexplored ||
                 _controller.GetExplorationStatusOfCell(new Cell(cell.x, cell.y + 1, cell.z), false) == CellStatus.unexplored ||
@@ -590,9 +684,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
             return selectedFrontiers;
         }      
-        
         public string GetInformation(){
-            return "";
+            return "This algorithm does not contain additional information.";
         }
     }
 
@@ -764,6 +857,5 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             // Traverse the right subtree
             // Not applicable since this is a tree, not a binary tree
         }
-
     }
 }

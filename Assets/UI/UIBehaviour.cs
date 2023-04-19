@@ -21,7 +21,7 @@ public class UIBehaviour : MonoBehaviour
     public UIDocument CameraUI;
 
     private List<SubmarineAgent> agents;
-    private int agentIndex;
+    private int agentIndex; // -1 = Cave, 0-9 = Agents
 
     private CameraController cameraController;
     //CaveUI Interactables
@@ -56,7 +56,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else if (AgentUI.enabled)
         {
-            UpdateAgentUI(agents[agentIndex-1]);
+            UpdateAgentUI(agents[agentIndex]);
             AgentUI.rootVisualElement.Q<ProgressBar>("ProgressBar").value = MathF.Floor(SimulationSettings.progress);
             AgentUI.rootVisualElement.Q<ProgressBar>("ProgressBar").title = string.Format("{0:00}:{1:00}",MathF.Floor(timeLeft/60),MathF.Floor(timeLeft)%60) + $" - {SimulationSettings.progress}%";    
         }
@@ -86,39 +86,39 @@ public class UIBehaviour : MonoBehaviour
         agentIndex = index;
     }
 
-    private void ChangeCam(){
+    public void ChangeCam(){
 
         if (mainCamera != null)
         {
             //Debug.Log($"click: agentIndex = {agentIndex}");
             GameObject chunk = GameObject.Find("Chunk(Clone)");
 
-            if (agentIndex == 0)
+            if (agentIndex == -1)
             {
                 ChangeToUI(CaveUI);
                 cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
             }
-            else if (agentIndex > agents.Count)
+            else if (agentIndex > agents.Count-1)
             {
                 ChangeToUI(CaveUI);
                 cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
-                agentIndex = 0;
+                agentIndex = -1;
             }
-            else if (agentIndex < 0)
+            else if (agentIndex < -1)
             {
-                agentIndex = agents.Count;
-                cameraController.SetTarget(agents[agentIndex-1].transform);
+                agentIndex = agents.Count-1;
+                cameraController.SetTarget(agents[agentIndex].transform);
                 ChangeToUI(AgentUI);
             }
             else
             {
-                cameraController.SetTarget(agents[agentIndex-1].transform);
+                cameraController.SetTarget(agents[agentIndex].transform);
                 ChangeToUI(AgentUI);
             }
         }
     }
 
-    public void ChangeToUI(UIDocument newUI){
+    private void ChangeToUI(UIDocument newUI){
         if (newUI == AgentUI)
         {
             CaveUI.enabled = false;
@@ -160,7 +160,7 @@ public class UIBehaviour : MonoBehaviour
                 if (cameraController.IsTransitioning())
                     return;
                 //Debug.Log("Cave Clicked");
-                agentIndex = 0;
+                agentIndex = -1;
                 ChangeCam();
             };
 
@@ -263,7 +263,7 @@ public class UIBehaviour : MonoBehaviour
                 mainCamera.transform.Translate(Vector3.right * (Mathf.Sqrt(mapWidth.value ^ 2 * mapDepth.value ^ 2) * 0.2f), Space.Self);
 
                 agents = new List<SubmarineAgent>(FindObjectsOfType<SubmarineAgent>());
-                agentIndex = 0;
+                agentIndex = -1;
             };
             btnStop.clickable.clicked += () => {
                 //Debug.Log("Stop Clicked");
@@ -300,11 +300,11 @@ public class UIBehaviour : MonoBehaviour
         Label position = AgentRoot.Q<Label>("Position-label");
         Label speed = AgentRoot.Q<Label>("Speed-label");
         Label algoTF = AgentRoot.Q<Label>("Algorithm-info");
-        Vector3 currPos = agents[agentIndex-1].Controller.GetPosition();
+        Vector3 currPos = agents[agentIndex].Controller.GetPosition();
   
-        id.text = agents[agentIndex-1].Id.ToString();
-        if (agents[agentIndex-1].Controller.GetCurrentTask() != null)
-            task.text = agents[agentIndex-1].Controller.GetCurrentTask().ToString().Replace("MAES3D.Agent.Task.", ""); // Trim the start
+        id.text = agents[agentIndex].Id.ToString();
+        if (agents[agentIndex].Controller.GetCurrentTask() != null)
+            task.text = agents[agentIndex].Controller.GetCurrentTask().ToString().Replace("MAES3D.Agent.Task.", ""); // Trim the start
         position.text = $"({currPos.x.ToString("n2")}, {currPos.y.ToString("n2")}, {currPos.z.ToString("n2")})";
 
         speed.text = (agent.Controller.GetSpeed() * 1/Time.fixedDeltaTime).ToString("n2");

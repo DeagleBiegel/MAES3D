@@ -37,7 +37,7 @@ namespace MAES3D.Algorithm.RandomBalisticWalk {
         }
 
         public string GetInformation(){
-            return "";
+            return "This algorithm does not contain additional information.";
         }
     }
 }

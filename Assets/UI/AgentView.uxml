@@ -19,6 +19,10 @@
                 <ui:Label text="Position:" display-tooltip-when-elided="true" name="title" />
                 <ui:Label text="Label" display-tooltip-when-elided="true" name="Position-label" />
             </ui:GroupBox>
+            <ui:GroupBox name="Speed" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; flex-direction: row; flex-wrap: wrap;">
+                <ui:Label text="Speed:" display-tooltip-when-elided="true" name="title" />
+                <ui:Label text="Label" display-tooltip-when-elided="true" name="Speed-label" />
+            </ui:GroupBox>
         </ui:GroupBox>
         <ui:GroupBox name="AlgorithmInformation" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 5%; margin-bottom: 2%; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
             <ui:Label text="Algorithm Information" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; margin-left: 0; margin-right: 0; margin-bottom: 0;" />
