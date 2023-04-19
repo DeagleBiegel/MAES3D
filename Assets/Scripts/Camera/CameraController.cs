@@ -70,6 +70,10 @@ public class CameraController : MonoBehaviour
                 if (hitDrone != null)
                 {
                     SetTarget(hit.transform);
+                    UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();
+                    UI.SetAgentIndex(hitDrone.Id+1);
+                    UI.ChangeToUI(UI.AgentUI);
+
                 }
                 else 
                 {
@@ -93,8 +97,10 @@ public class CameraController : MonoBehaviour
         ApplyCameraTransform();
     }
 
-
-
+    public bool IsTransitioning(){
+        return isTransitioning;
+    }
+    
     private void ApplyCameraTransform()
     {
         Quaternion rotation = Quaternion.Euler(currentXRotation, currentYRotation, 0);

@@ -14,7 +14,7 @@
             <ui:SliderInt picking-mode="Ignore" label="Map Width" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapWidth" low-value="30" focusable="false" class="property" />
             <ui:SliderInt picking-mode="Ignore" label="Map Depth" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapDepth" low-value="30" focusable="false" class="property" style="justify-content: center;" />
             <ui:Toggle label="Random Seed?" name="ToggleRandomSeed" value="true" focusable="false" class="property" />
-            <ui:TextField picking-mode="Ignore" label="Seed" text="Random Seed" is-delayed="false" multiline="false" readonly="false" name="TxtSeed" focusable="false" value="0" class="property" style="color: rgb(255, 255, 255);" />
+            <ui:TextField picking-mode="Ignore" label="Seed" text="Random Seed" is-delayed="false" multiline="true" readonly="false" name="TxtSeed" focusable="false" value="0" max-length="9" class="property" style="color: rgb(255, 255, 255); white-space: normal; max-width: 250px;" />
         </ui:GroupBox>
         <ui:GroupBox name="Controls" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
             <ui:ProgressBar title="30:00 - 0%" name="ProgressBar" class="lightBackground" style="width: 80%; left: 10%; height: auto; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 5%; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />

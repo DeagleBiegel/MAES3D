@@ -35,5 +35,9 @@ namespace MAES3D.Algorithm.RandomBalisticWalk {
                 }
             }
         }
+
+        public string GetInformation(){
+            return "";
+        }
     }
 }

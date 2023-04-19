@@ -19,6 +19,8 @@ namespace MAES3D.Agent {
         private float _moveSpeed = 1.5f;
         private float _turnSpeed = 100f;
 
+        MoveInstruction? instruction;
+
         public ExplorationMap ExplorationMap;
 
         private Stack<Cell> visitedCells = new Stack<Cell>();
@@ -32,6 +34,10 @@ namespace MAES3D.Agent {
             return _currentStatus;
         }
 
+        public ITask? GetCurrentTask(){
+            return _currentTask;
+        }
+
         public CollisionType GetCurrentCollision() {
             return _currentCollision;
         }
@@ -42,6 +48,13 @@ namespace MAES3D.Agent {
 
         public float GetAngle() {
             return _transform.eulerAngles.y;
+        }
+
+        public float GetSpeed(){
+            if (instruction != null)
+                return Mathf.Sqrt(Mathf.Pow(instruction.HorizontalSpeed, 2) + Mathf.Pow(instruction.VerticalSpeed,2));
+            else
+                return 0;
         }
 
         public void UpdateMovement() {
@@ -57,7 +70,7 @@ namespace MAES3D.Agent {
             }
             
 
-            MoveInstruction? instruction = _currentTask?.GetInstruction();
+            instruction = _currentTask?.GetInstruction();
 
             if (instruction != null) {
                 ApplyMovement(instruction);

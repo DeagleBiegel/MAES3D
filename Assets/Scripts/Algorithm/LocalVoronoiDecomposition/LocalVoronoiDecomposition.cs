@@ -19,6 +19,8 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
 
         private bool _searchMode;
 
+        private Cell _destination;
+
         public LocalVoronoiDecomposition() 
         {
             _occlusionPoints = new Dictionary<Cell, int>();
@@ -69,7 +71,7 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
                 }*/
 
 
-                Cell destination = null;
+                _destination = null;
                 CellStatus[,,] currentView = _controller.GetCurrentView();
                 List<Vector3> visibleAgents = _controller.GetVisibleAgentPositions();
 
@@ -77,18 +79,18 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
 
                 /* EXPLORATION MODE 
                  * FIND NEAREST AVAILABLE CELL */
-                destination = ExplorationMode(cells, currentView, visibleAgents) ??
+                _destination = ExplorationMode(cells, currentView, visibleAgents) ??
                               SearchMode(cells, currentView, visibleAgents);
 
-                if (destination != null) 
+                if (_destination != null) 
                 {
                     if (_searchMode) 
                     {
-                        _occlusionPoints[destination]++;
+                        _occlusionPoints[_destination]++;
                     }
 
-                    Debug.DrawLine(_controller.GetPosition(), destination.middle, Color.red, 5);
-                    _controller.MoveToCellAsync(destination);
+                    Debug.DrawLine(_controller.GetPosition(), _destination.middle, Color.red, 5);
+                    _controller.MoveToCellAsync(_destination);
                 }
             }
 
@@ -352,6 +354,10 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
             {
                 occlusionCells.Add(new Cell(wallCell.x + signX, wallCell.y + signY, wallCell.z + signZ));
             }
+        }
+
+        public string GetInformation(){
+            return $"Destination: ({_destination.middle.x.ToString("n2")}, {_destination.middle.y.ToString("n2")}, {_destination.middle.z.ToString("n2")})\n\nSearch Mode: {_searchMode}";
         }
     }
 }

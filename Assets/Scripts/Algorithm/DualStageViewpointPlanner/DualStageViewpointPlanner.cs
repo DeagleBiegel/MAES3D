@@ -591,7 +591,9 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             return selectedFrontiers;
         }      
         
-          
+        public string GetInformation(){
+            return "";
+        }
     }
 
     public class RRTnode{
@@ -762,5 +764,6 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             // Traverse the right subtree
             // Not applicable since this is a tree, not a binary tree
         }
+
     }
 }

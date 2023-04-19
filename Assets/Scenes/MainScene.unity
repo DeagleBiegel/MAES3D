@@ -174,7 +174,7 @@ MonoBehaviour:
   mainCamera: {fileID: 1547483322}
   CaveUI: {fileID: 1335954858}
   AgentUI: {fileID: 556916526}
-  CameraControls: {fileID: 1483006389}
+  CameraUI: {fileID: 1483006389}
 --- !u!1 &556916524
 GameObject:
   m_ObjectHideFlags: 0

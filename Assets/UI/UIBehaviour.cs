@@ -23,6 +23,7 @@ public class UIBehaviour : MonoBehaviour
     private List<SubmarineAgent> agents;
     private int agentIndex;
 
+    private CameraController cameraController;
     //CaveUI Interactables
     private DropdownField dropdownAlgorithm;
     private    SliderInt agentCount;
@@ -42,29 +43,9 @@ public class UIBehaviour : MonoBehaviour
 
 
     private void OnEnable(){
-        /*
-        dropdownAlgorithm = CaveRoot.Q<DropdownField>("DropdownAlgorithm");
-        agentCount = CaveRoot.Q<SliderInt>("AgentCount");
-        duration = CaveRoot.Q<SliderInt>("SimDuration");
-        mapHeight = CaveRoot.Q<SliderInt>("MapHeight");
-        mapWidth = CaveRoot.Q<SliderInt>("MapWidth");
-        mapDepth = CaveRoot.Q<SliderInt>("MapDepth");
-        toggleSeed = CaveRoot.Q<Toggle>("ToggleRandomSeed");
-        txtSeed = CaveRoot.Q<TextField>("TxtSeed");
-        progBar = CaveRoot.Q<ProgressBar>("ProgressBar");
-        btnStart = CaveRoot.Q<Button>("ButtonStart");
-        btnStop = CaveRoot.Q<Button>("ButtonStop");
-
-        btnPrevCam = CameraUI.rootVisualElement.Q<Button>("ButtonPrev");
-        btnCave = CameraUI.rootVisualElement.Q<Button>("ButtonCave");
-        btnNextCam = CameraUI.rootVisualElement.Q<Button>("ButtonNext");
-        */
-
+        cameraController = mainCamera.GetComponent<CameraController>();
         UpdateButtons(CaveUI);
-        /*
-        UpdateButtons(CameraUI);
-        UpdateButtons(AgentUI);
-        */
+
     }
 
     void FixedUpdate(){
@@ -75,12 +56,13 @@ public class UIBehaviour : MonoBehaviour
         }
         else if (AgentUI.enabled)
         {
+            UpdateAgentUI(agents[agentIndex-1]);
             AgentUI.rootVisualElement.Q<ProgressBar>("ProgressBar").value = MathF.Floor(SimulationSettings.progress);
             AgentUI.rootVisualElement.Q<ProgressBar>("ProgressBar").title = string.Format("{0:00}:{1:00}",MathF.Floor(timeLeft/60),MathF.Floor(timeLeft)%60) + $" - {SimulationSettings.progress}%";    
         }
         else
         {
-            Debug.LogWarning("No UI is enabled");
+            //Debug.LogWarning("No UI is enabled");
         }
 
         if(timeLeft > 0){
@@ -98,19 +80,17 @@ public class UIBehaviour : MonoBehaviour
             timeLeft = 0;
             AddResults((int)(SimulationSettings.duration - timeLeft), (int)SimulationSettings.progress, SimulationSettings.Instance-1);
         }
-
-
-
-
     }
 
+    public void SetAgentIndex(int index){
+        agentIndex = index;
+    }
 
     private void ChangeCam(){
 
         if (mainCamera != null)
         {
             //Debug.Log($"click: agentIndex = {agentIndex}");
-            CameraController cameraController = mainCamera.GetComponent<CameraController>();
             GameObject chunk = GameObject.Find("Chunk(Clone)");
 
             if (agentIndex == 0)
@@ -138,7 +118,7 @@ public class UIBehaviour : MonoBehaviour
         }
     }
 
-    private void ChangeToUI(UIDocument newUI){
+    public void ChangeToUI(UIDocument newUI){
         if (newUI == AgentUI)
         {
             CaveUI.enabled = false;
@@ -153,7 +133,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Not Valid UI Selected");
+            //Debug.LogError("Not Valid UI Selected");
             Debug.Break();
         }
     }
@@ -167,28 +147,35 @@ public class UIBehaviour : MonoBehaviour
             
             btnPrevCam.clickable.clicked += () => 
             {
-                Debug.Log("Prev Clicked");
-                agentIndex--;
+                if (cameraController.IsTransitioning())
+                    return;
+
+                //Debug.Log("Prev Clicked");
+                agentIndex++;
                 ChangeCam();
             };
 
             btnCave.clickable.clicked += () => 
             {
-                Debug.Log("Cave Clicked");
+                if (cameraController.IsTransitioning())
+                    return;
+                //Debug.Log("Cave Clicked");
                 agentIndex = 0;
                 ChangeCam();
             };
 
             btnNextCam.clickable.clicked += () => 
             {
-                Debug.Log("Next Clicked");
-                agentIndex++;
+                if (cameraController.IsTransitioning())
+                    return;
+                //Debug.Log("Next Clicked");
+                agentIndex--;
                 ChangeCam();
             };
         }
         else if (UIDoc == CaveUI)
         {
-            Debug.Log("CaveUI Updated");
+            //Debug.Log("CaveUI Updated");
             VisualElement CaveRoot = CaveUI.rootVisualElement;
 
             //Update References to Interactables
@@ -231,11 +218,11 @@ public class UIBehaviour : MonoBehaviour
             });
 
             btnStart.clickable.clicked += () => {
-                Debug.Log("Start Clicked");
+                //Debug.Log("Start Clicked");
 
                 if ((Simulation)FindObjectOfType(typeof(Simulation)) != null)
                 {
-                    Debug.Log("Tried to start a simulation while another simulation is running.");
+                    //Debug.Log("Tried to start a simulation while another simulation is running.");
                     return;
                 }
                 CameraUI.enabled = true; // Enables the camera controls UI
@@ -279,7 +266,7 @@ public class UIBehaviour : MonoBehaviour
                 agentIndex = 0;
             };
             btnStop.clickable.clicked += () => {
-                Debug.Log("Stop Clicked");
+                //Debug.Log("Stop Clicked");
                 CameraUI.enabled = false; // Disables the camera controls UI
 
                 timeLeft = 0;
@@ -293,7 +280,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Not Valid UI Selected");
+            //Debug.LogError("Not Valid UI Selected");
             Debug.Break();
         }
     }
@@ -304,25 +291,41 @@ public class UIBehaviour : MonoBehaviour
         tw.Close();
     }
 
-    private void UpdateAgentUI(int agentID, String task, Vector3 position, Vector3 target, string algoInfo = null)
+    public void UpdateAgentUI(SubmarineAgent agent)
     {
+
+        VisualElement AgentRoot = AgentUI.rootVisualElement;
+        Label id = AgentRoot.Q<Label>("ID-label");
+        Label task = AgentRoot.Q<Label>("Task-label");
+        Label position = AgentRoot.Q<Label>("Position-label");
+        Label speed = AgentRoot.Q<Label>("Speed-label");
+        Label algoTF = AgentRoot.Q<Label>("Algorithm-info");
+        Vector3 currPos = agents[agentIndex-1].Controller.GetPosition();
+  
+        id.text = agents[agentIndex-1].Id.ToString();
+        if (agents[agentIndex-1].Controller.GetCurrentTask() != null)
+            task.text = agents[agentIndex-1].Controller.GetCurrentTask().ToString().Replace("MAES3D.Agent.Task.", ""); // Trim the start
+        position.text = $"({currPos.x.ToString("n2")}, {currPos.y.ToString("n2")}, {currPos.z.ToString("n2")})";
+
+        speed.text = (agent.Controller.GetSpeed() * 1/Time.fixedDeltaTime).ToString("n2");
+
+        algoTF.text = agent.Algorithm.GetInformation();
 
     }
 
     private void FixVisualBug(){
-        List<VisualElement> textFields = new UQueryBuilder<VisualElement>(CaveUI.rootVisualElement).Name("unity-text-field").ToList();
-        foreach (TextField tf in textFields){
-            tf.label = tf.value;
-        }
-
         dropdownAlgorithm.index = SimulationSettings.algorithm;
-
         agentCount.value = SimulationSettings.agentCount;
         duration.value = ((int)SimulationSettings.duration / 60);
         mapHeight.value = SimulationSettings.Height;
         mapWidth.value = SimulationSettings.Width;
         mapDepth.value = SimulationSettings.Depth;
         toggleSeed.value = SimulationSettings.useRandomSeed;
+
+        List<VisualElement> textFields = new UQueryBuilder<VisualElement>(CaveUI.rootVisualElement).Name("unity-text-field").ToList();
+        foreach (TextField tf in textFields){
+            tf.label = tf.value;
+        }
     }
 
     private String AlgorithmIndexToString(int algorithmIndex){
