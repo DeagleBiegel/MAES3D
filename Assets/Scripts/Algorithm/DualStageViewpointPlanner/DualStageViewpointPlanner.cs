@@ -28,11 +28,15 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         private RRTnode location = null;
 
+        private RRTnode _destination = null;
+
         private Cell prevCell;
 
         private bool firstTick = true;
 
         private bool relocated = false;
+
+        private string _stage = "";
 
         private bool done = false; // delete later
 
@@ -86,13 +90,14 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
-                RRTnode newDestination = ExplorationStage(location, relocated);
+                _destination = ExplorationStage(location, relocated);
 
-                if (location != newDestination && localFrontiers.Count != 0)
+                if (location != _destination && localFrontiers.Count != 0)
                 {
-                    //newDestination.DrawNode(Color.magenta);
-                    _controller.MoveToCellAsync(Utility.CoordinateToCell(newDestination.position));
-                    location = newDestination;
+                    _stage = "Exploration Stage";
+                    //_destination.DrawNode(Color.magenta);
+                    _controller.MoveToCellAsync(Utility.CoordinateToCell(_destination.position));
+                    location = _destination;
                 }
                 else if (localFrontiers.Count == 0) // If there are no more local frontiers after exploration stage
                 {
@@ -100,20 +105,21 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
                     if (globalFrontiers.Count == 0) // If there are no more global frontiers after exploration stage
                     {    
-                        Debug.Log("Simulation Over: Cannot find any more frontiers, while in exploration stage");
-
+                        //Debug.Log("Simulation Over: Cannot find any more frontiers, while in exploration stage");
+                        _stage = "No more frontiers. Done for now";
                         //CheckOtherAgentsFrontiers();
                         done = true;
                     }
                     else
                     {
-                        Debug.Log("Relocation Stage");
+                        //Debug.Log("Relocation Stage");
+                        _stage = "Relocation Stage";
                         while (_controller.GetCurrentStatus() == Status.Idle) // If the global frontier is unreachable run again with a new one
                         {
                             Cell globalFrontierDestination = RelocationStage();
                             //globalFrontierDestination.DrawCell(Color.magenta);
                             _controller.MoveToCellAsync(globalFrontierDestination);
-                            newDestination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
+                            _destination = globalGraph.FindNearestNode(globalFrontierDestination.toVector);
                             if (globalFrontiers.Count == 0)
                             {
                                 Debug.Log("Simulation Over: Cannot find any more frontiers, while in relocation stage");
@@ -121,7 +127,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
                                 return;
                             }
                         }
-                        location = newDestination;
+                        location = _destination;
                         relocated = true;
                     }
                 }
@@ -131,7 +137,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             prevCell = currCell;
             /*
             if(_controller.GetCurrentStatus() == Status.Idle){
-                ExplorationStage(destination);
+                ExplorationStage(_destination);
                 _controller.MoveToCellAsync(Utility.CoordinateToCell(CalculateBestDestination().position));
                 done = true;
             }
@@ -200,7 +206,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             // end
             // Previous Tree ← Current Tree            
 
-            return CalculateBestDestination(); // destination 
+            return CalculateBestDestination(); // _destination 
         }
 
         public void DynamicExpansion(RRTnode location, bool relocated = false){ //Changes Rootnode to given RRTnode, Prunes the local planning horizon, rebuilds the graph from the new root
@@ -685,7 +691,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             return selectedFrontiers;
         }      
         public string GetInformation(){
-            return "This algorithm does not contain additional information.";
+
+            return $"Destination: ({Utility.CoordinateToCell(_destination.position).middle.x.ToString("n2")}, {Utility.CoordinateToCell(_destination.position).middle.y.ToString("n2")}, {Utility.CoordinateToCell(_destination.position).middle.z.ToString("n2")})\n\nCurrent Stage: {_stage}";
         }
     }
 

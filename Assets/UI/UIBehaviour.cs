@@ -100,9 +100,9 @@ public class UIBehaviour : MonoBehaviour
             }
             else if (agentIndex > agents.Count-1)
             {
+                agentIndex = -1;
                 ChangeToUI(CaveUI);
                 cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
-                agentIndex = -1;
             }
             else if (agentIndex < -1)
             {
@@ -111,7 +111,8 @@ public class UIBehaviour : MonoBehaviour
                 ChangeToUI(AgentUI);
             }
             else
-            {
+            {  
+                Debug.Log(agentIndex);
                 cameraController.SetTarget(agents[agentIndex].transform);
                 ChangeToUI(AgentUI);
             }
@@ -263,6 +264,7 @@ public class UIBehaviour : MonoBehaviour
                 mainCamera.transform.Translate(Vector3.right * (Mathf.Sqrt(mapWidth.value ^ 2 * mapDepth.value ^ 2) * 0.2f), Space.Self);
 
                 agents = new List<SubmarineAgent>(FindObjectsOfType<SubmarineAgent>());
+                agents.Reverse();
                 agentIndex = -1;
             };
             btnStop.clickable.clicked += () => {

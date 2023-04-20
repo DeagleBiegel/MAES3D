@@ -29,7 +29,7 @@ public class CameraController : MonoBehaviour
         rotationSpeed = 3.0f;
         zoomSpeed = 1.0f;
         minZoomDistance = 2.0f;
-        maxZoomDistance = 100.0f;
+        maxZoomDistance = 125.0f;
 
         transitionDuration = 0.5f;
         isTransitioning = false;
