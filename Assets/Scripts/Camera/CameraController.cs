@@ -154,7 +154,7 @@ public class CameraController : MonoBehaviour
         if (!isTransitioning)
         {
             zoomSpeed = 10f;
-            float newZoom = (SimulationSettings.Width + SimulationSettings.Height + SimulationSettings.Depth) / 3;
+            float newZoom = (SimulationSettings.Width + SimulationSettings.Height + SimulationSettings.Depth) / 3 + 20;
             StartCoroutine(SmoothTransition(newTarget, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2), newZoom));
         }
     }

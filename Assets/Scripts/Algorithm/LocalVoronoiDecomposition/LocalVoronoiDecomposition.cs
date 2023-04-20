@@ -89,7 +89,7 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
                         _occlusionPoints[_destination]++;
                     }
 
-                    Debug.DrawLine(_controller.GetPosition(), _destination.middle, Color.red, 5);
+                    //Debug.DrawLine(_controller.GetPosition(), _destination.middle, Color.red, 5);
                     _controller.MoveToCellAsync(_destination);
                 }
             }
