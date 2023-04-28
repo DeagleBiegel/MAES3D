@@ -120,7 +120,7 @@ public class CameraController : MonoBehaviour
 
     public void SetTarget(Transform newTarget)
     {
-        if (!isTransitioning && target != newTarget)
+        if (target != newTarget)
         {
             zoomSpeed = 2f;
             float newZoom = 5;
@@ -130,11 +130,27 @@ public class CameraController : MonoBehaviour
 
     public void SetTargetOffset(Transform newTarget, Vector3 newCenterOffset) 
     {
-        if (!isTransitioning && target != newTarget)
+        if (target != newTarget)
         {
             zoomSpeed = 10f;
-            float newZoom = (SimulationSettings.Width + SimulationSettings.Height + SimulationSettings.Depth) / 3 + 20;
-            StartCoroutine(SmoothTransition(newTarget, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2), newZoom));
+            float newZoom = CalculateZoomForTarget(newTarget.gameObject);
+            StartCoroutine(SmoothTransition(newTarget, newCenterOffset, newZoom));
         }
+    }
+
+    private float CalculateZoomForTarget(GameObject targetObject)
+    {
+        // Get the bounds of the target object mesh
+        Renderer renderer = targetObject.GetComponent<Renderer>();
+        Bounds bounds = renderer.bounds;
+
+        // Calculate the average size of the bounds in all three dimensions
+        float size = (bounds.size.x + bounds.size.y + bounds.size.z) / 3;
+
+        // Calculate the desired distance from the camera based on the size of the bounds
+        float distance = size / Mathf.Tan(Camera.main.fieldOfView / 2 * Mathf.Deg2Rad);
+
+        // Return the zoom level based on the desired distance
+        return distance;
     }
 }
