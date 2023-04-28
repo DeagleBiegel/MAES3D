@@ -7,6 +7,13 @@ namespace MAES3D
 {
     public class SelectAgent : MonoBehaviour
     {
+        SubmarineAgent _drone;
+
+        void Start() 
+        {
+            _drone = GetComponent<SubmarineAgent>();
+        }
+
         // Update is called once per frame
         void Update()
         {
@@ -22,17 +29,36 @@ namespace MAES3D
 
                     if (hit.transform.gameObject == gameObject)
                     {
-                        // Changed target for camera
                         CameraController cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
-                        cameraController.SetTarget(hit.transform);
 
-                        // Change UI show the drone
-                        UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();
-                        UI.SetAgentIndex(hitDrone.Id);
-                        UI.ChangeCam();
+                        if (!cameraController.IsTransitioning()) 
+                        {
+                            Select(hit.transform, hitDrone, cameraController);
+                        }
+
                     }
                 }
+            }         
+            else if (Input.GetKeyDown(_drone.Id.ToString()))
+            {
+                // Changed target for camera
+                CameraController cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
+
+                if (!cameraController.IsTransitioning()) 
+                {
+                    Select(transform, _drone, cameraController);
+                }
             }
+        }
+
+        private void Select(Transform trans, SubmarineAgent agent, CameraController camera) 
+        {
+            camera.SetTarget(transform);
+
+            // Change UI show the drone
+            UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();
+            UI.SetAgentIndex(_drone.Id);
+            UI.ChangeCam();
         }
     }
 }
