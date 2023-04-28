@@ -45,8 +45,8 @@ public class CameraController : MonoBehaviour
         // Default camera to 'Simulator' in case there is no target
         if (target == null) 
         {
-            GameObject light = GameObject.Find("Simulator");
-            SetTarget(light.transform);  
+            GameObject simulator = GameObject.Find("Simulator");
+            SetTarget(simulator.transform);  
         }
 
         // Mouse X position and the width of the screen
