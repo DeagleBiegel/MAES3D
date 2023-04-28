@@ -151,7 +151,7 @@ public class UIBehaviour : MonoBehaviour
                     return;
 
                 //Debug.Log("Prev Clicked");
-                agentIndex++;
+                agentIndex--;
                 ChangeCam();
             };
 
@@ -169,7 +169,7 @@ public class UIBehaviour : MonoBehaviour
                 if (cameraController.IsTransitioning())
                     return;
                 //Debug.Log("Next Clicked");
-                agentIndex--;
+                agentIndex++;
                 ChangeCam();
             };
         }

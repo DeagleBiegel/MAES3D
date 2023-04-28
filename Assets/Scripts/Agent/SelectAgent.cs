@@ -33,7 +33,7 @@ namespace MAES3D
 
                         if (!cameraController.IsTransitioning()) 
                         {
-                            Select(hit.transform, hitDrone, cameraController);
+                            Select(transform, _drone, cameraController);
                         }
 
                     }
