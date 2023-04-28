@@ -86,6 +86,12 @@ public class UIBehaviour : MonoBehaviour
         agentIndex = index;
     }
 
+    public void UpdateUI() 
+    {
+        UIDocument UI = agentIndex == -1 ? CaveUI : AgentUI;
+        ChangeToUI(UI);
+    }
+
     public void ChangeCam(){
 
         if (mainCamera != null)

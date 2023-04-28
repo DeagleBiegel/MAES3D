@@ -58,7 +58,7 @@ namespace MAES3D
             // Change UI show the drone
             UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();
             UI.SetAgentIndex(_drone.Id);
-            UI.ChangeCam();
+            UI.UpdateUI();
         }
     }
 }

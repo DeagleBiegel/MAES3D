@@ -21,7 +21,7 @@ namespace MAES3D
                     // Change UI show the cave
                     UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();
                     UI.SetAgentIndex(-1);
-                    UI.ChangeCam();
+                    UI.UpdateUI();
                 }
             }
         }
