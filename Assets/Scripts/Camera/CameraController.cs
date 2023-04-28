@@ -132,16 +132,19 @@ public class CameraController : MonoBehaviour
     {
         if (target != newTarget)
         {
+            Renderer renderer = newTarget.GetComponent<Renderer>();
+            Bounds bounds = renderer.bounds;
+
             zoomSpeed = 10f;
-            float newZoom = CalculateZoomForTarget(newTarget.gameObject);
-            StartCoroutine(SmoothTransition(newTarget, newCenterOffset, newZoom));
+            float newZoom = CalculateZoomForTarget(renderer);
+
+            StartCoroutine(SmoothTransition(newTarget, bounds.center, newZoom));
         }
     }
 
-    private float CalculateZoomForTarget(GameObject targetObject)
+    private float CalculateZoomForTarget(Renderer renderer)
     {
         // Get the bounds of the target object mesh
-        Renderer renderer = targetObject.GetComponent<Renderer>();
         Bounds bounds = renderer.bounds;
 
         // Calculate the average size of the bounds in all three dimensions
