@@ -118,27 +118,27 @@ public class CameraController : MonoBehaviour
         isTransitioning = false;
     }
 
+    // For targeting a drone
     public void SetTarget(Transform newTarget)
     {
         if (target != newTarget)
         {
             zoomSpeed = 2f;
-            float newZoom = 5;
-            StartCoroutine(SmoothTransition(newTarget, Vector3.zero, newZoom));
+            StartCoroutine(SmoothTransition(newTarget, Vector3.zero, 5));
         }
     }
 
+    // For targeting the cave
     public void SetTargetOffset(Transform newTarget, Vector3 newCenterOffset) 
     {
         if (target != newTarget)
         {
             Renderer renderer = newTarget.GetComponent<Renderer>();
-            Bounds bounds = renderer.bounds;
 
             zoomSpeed = 10f;
             float newZoom = CalculateZoomForTarget(renderer);
 
-            StartCoroutine(SmoothTransition(newTarget, bounds.center, newZoom));
+            StartCoroutine(SmoothTransition(newTarget, renderer.bounds.center, newZoom));
         }
     }
 
