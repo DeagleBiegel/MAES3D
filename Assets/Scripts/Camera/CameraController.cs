@@ -49,24 +49,33 @@ public class CameraController : MonoBehaviour
             SetTarget(light.transform);  
         }
 
-        // Rotate camera around drone
-        if (Input.GetMouseButton(1))
+        // Mouse X position and the width of the screen
+        float mouseX = Input.mousePosition.x;
+        int windowWidth = Screen.width;
+
+        // Mouse is on the UI at the right side of the screen
+        if (mouseX <= windowWidth - 300) 
         {
-            currentYRotation += Input.GetAxis("Mouse X") * rotationSpeed;
-            currentXRotation -= Input.GetAxis("Mouse Y") * rotationSpeed;
+            // Rotate camera around drone
+            if (Input.GetMouseButton(1))
+            {
+                currentYRotation += Input.GetAxis("Mouse X") * rotationSpeed;
+                currentXRotation -= Input.GetAxis("Mouse Y") * rotationSpeed;
 
-            currentXRotation = Mathf.Clamp(currentXRotation, 0, 90);
+                currentXRotation = Mathf.Clamp(currentXRotation, 0, 90);
+            }
+
+            // Zoom in/out using scroll wheel
+            currentZoom -= Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
+            currentZoom = Mathf.Clamp(currentZoom, minZoomDistance, maxZoomDistance);
         }
-
-        // Zoom in/out using scroll wheel
-        currentZoom -= Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
-        currentZoom = Mathf.Clamp(currentZoom, minZoomDistance, maxZoomDistance);
 
         // Apply changes
         ApplyCameraTransform();
     }
 
-    public bool IsTransitioning(){
+    public bool IsTransitioning()
+    {
         return isTransitioning;
     }
     
