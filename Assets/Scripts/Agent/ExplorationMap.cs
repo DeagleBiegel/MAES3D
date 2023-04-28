@@ -7,14 +7,6 @@ using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace MAES3D.Agent {
-
-    public enum CellStatus {
-        unexplored,
-        explored,
-        wall,
-        covered
-    }
-
     public class ExplorationMap {
 
         private CellStatus[,,] _map;
