@@ -53,7 +53,7 @@ public class CameraController : MonoBehaviour
         float mouseX = Input.mousePosition.x;
         int windowWidth = Screen.width;
 
-        // Mouse is on the UI at the right side of the screen
+        // Mouse is on the UI at the right side of the screen (UI is 300px wide)
         if (mouseX <= windowWidth - 300) 
         {
             // Rotate camera around drone
