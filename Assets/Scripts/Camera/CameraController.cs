@@ -110,7 +110,7 @@ public class CameraController : MonoBehaviour
 
     public void SetTarget(Transform newTarget)
     {
-        if (!isTransitioning)
+        if (!isTransitioning && target != newTarget)
         {
             zoomSpeed = 2f;
             float newZoom = 5;
@@ -120,7 +120,7 @@ public class CameraController : MonoBehaviour
 
     public void SetTargetOffset(Transform newTarget, Vector3 newCenterOffset) 
     {
-        if (!isTransitioning)
+        if (!isTransitioning && target != newTarget)
         {
             zoomSpeed = 10f;
             float newZoom = (SimulationSettings.Width + SimulationSettings.Height + SimulationSettings.Depth) / 3 + 20;
