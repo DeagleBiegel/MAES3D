@@ -112,7 +112,6 @@ public class UIBehaviour : MonoBehaviour
             }
             else
             {  
-                Debug.Log(agentIndex);
                 cameraController.SetTarget(agents[agentIndex].transform);
                 ChangeToUI(AgentUI);
             }
