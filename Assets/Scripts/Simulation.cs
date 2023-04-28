@@ -19,27 +19,25 @@ namespace MAES3D {
         
         private bool disabled = false;
 
+        //Perform every LCCM step for each agent in a synchroized manner
         public void ExecuteStep() {
-            if (!disabled){
-                //Perform every LCCM step for each agent in a synchroized manner
+            // Paused
+            if (disabled) return;
 
-                //Look
-                ExplorationManager.UpdateMaps(_agents);
+            //Look
+            ExplorationManager.UpdateMaps(_agents);
 
-                //Compute
-                foreach (SubmarineAgent agent in _agents) {
-                    agent.LogicUpdate();
-                }
+            //Compute
+            foreach (SubmarineAgent agent in _agents)
+                agent.LogicUpdate();
 
-                //Communicate
-                CommunicationManager.ShareMaps(_agents);
+            //Communicate
+            CommunicationManager.ShareMaps(_agents);
 
-                //Move
-                foreach (SubmarineAgent agent in _agents) {
-                    agent.MovementUpdate();
-                }
-
-            }
+            //Move
+            foreach (SubmarineAgent agent in _agents)
+                agent.MovementUpdate();
+            
 
         }
 
