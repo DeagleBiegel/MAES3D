@@ -58,37 +58,6 @@ public class CameraController : MonoBehaviour
             currentXRotation = Mathf.Clamp(currentXRotation, 0, 90);
         }
 
-        // Click on a drone to make it the target
-        if (Input.GetMouseButton(0))
-        {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                SubmarineAgent hitDrone = hit.transform.GetComponent<SubmarineAgent>();
-                if (hitDrone != null)
-                {
-                    SetTarget(hit.transform);
-                    UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();
-                    UI.SetAgentIndex(hitDrone.Id);
-                    UI.ChangeCam();
-
-                }
-                else 
-                {
-                    /*
-                    Chunk hitCave = hit.transform.GetComponent<Chunk>();
-
-                    if (hitCave != null)
-                    {
-                        SetTargetOffset(hit.transform, Vector3.zero);
-                    }
-                    */
-                }
-            }
-        }
-
         // Zoom in/out using scroll wheel
         currentZoom -= Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
         currentZoom = Mathf.Clamp(currentZoom, minZoomDistance, maxZoomDistance);
