@@ -111,6 +111,7 @@ public class CameraController : MonoBehaviour
             transform.position = Vector3.Lerp(startPosition, transform.position, t);
             transform.rotation = Quaternion.Slerp(startRotation, transform.rotation, t);
 
+            // Give control back to Unity
             yield return null;
         }
 
