@@ -313,7 +313,7 @@ public class UIBehaviour : MonoBehaviour
         Label position = AgentRoot.Q<Label>("Position-label");
         Label speed = AgentRoot.Q<Label>("Speed-label");
         Label algoTF = AgentRoot.Q<Label>("Algorithm-info");
-        Vector3 currPos = agents[agentIndex].Controller.GetPosition();
+        Vector3 currPos = agents[agentIndex] == null ? Vector3.zero : agents[agentIndex].Controller.GetPosition();
   
         id.text = agents[agentIndex].Id.ToString();
         if (agents[agentIndex].Controller.GetCurrentTask() != null)
