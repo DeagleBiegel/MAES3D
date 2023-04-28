@@ -235,9 +235,15 @@ public class UIBehaviour : MonoBehaviour
                 SimulationSettings.agentCount = agentCount.value;
                 SimulationSettings.duration = duration.value*60; // in minutes
                 SimulationSettings.useRandomSeed = toggleSeed.value;
-                if (!SimulationSettings.useRandomSeed)
+                if (SimulationSettings.useRandomSeed)
                 {
-                    SimulationSettings.seed = Int32.Parse(txtSeed.value);
+                    UnityEngine.Random.InitState((int)System.DateTime.Now.Ticks);
+                    SimulationSettings.seed = UnityEngine.Random.Range(100000, 1000000);
+                }
+                else {
+                    int seed = Int32.Parse(txtSeed.value);
+                    UnityEngine.Random.InitState(seed);
+                    SimulationSettings.seed = seed;
                 }
                 SimulationSettings.Height = mapHeight.value;
                 SimulationSettings.Width = mapWidth.value;
