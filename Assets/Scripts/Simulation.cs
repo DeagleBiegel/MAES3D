@@ -37,8 +37,6 @@ namespace MAES3D {
             //Move
             foreach (SubmarineAgent agent in _agents)
                 agent.MovementUpdate();
-            
-
         }
 
         public void SetupScenario() {
