@@ -150,10 +150,10 @@ public class CameraController : MonoBehaviour
         // Calculate the average size of the bounds in all three dimensions
         float size = (bounds.size.x + bounds.size.y + bounds.size.z) / 3;
 
-        // Calculate the desired distance from the camera based on the size of the bounds
+        // Calculate the distance from the camera based on the size of the bounds
         float distance = size / Mathf.Tan(Camera.main.fieldOfView / 2 * Mathf.Deg2Rad);
 
-        // Return the zoom level based on the desired distance
+        // Return the zoom level based on the distance
         return distance;
     }
 }
