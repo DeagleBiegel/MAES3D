@@ -16,7 +16,7 @@ namespace MAES3D
                 if (!cameraController.IsTransitioning()) 
                 {
                     // Set the cave as the selected object for the camera
-                    cameraController.SetTargetOffset(transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+                    cameraController.SetTargetOffset(transform);
 
                     // Change UI show the cave
                     UIBehaviour UI = GameObject.Find("UI").GetComponent<UIBehaviour>();

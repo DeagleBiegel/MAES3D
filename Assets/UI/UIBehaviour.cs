@@ -102,13 +102,13 @@ public class UIBehaviour : MonoBehaviour
             if (agentIndex == -1)
             {
                 ChangeToUI(CaveUI);
-                cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+                cameraController.SetTargetOffset(chunk.transform);
             }
             else if (agentIndex > agents.Count-1)
             {
                 agentIndex = -1;
                 ChangeToUI(CaveUI);
-                cameraController.SetTargetOffset(chunk.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+                cameraController.SetTargetOffset(chunk.transform);
             }
             else if (agentIndex < -1)
             {

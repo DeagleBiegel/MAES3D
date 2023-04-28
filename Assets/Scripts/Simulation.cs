@@ -53,7 +53,7 @@ namespace MAES3D {
             if (cameraObject != null)
             {
                 cameraController = cameraObject.GetComponent<CameraController>();
-                cameraController.SetTargetOffset(map.transform, new Vector3(SimulationSettings.Width / 2, SimulationSettings.Height / 2, SimulationSettings.Depth / 2));
+                cameraController.SetTargetOffset(map.transform);
             }
 
             _agents = new List<SubmarineAgent>();

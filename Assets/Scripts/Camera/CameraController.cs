@@ -129,7 +129,7 @@ public class CameraController : MonoBehaviour
     }
 
     // For targeting the cave
-    public void SetTargetOffset(Transform newTarget, Vector3 newCenterOffset) 
+    public void SetTargetOffset(Transform newTarget) 
     {
         if (target != newTarget)
         {
