@@ -59,10 +59,18 @@ public class CameraController : MonoBehaviour
             // Rotate camera around drone
             if (Input.GetMouseButton(1))
             {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+
                 currentYRotation += Input.GetAxis("Mouse X") * rotationSpeed;
                 currentXRotation -= Input.GetAxis("Mouse Y") * rotationSpeed;
 
                 currentXRotation = Mathf.Clamp(currentXRotation, 0, 90);
+            }
+            else 
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;            
             }
 
             // Zoom in/out using scroll wheel
