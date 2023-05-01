@@ -45,7 +45,11 @@ namespace MAES3D {
 
         public void SetupScenario() {
             GameObject gameObject = Instantiate(MapPrefab, parent: transform);
-            Chunk map = (Chunk) gameObject.GetComponent(typeof(Chunk));
+            //Chunk mapc = (Chunk) gameObject.GetComponent(typeof(Chunk));
+
+            MapGenerator mapGen = new RandomConnectedSpheres();
+            Map map = (Map)gameObject.GetComponent(typeof(Map));
+            map.InitMap(mapGen.GenerateMap());
 
             _agents = new List<SubmarineAgent>();
             switch(SimulationSettings.algorithm) 

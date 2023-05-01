@@ -45,4 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AgentPrefab: {fileID: 7377557973157503990, guid: 5ac07366a9aa32c499e372d3d95e1f6b, type: 3}
-  MapPrefab: {fileID: 7971712903494438094, guid: f9134e82c9a294747ade62b5fac9e66e, type: 3}
+  MapPrefab: {fileID: 7971712903494438094, guid: 9857225b03d50a84ba169df78697f9c3, type: 3}

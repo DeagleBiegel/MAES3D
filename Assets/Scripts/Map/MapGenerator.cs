@@ -15,13 +15,13 @@ public abstract class MapGenerator {
         InitializeVoxelMap();
     }
 
-    public Map GenerateMap() {
+    public bool[,,] GenerateMap() {
 
         PopulateVoxelMap();
 
         RemovePockets();
 
-        return new Map(voxelMap);
+        return voxelMap;
     }
 
     protected abstract void PopulateVoxelMap();
@@ -51,10 +51,10 @@ public abstract class MapGenerator {
                 for (int z = 1; z < SizeZ - 1; z++) {
 
                     int neighbourWallCount = 0;
-                    for (int dx = x - 1; x <= x + 1; x++) {
-                        for (int dy = y - 1; y <= y + 1; y++) {
-                            for (int dz = z - 1; z <= z + 1; z++) {
-                                if (voxelMap[x, y, z] && !(dx == x && dy == y && dz == z)) {
+                    for (int dx = x - 1; dx <= x + 1; dx++) {
+                        for (int dy = y - 1; dy <= y + 1; dy++) {
+                            for (int dz = z - 1; dz <= z + 1; dz++) {
+                                if (voxelMap[dx, dy, dz] == true && !(dx == x && dy == y && dz == z)) {
                                     neighbourWallCount++;
                                 }
                             }

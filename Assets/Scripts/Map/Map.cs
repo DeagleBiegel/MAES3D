@@ -12,7 +12,9 @@ public class Map : MonoBehaviour {
     public int Width => _voxelMap.GetLength(0);
     public int Height => _voxelMap.GetLength(1);
     public int Depth => _voxelMap.GetLength(2);
-    public List<Cell> SpawnPosition => _spawnPositions;
+    public List<Cell> SpawnPositions => _spawnPositions;
+    public int ExplorableTiles => _explorableTiles;
+
 
     private bool[,,] _voxelMap;
 
@@ -25,16 +27,43 @@ public class Map : MonoBehaviour {
     private List<Vector2> _uvs = new List<Vector2>();
 
     private List<Cell> _spawnPositions = new List<Cell>();
+    private int _explorableTiles;
 
-    void Start() {
+    //void Awake() {
+    //    _meshRenderer = gameObject.GetComponent<MeshRenderer>();
+    //    _meshFilter = gameObject.GetComponent<MeshFilter>();
+    //    _meshCollider = gameObject.AddComponent<MeshCollider>();
+    //
+    //    CreateMesh();
+    //}
+
+    public void InitMap(bool[,,] voxelMap) {
+
+        _meshRenderer = gameObject.GetComponent<MeshRenderer>();
+        _meshFilter = gameObject.GetComponent<MeshFilter>();
+        _meshCollider = gameObject.AddComponent<MeshCollider>();
+
+        this._voxelMap = voxelMap;
+        _explorableTiles = CalculateNumberOfExplorableTiles();
+        CalculateSpawnPositions();
         CreateMeshData();
         CreateMesh();
     }
 
-    public Map(bool[,,] voxelMap) {
+    private int CalculateNumberOfExplorableTiles() {
+        int explorableTiles = 0;
 
-        this._voxelMap = voxelMap;
-        CalculateSpawnPositions();
+        for (int x = 0; x < SizeX; x++) {
+            for (int y = 0; y < SizeY; y++) {
+                for (int z = 0; z < SizeZ; z++) {
+                    if (_voxelMap[x, y, z] == false) {
+                        explorableTiles++;
+                    }
+                }
+            }
+        }
+
+        return explorableTiles;
     }
 
     private void CalculateSpawnPositions() {

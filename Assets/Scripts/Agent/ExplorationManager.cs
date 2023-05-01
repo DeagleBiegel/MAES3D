@@ -14,7 +14,9 @@ namespace MAES3D.Agent {
         private List<Vector3> _relativeRayTargets;
         private List<ObservationLine> _observationLines;
 
-        private bool[,,] _voxelMap;
+        private Map map;
+
+        //private bool[,,] _voxelMap;
         private bool[,,] _exploredMap; 
         private bool[,,] _hasBeenSeen;
         
@@ -29,11 +31,10 @@ namespace MAES3D.Agent {
         {
             _observationLines = CalculateObservationLines();
 
-            Chunk chunk = GameObject.FindObjectOfType(typeof(Chunk)) as Chunk;
-            _voxelMap = chunk.GetVoxelMap();
-            _exploredMap = new bool[_voxelMap.GetLength(0), _voxelMap.GetLength(1), _voxelMap.GetLength(2)];
+            map = GameObject.FindObjectOfType(typeof(Map)) as Map;
+            _exploredMap = new bool[map.SizeX, map.SizeY, map.SizeZ];
             _exploredTiles = 0;
-            _explorableTiles = chunk.GetNumberOfExplorableTiles();
+            _explorableTiles = map.ExplorableTiles;
         }
 
         public void UpdateMaps(List<SubmarineAgent> agents) 
@@ -52,7 +53,7 @@ namespace MAES3D.Agent {
         {
             agent.Controller.ExplorationMap.ResetCurrentView();
             Vector3 agentPosition = agent.Controller.GetPosition();
-            _hasBeenSeen = new bool[_voxelMap.GetLength(0), _voxelMap.GetLength(1), _voxelMap.GetLength(2)];
+            _hasBeenSeen = new bool[map.SizeX, map.SizeY, map.SizeZ];
 
             foreach (ObservationLine observationLine in _observationLines) 
             {
@@ -121,7 +122,7 @@ namespace MAES3D.Agent {
 
                 if (_hasBeenSeen[cell.x, cell.y, cell.z] == false) 
                 {
-                    if (_voxelMap[cell.x, cell.y, cell.z] == true)
+                    if (map.IsWall(cell.x, cell.y, cell.z))
                     {
                         agent.Controller.ExplorationMap.UpdateCell(cell, CellStatus.wall);
                         break;
@@ -151,7 +152,7 @@ namespace MAES3D.Agent {
                 List<Cell> coveredCells = GetCellsBetweenPoints(agentPosition, relativeTarget);
                 
                 foreach (Cell cell in coveredCells) {
-                    if (_voxelMap[cell.x, cell.y, cell.z] == true) {
+                    if (map.IsWall(cell.x, cell.y, cell.z)) {
                         agent.Controller.ExplorationMap.UpdateCell(cell, CellStatus.wall);
                     }
                     else {
@@ -336,24 +337,6 @@ namespace MAES3D.Agent {
             }
             
             return traversedCells;
-        }
-
-        private bool IsCellViewableFromPosition(Cell cell, Vector3 observationPosition) {
-
-            Cell observationCell = Utility.CoordinateToCell(observationPosition);
-
-            int[] sign = {Math.Sign(observationCell.x - cell.x),
-                          Math.Sign(observationCell.y - cell.y),
-                          Math.Sign(observationCell.z - cell.z)};
-
-            if (sign[0] != 0 && _voxelMap[cell.x + sign[0], cell.y, cell.z] == false ||
-                sign[1] != 0 && _voxelMap[cell.x, cell.y + sign[1], cell.z] == false ||
-                sign[2] != 0 && _voxelMap[cell.x, cell.y, cell.z + sign[2]] == false) {
-                return true;
-            }
-            else { 
-                return false;
-            }
         }
 
         private List<Cell> GetCellsBetweenPoints(Vector3 agentPosition, Vector3 targetPosition) {
