@@ -25,6 +25,10 @@ namespace MAES3D.Agent {
 
         public float ExploredRatio => _exploredTiles * 100 / _explorableTiles;
 
+        public List<Vector3Int> NewlyExplored { get; set; }
+
+        public bool[,,] ExploredMap => _exploredMap;
+
         public ExplorationManager() 
         {
             _observationLines = CalculateObservationLines();
@@ -34,6 +38,7 @@ namespace MAES3D.Agent {
             _exploredMap = new bool[_voxelMap.GetLength(0), _voxelMap.GetLength(1), _voxelMap.GetLength(2)];
             _exploredTiles = 0;
             _explorableTiles = chunk.GetNumberOfExplorableTiles();
+            NewlyExplored = new List<Vector3Int>();
         }
 
         public void UpdateMaps(List<SubmarineAgent> agents) 
@@ -132,6 +137,7 @@ namespace MAES3D.Agent {
 
                         if (_exploredMap[cell.x, cell.y, cell.z] == false) 
                         {
+                            NewlyExplored.Add(new Vector3Int(cell.x, cell.y, cell.z));
                             _exploredMap[cell.x, cell.y, cell.z] = true;
                             _exploredTiles++;
                         }

@@ -161,7 +161,6 @@ namespace MAES3D {
                     }
                 }
             }
-
         }
 
         private bool CheckVoxel(Vector3 pos) {

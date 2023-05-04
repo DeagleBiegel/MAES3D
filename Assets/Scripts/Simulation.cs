@@ -11,6 +11,7 @@ namespace MAES3D {
 
         public GameObject AgentPrefab;
         public GameObject MapPrefab;
+        public GameObject ExplorationPrefab;
 
         public ExplorationManager ExplorationManager;
         public CommunicationManager CommunicationManager;
@@ -74,8 +75,11 @@ namespace MAES3D {
                     Debug.Log("Selected Algorithm does not exist");
                     break;
             }
+
             ExplorationManager = new ExplorationManager();
             CommunicationManager = new CommunicationManager(_agents, 5);
+
+            Instantiate(ExplorationPrefab, parent: transform);
         }
 
         private SubmarineAgent SpawnAgent(IAlgorithm algorithm, Vector3 position, int id) {
