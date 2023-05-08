@@ -1,16 +1,48 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/StyleSheet.uss?fileID=7433441132597879392&amp;guid=03ecd5b907436a749918d813f369138e&amp;type=3#StyleSheet" />
-    <ui:GroupBox style="height: 100%; width: 300px; right: 0; position: absolute; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; background-color: rgba(0, 0, 0, 0.9); color: rgba(255, 255, 255, 255); top: -2px;">
+    <ui:GroupBox style="height: 100%; width: 300px; right: 0; position: absolute; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; background-color: rgba(0, 0, 0, 0.9); color: rgb(255, 255, 255); top: -2px;">
         <ui:Label text="MAES3D" display-tooltip-when-elided="true" name="Title" style="font-size: 45%; -unity-text-align: upper-center; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; margin-top: 10px;" />
-        <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" nested-interaction-kind="Default" focusable="false" mode="VerticalAndHorizontal" style="flex-direction: row; -unity-text-align: upper-left; align-items: center; color: rgb(255, 255, 255); flex-basis: 100%; justify-content: space-around; position: absolute; right: 0; height: initial; top: 80px; bottom: 160px;">
-            <ui:GroupBox name="Simulation" class="smallContainer" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
-                <ui:Label text="Simulation" display-tooltip-when-elided="true" name="Title" enable-rich-text="false" class="secTitle" style="-unity-text-align: upper-center; height: 22px;" />
-                <ui:SliderInt label="Number of Agents" value="3" high-value="10" name="AgentCount" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
-                <ui:SliderInt picking-mode="Ignore" label="Duration (min)" value="30" high-value="120" name="SimDuration" show-input-field="true" low-value="1" focusable="false" class="property" />
-                <ui:DropdownField label="Algorithms" index="0" choices="Random Ballistic Walk,Local Voronoi Deco...,Dual-Stage Viewpo..." name="DropdownAlgorithm" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />
+        <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" nested-interaction-kind="Default" focusable="false" mode="VerticalAndHorizontal" style="flex-direction: row; -unity-text-align: upper-left; color: rgb(255, 255, 255); position: absolute; right: 0; top: 80px; width: 100%; bottom: 160px;">
+            <ui:GroupBox class="smallContainer">
+                <ui:Foldout text="Advanced Settings" value="true" style="flex-direction: column; flex-wrap: wrap;">
+                    <ui:GroupBox style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; align-items: center;">
+                        <ui:DropdownField label="Map Generators" index="0" choices="Random Cell Construction,Sphere Connection, Import Map" name="DropdownMapGenerator" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-top: 0; padding-bottom: 0; padding-left: 0; padding-right: 0;" />
+                        <ui:Button text="Import Map" display-tooltip-when-elided="true" name="ButtonImportMap" class="button" style="margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 90%;" />
+                    </ui:GroupBox>
+                </ui:Foldout>
             </ui:GroupBox>
-            <ui:GroupBox name="MapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 5%;">
+            <ui:VisualElement name="devider" style="margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px; padding-left: 10px; padding-right: 10px; padding-top: 2px; padding-bottom: 2px; background-color: rgb(45, 45, 45);" />
+            <ui:GroupBox name="Simulation" class="smallContainer" style="margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+                <ui:Label text="Simulation" display-tooltip-when-elided="true" name="Title" enable-rich-text="false" class="secTitle" style="-unity-text-align: upper-center; height: 22px;" />
+                <ui:SliderInt label="Agent(s)" value="3" high-value="10" name="AgentCount" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
+                <ui:SliderInt picking-mode="Ignore" label="Duration (min)" value="30" high-value="120" name="SimDuration" show-input-field="true" low-value="1" focusable="false" class="property" />
+                <ui:DropdownField label="Algorithms" index="0" choices="Random Ballistic Walk,Local Voronoi Decomposition,Dual-Stage Viewpoint Planner" name="DropdownAlgorithm" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />
+            </ui:GroupBox>
+            <ui:GroupBox name="OldMapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; display: flex;">
                 <ui:Label text="Map Generator" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto;" />
+                <ui:RadioButtonGroup label="Neighborhood Method" value="-1" name="NeighborhoodMethod" focusable="false" style="flex-direction: column; margin-left: 0; margin-top: 0; margin-bottom: 0; margin-right: 0;">
+                    <ui:RadioButton label="Moore" name="Moore" value="true" focusable="false" />
+                    <ui:RadioButton label="Van Neumann" name="VanNeumann" focusable="false" />
+                </ui:RadioButtonGroup>
+                <ui:SliderInt picking-mode="Ignore" label="Smoothing Iterations" value="5" high-value="20" show-input-field="true" direction="Horizontal" inverted="false" name="SmoothingIterations" low-value="0" focusable="false" class="property" />
+                <ui:SliderInt picking-mode="Ignore" label="Map Height" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapHeight" low-value="30" focusable="false" class="property" />
+                <ui:SliderInt picking-mode="Ignore" label="Map Width" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapWidth" low-value="30" focusable="false" class="property" />
+                <ui:SliderInt picking-mode="Ignore" label="Map Depth" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapDepth" low-value="30" focusable="false" class="property" style="justify-content: center;" />
+                <ui:Toggle label="Random Seed?" name="ToggleRandomSeed" value="true" focusable="false" class="property" />
+                <ui:TextField picking-mode="Ignore" label="Seed" text="Random Seed" is-delayed="false" multiline="true" readonly="false" name="TxtSeed" focusable="false" value="0" max-length="9" class="property" style="color: rgb(255, 255, 255); white-space: normal; max-width: 250px;" />
+            </ui:GroupBox>
+            <ui:GroupBox name="NewMapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 5%; display: none;">
+                <ui:Label text="Map Generator" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto;" />
+                <ui:SliderInt picking-mode="Ignore" label="Fill Ratio" value="20" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="FillRatio" low-value="0" focusable="false" class="property" />
+                <ui:GroupBox name="MinMaxBox" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
+                    <ui:Label text="Sphere Radius" display-tooltip-when-elided="true" class="property" style="-unity-font-style: normal; margin-left: 3px; margin-right: 3px; margin-top: 1px; margin-bottom: 1px;" />
+                    <ui:GroupBox name="MinMaxSlider" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; flex-direction: row; justify-content: flex-start;">
+                        <ui:MinMaxSlider picking-mode="Ignore" min-value="3" max-value="8" low-limit="1" high-limit="20" name="SphereRadius" focusable="false" class="property" style="width: 75%;" />
+                        <ui:Label text="3 - 8" display-tooltip-when-elided="true" name="MiniMax" class="property" style="margin-left: 3px; margin-right: 3px; margin-top: 1px; margin-bottom: 1px;" />
+                    </ui:GroupBox>
+                </ui:GroupBox>
+                <ui:SliderInt picking-mode="Ignore" label="Sphere Connections" value="3" high-value="10" show-input-field="true" direction="Horizontal" inverted="false" name="SphereConnections" low-value="1" focusable="false" class="property" />
+                <ui:SliderInt picking-mode="Ignore" label="Smoothing Iterations" value="5" high-value="20" show-input-field="true" direction="Horizontal" inverted="false" name="SmoothingIterations" low-value="0" focusable="false" class="property" />
                 <ui:SliderInt picking-mode="Ignore" label="Map Height" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapHeight" low-value="30" focusable="false" class="property" />
                 <ui:SliderInt picking-mode="Ignore" label="Map Width" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapWidth" low-value="30" focusable="false" class="property" />
                 <ui:SliderInt picking-mode="Ignore" label="Map Depth" value="50" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="MapDepth" low-value="30" focusable="false" class="property" style="justify-content: center;" />

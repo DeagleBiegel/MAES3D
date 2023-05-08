@@ -24,7 +24,6 @@ PopupTextElement {
 }
 
 .button {
-    width: 25%;
     height: 50px;
     font-size: 18px;
     -unity-font-style: bold;
@@ -33,7 +32,19 @@ PopupTextElement {
     border-bottom-left-radius: 15px;
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
-    color: rgba(255, 255, 255, 255);
+    color: rgb(255, 255, 255);
+}
+
+.button:hover {
+    height: 50px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    background-color: rgb(87, 87, 87);
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    color: rgb(255, 255, 255);
 }
 
 .secTitle {
@@ -56,6 +67,14 @@ PopupTextElement {
     width: 90%;
     left: 5%;
     -unity-font-style: normal;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .lightBackground {
@@ -64,4 +83,38 @@ PopupTextElement {
 
 .unity-progress-bar__progress {
     background-color: rgb(3, 96, 0);
+}
+
+.unity-radio-button {
+    flex-direction: row-reverse;
+}
+
+.unity-radio-button__input {
+    max-width: 25px;
+    min-width: 25px;
+}
+
+.unity-radio-button__input:hover {
+}
+
+.unity-radio-button__label {
+    width: 85%;
+    max-width: 225px;
+}
+
+.unity-base-field {
+    color: rgba(255, 255, 255, 255);
+}
+
+.unity-foldout__content {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.unity-base-popup-field {
+    width: 100%;
+    max-width: 275px;
+    min-width: 100%;
 }

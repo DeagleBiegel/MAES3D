@@ -31,6 +31,7 @@ public class UIBehaviour : MonoBehaviour
     private    SliderInt mapHeight;
     private    SliderInt mapWidth;
     private    SliderInt mapDepth;
+    private    MinMaxSlider sphereRadius;
     private    Toggle toggleSeed;
     private    TextField txtSeed;
     private    ProgressBar progBar;
@@ -197,6 +198,8 @@ public class UIBehaviour : MonoBehaviour
             btnStart = CaveRoot.Q<Button>("ButtonStart");
             btnStop = CaveRoot.Q<Button>("ButtonStop");
 
+            sphereRadius = CaveRoot.Q<MinMaxSlider>("SphereRadius");
+
             // Fixing TextFieldBugs
             FixVisualBug();
 
@@ -221,6 +224,12 @@ public class UIBehaviour : MonoBehaviour
                     txtSeed.value = "Insert Seed";
                 else
                     txtSeed.value = "Random Seed";
+            });
+            sphereRadius.RegisterValueChangedCallback(v =>{
+                CaveRoot.Q<Label>("MiniMax").text = $"{sphereRadius.minValue.ToString("n0")} - {sphereRadius.maxValue.ToString("n0")}";
+                
+                sphereRadius.minValue = (int)sphereRadius.minValue;
+                sphereRadius.maxValue = (int)sphereRadius.maxValue;
             });
 
             btnStart.clickable.clicked += () => {
