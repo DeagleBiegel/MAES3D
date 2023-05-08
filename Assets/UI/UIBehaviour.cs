@@ -251,7 +251,7 @@ public class UIBehaviour : MonoBehaviour
                 }
             });
             btnImportMap.clickable.clicked += () => {
-                OpenFileExplorer();
+                //OpenFileExplorer();
 
             };
 
@@ -422,7 +422,7 @@ public class UIBehaviour : MonoBehaviour
                 return "No AlgorithmIndex Given";
         }
     }
-
+/*
     private void OpenFileExplorer(){
         string path;
         path = EditorUtility.OpenFilePanel("Select a Voxel-Map", "", "vmap");
@@ -443,4 +443,5 @@ public class UIBehaviour : MonoBehaviour
             //use myMap here
         }
     }
+*/
 }
