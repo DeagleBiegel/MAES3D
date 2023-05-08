@@ -4,9 +4,9 @@
         <ui:Label text="MAES3D" display-tooltip-when-elided="true" name="Title" style="font-size: 45%; -unity-text-align: upper-center; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; margin-top: 10px;" />
         <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" nested-interaction-kind="Default" focusable="false" mode="VerticalAndHorizontal" style="flex-direction: row; -unity-text-align: upper-left; color: rgb(255, 255, 255); position: absolute; right: 0; top: 80px; width: 100%; bottom: 160px;">
             <ui:GroupBox class="smallContainer">
-                <ui:Foldout text="Advanced Settings" value="true" style="flex-direction: column; flex-wrap: wrap;">
+                <ui:Foldout text="Advanced Settings" value="false" style="flex-direction: column; flex-wrap: wrap;">
                     <ui:GroupBox style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; align-items: center;">
-                        <ui:DropdownField label="Map Generators" index="0" choices="Random Cell Construction,Sphere Connection, Import Map" name="DropdownMapGenerator" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-top: 0; padding-bottom: 0; padding-left: 0; padding-right: 0;" />
+                        <ui:DropdownField label="Map Generators" index="0" choices="Sphere Connection,Random Cell Construction,Import Map" name="DropdownMapGenerator" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-top: 0; padding-bottom: 0; padding-left: 0; padding-right: 0;" />
                         <ui:Button text="Import Map" display-tooltip-when-elided="true" name="ButtonImportMap" class="button" style="margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 90%;" />
                     </ui:GroupBox>
                 </ui:Foldout>
@@ -18,7 +18,7 @@
                 <ui:SliderInt picking-mode="Ignore" label="Duration (min)" value="30" high-value="120" name="SimDuration" show-input-field="true" low-value="1" focusable="false" class="property" />
                 <ui:DropdownField label="Algorithms" index="0" choices="Random Ballistic Walk,Local Voronoi Decomposition,Dual-Stage Viewpoint Planner" name="DropdownAlgorithm" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />
             </ui:GroupBox>
-            <ui:GroupBox name="OldMapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; display: flex;">
+            <ui:GroupBox name="OldMapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
                 <ui:Label text="Map Generator" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto;" />
                 <ui:RadioButtonGroup label="Neighborhood Method" value="-1" name="NeighborhoodMethod" focusable="false" style="flex-direction: column; margin-left: 0; margin-top: 0; margin-bottom: 0; margin-right: 0;">
                     <ui:RadioButton label="Moore" name="Moore" value="true" focusable="false" />
@@ -31,7 +31,7 @@
                 <ui:Toggle label="Random Seed?" name="ToggleRandomSeed" value="true" focusable="false" class="property" />
                 <ui:TextField picking-mode="Ignore" label="Seed" text="Random Seed" is-delayed="false" multiline="true" readonly="false" name="TxtSeed" focusable="false" value="0" max-length="9" class="property" style="color: rgb(255, 255, 255); white-space: normal; max-width: 250px;" />
             </ui:GroupBox>
-            <ui:GroupBox name="NewMapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 5%; display: none;">
+            <ui:GroupBox name="NewMapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 5%;">
                 <ui:Label text="Map Generator" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto;" />
                 <ui:SliderInt picking-mode="Ignore" label="Fill Ratio" value="20" high-value="100" show-input-field="true" direction="Horizontal" inverted="false" name="FillRatio" low-value="0" focusable="false" class="property" />
                 <ui:GroupBox name="MinMaxBox" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
@@ -54,7 +54,7 @@
             <ui:ProgressBar title="30:00 - 0%" name="ProgressBar" class="lightBackground" style="width: 80%; left: 10%; height: auto; margin-left: 0; margin-right: 0; margin-top: 15px; margin-bottom: 15px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />
             <ui:Label text="Simulation Controls" display-tooltip-when-elided="true" name="SimulationControls" class="secTitle" />
             <ui:GroupBox name="SimulationController" class="smallContainer" style="flex-direction: row; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; justify-content: center;">
-                <ui:Button text="Play" display-tooltip-when-elided="true" name="ButtonStart" focusable="false" class="button" style="background-image: none; width: 50%;" />
+                <ui:Button text="Start" display-tooltip-when-elided="true" name="ButtonStart" focusable="false" class="button" style="background-image: none; width: 50%;" />
                 <ui:Button text="Stop" display-tooltip-when-elided="true" name="ButtonStop" focusable="false" class="button" style="width: 50%;" />
             </ui:GroupBox>
         </ui:GroupBox>

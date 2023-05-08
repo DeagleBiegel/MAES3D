@@ -6,7 +6,8 @@ using UnityEngine;
 using MAES3D.Agent;
 using MAES3D;
 using UnityEngine.UIElements;
-
+using UnityEditor;
+using UnityEngine.Networking;
 
 public class UIBehaviour : MonoBehaviour
 {
@@ -24,7 +25,10 @@ public class UIBehaviour : MonoBehaviour
     private int agentIndex; // -1 = Cave, 0-9 = Agents
 
     private CameraController cameraController;
+    
     //CaveUI Interactables
+    private DropdownField dropdownMapGenerators;
+    private Button btnImportMap;
     private DropdownField dropdownAlgorithm;
     private    SliderInt agentCount;
     private    SliderInt duration;
@@ -37,10 +41,13 @@ public class UIBehaviour : MonoBehaviour
     private    ProgressBar progBar;
     private    Button btnStart;
     private    Button btnStop;
+    
     //CameraUI Interactable
     private    Button btnPrevCam;
     private    Button btnCave;
     private    Button btnNextCam;
+    private Toggle toggleUnexplored;
+    private GameObject unexploredMap;
 
 
     private void OnEnable(){
@@ -151,6 +158,7 @@ public class UIBehaviour : MonoBehaviour
             btnPrevCam = CameraUI.rootVisualElement.Q<Button>("ButtonPrev");
             btnCave = CameraUI.rootVisualElement.Q<Button>("ButtonCave");
             btnNextCam = CameraUI.rootVisualElement.Q<Button>("ButtonNext");
+            toggleUnexplored = CameraUI.rootVisualElement.Q<Toggle>("ToggleUnexplored");           
             
             btnPrevCam.clickable.clicked += () => 
             {
@@ -179,6 +187,11 @@ public class UIBehaviour : MonoBehaviour
                 agentIndex++;
                 ChangeCam();
             };
+
+            toggleUnexplored.RegisterValueChangedCallback(v =>{
+                unexploredMap ??= GameObject.Find("Explored(Clone)");
+                unexploredMap.SetActive(toggleUnexplored.value);
+            });
         }
         else if (UIDoc == CaveUI)
         {
@@ -186,6 +199,10 @@ public class UIBehaviour : MonoBehaviour
             VisualElement CaveRoot = CaveUI.rootVisualElement;
 
             //Update References to Interactables
+            dropdownMapGenerators = CaveRoot.Q<DropdownField>("DropdownMapGenerator");
+            btnImportMap = CaveRoot.Q<Button>("ButtonImportMap");
+            btnImportMap.SetEnabled(false);
+
             dropdownAlgorithm = CaveRoot.Q<DropdownField>("DropdownAlgorithm");
             agentCount = CaveRoot.Q<SliderInt>("AgentCount");
             duration = CaveRoot.Q<SliderInt>("SimDuration");
@@ -198,18 +215,56 @@ public class UIBehaviour : MonoBehaviour
             btnStart = CaveRoot.Q<Button>("ButtonStart");
             btnStop = CaveRoot.Q<Button>("ButtonStop");
 
+            GroupBox NewMapGen = CaveRoot.Q<GroupBox>("NewMapGenerator");
+            GroupBox OldMapGen = CaveRoot.Q<GroupBox>("OldMapGenerator");
+            OldMapGen.SetEnabled(false);
+
             sphereRadius = CaveRoot.Q<MinMaxSlider>("SphereRadius");
 
             // Fixing TextFieldBugs
             FixVisualBug();
 
             //Update Interactables when interacted with
+            //Advanced Settings
+            dropdownMapGenerators.RegisterValueChangedCallback(v =>{
+                switch (dropdownMapGenerators.index)
+                {
+                    case 0:
+                        btnImportMap.SetEnabled(false);
+                        NewMapGen.SetEnabled(true);
+                        OldMapGen.SetEnabled(false);
+                        break;
+                    case 1:
+                        btnImportMap.SetEnabled(false);
+                        NewMapGen.SetEnabled(false);
+                        OldMapGen.SetEnabled(true);
+                        break;
+                    case 2:
+                        btnImportMap.SetEnabled(true);
+                        NewMapGen.SetEnabled(false);
+                        OldMapGen.SetEnabled(false);
+                        break;
+
+                    default:
+                        Debug.LogError("Dropdown Out of Range");
+                        break;
+                }
+            });
+            btnImportMap.clickable.clicked += () => {
+                OpenFileExplorer();
+
+            };
+
+
+            //General Settings
             agentCount.RegisterValueChangedCallback(v =>{
                 agentCount.Q<TextField>("unity-text-field").label = agentCount.value.ToString();
             });
             duration.RegisterValueChangedCallback(v =>{
                 duration.Q<TextField>("unity-text-field").label = duration.value.ToString();
             });
+
+            //Map Generator General
             mapHeight.RegisterValueChangedCallback(v =>{
                 mapHeight.Q<TextField>("unity-text-field").label = mapHeight.value.ToString();
             });
@@ -225,6 +280,9 @@ public class UIBehaviour : MonoBehaviour
                 else
                     txtSeed.value = "Random Seed";
             });
+            //Map Generator Random Cell Construction
+
+            //Map Generator Sphere connection (new)
             sphereRadius.RegisterValueChangedCallback(v =>{
                 CaveRoot.Q<Label>("MiniMax").text = $"{sphereRadius.minValue.ToString("n0")} - {sphereRadius.maxValue.ToString("n0")}";
                 
@@ -232,6 +290,7 @@ public class UIBehaviour : MonoBehaviour
                 sphereRadius.maxValue = (int)sphereRadius.maxValue;
             });
 
+            //Simulation Controls
             btnStart.clickable.clicked += () => {
                 //Debug.Log("Start Clicked");
 
@@ -361,6 +420,27 @@ public class UIBehaviour : MonoBehaviour
                 return "DSVP";
             default:
                 return "No AlgorithmIndex Given";
+        }
+    }
+
+    private void OpenFileExplorer(){
+        string path;
+        path = EditorUtility.OpenFilePanel("Select a Voxel-Map", "", "vmap");
+        StartCoroutine(GetMap(path));
+    }
+    IEnumerator GetMap(string paths){
+        UnityWebRequest www = UnityWebRequest.Get("file:///" + paths);
+
+        yield return www.SendWebRequest();
+
+        if (www.isNetworkError || www.isHttpError)
+        {
+            Debug.LogWarning(www.error);
+        }
+        else
+        {
+            var myMap = ((DownloadHandlerFile)www.downloadHandler);
+            //use myMap here
         }
     }
 }
