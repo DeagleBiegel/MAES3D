@@ -56,7 +56,9 @@ public class Explored : MonoBehaviour
                                 if (chunk.Position.x * CHUNK_SIZE + _x > layout.GetLength(0) - 1 || chunk.Position.y * CHUNK_SIZE + _y > layout.GetLength(1) - 1 || chunk.Position.z * CHUNK_SIZE + _z > layout.GetLength(2) - 1)
                                     continue;
 
-                                chunk.Filled[_x, _y, _z] = !layout[chunk.Position.x * CHUNK_SIZE + _x, chunk.Position.y * CHUNK_SIZE + _y, chunk.Position.z * CHUNK_SIZE + _z];
+                                chunk.Filled[_x, _y, _z] = !layout[chunk.Position.x * CHUNK_SIZE + _x,
+                                                                   chunk.Position.y * CHUNK_SIZE + _y, 
+                                                                   chunk.Position.z * CHUNK_SIZE + _z];
                             } 
                         }
                     }
@@ -90,8 +92,7 @@ public class Explored : MonoBehaviour
                 int chunkY = Mathf.FloorToInt(nExplored.y / (float) CHUNK_SIZE);
                 int chunkZ = Mathf.FloorToInt(nExplored.z / (float) CHUNK_SIZE);
 
-                GameObject chunkObject = chunks[chunkX, chunkY, chunkZ];
-                ExplChunk chunk = chunkObject.GetComponent<ExplChunk>();
+                ExplChunk chunk = GetChunk(chunkX, chunkY, chunkZ);
 
                 int chunkPosX = nExplored.x % CHUNK_SIZE;
                 int chunkPosY = nExplored.y % CHUNK_SIZE;
