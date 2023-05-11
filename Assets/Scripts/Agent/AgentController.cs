@@ -151,6 +151,86 @@ namespace MAES3D.Agent {
             MoveToCell(targetCell);
         }
 
+        public void MoveToCellCoroutine(Cell targetCell) 
+        {
+            var position = GetPosition();
+
+            //Check if target cell is explored
+            if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
+                Debug.LogWarning($"An wants to move to the cell {targetCell} but it is unexplored\n" +
+                                 $"\tCannot calculate path to target");
+                Debug.Break();
+                return;
+            }
+
+            //If agent can go directly to goal
+            Vector3 directionToGoal = targetCell.middle - position;
+            float distanceToGoal = Vector3.Distance(position, targetCell.middle);
+            if (!Physics.SphereCast(position, 0.4f, directionToGoal, out _, distanceToGoal)) {
+                _currentTask = new CompositeMovementTask(new List<Vector3> { directionToGoal }, _moveSpeed, _turnSpeed, _transform);
+                Debug.DrawLine(position, targetCell.middle, Color.cyan);
+                //Debug.Break();
+                return;
+            }          
+
+            // Set the status of the agent to busy while finding A* Path
+            _currentStatus = Status.Busy; 
+
+            Debug.Log("Starting A*");
+
+            // We need a script with MonoBehavior for Coroutine, so we
+            // get the a component attatched to the _transform
+            var agent = _transform.GetComponent<SubmarineAgent>();
+
+            agent.StartCoroutine(AStar.FindPath(position, targetCell.middle, GetLocalExplorationMap(), (path) => 
+            {
+                if (path == null || path.Count == 0) 
+                {
+                    // Handle case where there is no path
+                    Debug.Log("No path found");
+                    return;
+                }
+
+                // Set the fullPath variable to the result of the A* pathfinding coroutine
+                List<Cell> fullPath = path;
+
+                // Path found, can start moving
+                _currentStatus = Status.Moving;
+
+                //Make a more optimal shorter path
+                List<Vector3> shortPath = new List<Vector3>();
+
+                //Remove first element so the first cell is not the on the agent is in
+                fullPath.RemoveAt(0);
+
+                //!!
+                //!!SHOULD do more itterations to fix a small "issue" with points lining up!!
+                //!!
+                Vector3 currentPosition = position;
+                for (int i = 1; i < fullPath.Count; i++) {
+                    Cell cell = fullPath[i];
+
+                    Vector3 direction = cell.middle - currentPosition;
+                    float distance = Vector3.Distance(currentPosition, cell.middle);
+
+                    if (Physics.SphereCast(currentPosition, 0.4f/*HAS to be same size as agents collider*/, direction, out _, distance)) {
+                        currentPosition = fullPath[i - 1].middle;
+                        shortPath.Add(fullPath[i - 1].middle);
+                    }
+                }
+                shortPath.Add(fullPath[fullPath.Count - 1].middle);
+
+                //Make path into relative targets
+                List<Vector3> relativePath = new List<Vector3>();
+                relativePath.Add(shortPath[0] - position);
+                for (int i = 1; i < shortPath.Count; i++) {
+                    relativePath.Add(shortPath[i] - shortPath[i - 1]);
+                }
+
+                _currentTask = new CompositeMovementTask(relativePath, _moveSpeed, _turnSpeed, _transform);
+            }));
+        }
+
         public async void MoveToCellAsync(Cell targetCell) 
         {
             var position = GetPosition();
