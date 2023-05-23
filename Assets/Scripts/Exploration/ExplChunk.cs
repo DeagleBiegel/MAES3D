@@ -21,6 +21,8 @@ public class ExplChunk : MonoBehaviour
 
     private int vertexIndex = 0;
 
+    private Map cave;
+
     void Awake()
     {
         Filled = new bool[Explored.CHUNK_SIZE, Explored.CHUNK_SIZE, Explored.CHUNK_SIZE];
@@ -31,15 +33,14 @@ public class ExplChunk : MonoBehaviour
 
         // Find the object with the name.
         GameObject simulationObject = GameObject.Find("Simulation(Clone)");
-        GameObject chunkObject = GameObject.Find("Chunk(Clone)");
+        GameObject chunkObject = GameObject.Find("Map(Clone)");
 
         // Get the component of the script attached to the object.
         Simulation simulation = simulationObject.GetComponent<Simulation>();
-        Chunk cave = chunkObject.GetComponent<Chunk>();
+        cave = chunkObject.GetComponent<Map>();
 
         // Make a reference to the array of explored voxels
         explored = simulation.ExplorationManager.ExploredMap;
-        layout = cave.GetVoxelMap();
     }
 
     private void CreateMeshData() 
@@ -85,7 +86,7 @@ public class ExplChunk : MonoBehaviour
             return true;
         
 
-        return (explored[x, y, z] || layout[x, y, z]);
+        return (explored[x, y, z] || cave.IsWall(x, y, z));
     }
 
     private void AddVoxelDataToChunk(Vector3 pos) 

@@ -20,19 +20,19 @@ public class Explored : MonoBehaviour
     {
         // Find the object with the name.
         GameObject simulationObject = GameObject.Find("Simulation(Clone)");
-        GameObject chunkObject = GameObject.Find("Chunk(Clone)");
+        GameObject chunkObject = GameObject.Find("Map(Clone)");
 
         // Get the component of the script attached to the object.
         Simulation simulation = simulationObject.GetComponent<Simulation>();
-        Chunk cave = chunkObject.GetComponent<Chunk>();
+        Map cave = chunkObject.GetComponent<Map>();
 
         // Make a reference to the array of explored voxels
         _newlyExplored = simulation.ExplorationManager.NewlyExplored;
-        var layout = cave.GetVoxelMap();
+        //var layout = cave.GetVoxelMap();
 
-        int width =  Mathf.CeilToInt(layout.GetLength(0) / (float) CHUNK_SIZE);
-        int height = Mathf.CeilToInt(layout.GetLength(1) / (float) CHUNK_SIZE);
-        int depth =  Mathf.CeilToInt(layout.GetLength(2) / (float) CHUNK_SIZE);
+        int width = cave.Width; //Mathf.CeilToInt(layout.GetLength(0) / (float) CHUNK_SIZE);
+        int height = cave.Height; //Mathf.CeilToInt(layout.GetLength(1) / (float) CHUNK_SIZE);
+        int depth = cave.Depth; //Mathf.CeilToInt(layout.GetLength(2) / (float) CHUNK_SIZE);
 
         chunks = new GameObject[width, height, depth];
 
@@ -53,12 +53,16 @@ public class Explored : MonoBehaviour
                         {
                             for (int _z = 0; _z < CHUNK_SIZE; _z++) 
                             {
-                                if (chunk.Position.x * CHUNK_SIZE + _x > layout.GetLength(0) - 1 || chunk.Position.y * CHUNK_SIZE + _y > layout.GetLength(1) - 1 || chunk.Position.z * CHUNK_SIZE + _z > layout.GetLength(2) - 1)
+                                if (chunk.Position.x * CHUNK_SIZE + _x > width - 1 || chunk.Position.y * CHUNK_SIZE + _y > height - 1 || chunk.Position.z * CHUNK_SIZE + _z > depth - 1)
                                     continue;
 
-                                chunk.Filled[_x, _y, _z] = !layout[chunk.Position.x * CHUNK_SIZE + _x,
-                                                                   chunk.Position.y * CHUNK_SIZE + _y, 
-                                                                   chunk.Position.z * CHUNK_SIZE + _z];
+                                chunk.Filled[_x, _y, _z] = !cave.IsWall(chunk.Position.x * CHUNK_SIZE + _x,
+                                                                        chunk.Position.y * CHUNK_SIZE + _y,
+                                                                        chunk.Position.z * CHUNK_SIZE + _z);
+
+                                //chunk.Filled[_x, _y, _z] = !layout[chunk.Position.x * CHUNK_SIZE + _x,
+                                //                                   chunk.Position.y * CHUNK_SIZE + _y, 
+                                //                                   chunk.Position.z * CHUNK_SIZE + _z];
                             } 
                         }
                     }
