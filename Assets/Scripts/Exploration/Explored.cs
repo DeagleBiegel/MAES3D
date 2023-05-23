@@ -30,9 +30,9 @@ public class Explored : MonoBehaviour
         _newlyExplored = simulation.ExplorationManager.NewlyExplored;
         //var layout = cave.GetVoxelMap();
 
-        int width = cave.Width; //Mathf.CeilToInt(layout.GetLength(0) / (float) CHUNK_SIZE);
-        int height = cave.Height; //Mathf.CeilToInt(layout.GetLength(1) / (float) CHUNK_SIZE);
-        int depth = cave.Depth; //Mathf.CeilToInt(layout.GetLength(2) / (float) CHUNK_SIZE);
+        int width = Mathf.CeilToInt(cave.Width / (float)CHUNK_SIZE); //Mathf.CeilToInt(layout.GetLength(0) / (float) CHUNK_SIZE);
+        int height = Mathf.CeilToInt(cave.Height / (float) CHUNK_SIZE); //Mathf.CeilToInt(layout.GetLength(1) / (float) CHUNK_SIZE);
+        int depth = Mathf.CeilToInt(cave.Depth / (float)CHUNK_SIZE); //Mathf.CeilToInt(layout.GetLength(2) / (float) CHUNK_SIZE);
 
         chunks = new GameObject[width, height, depth];
 
@@ -53,7 +53,7 @@ public class Explored : MonoBehaviour
                         {
                             for (int _z = 0; _z < CHUNK_SIZE; _z++) 
                             {
-                                if (chunk.Position.x * CHUNK_SIZE + _x > width - 1 || chunk.Position.y * CHUNK_SIZE + _y > height - 1 || chunk.Position.z * CHUNK_SIZE + _z > depth - 1)
+                                if (chunk.Position.x * CHUNK_SIZE + _x > cave.Width - 1 || chunk.Position.y * CHUNK_SIZE + _y > cave.Height - 1 || chunk.Position.z * CHUNK_SIZE + _z > cave.Depth - 1)
                                     continue;
 
                                 chunk.Filled[_x, _y, _z] = !cave.IsWall(chunk.Position.x * CHUNK_SIZE + _x,
