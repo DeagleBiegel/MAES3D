@@ -44,7 +44,20 @@ namespace MAES3D {
             GameObject gameObject = Instantiate(MapPrefab, parent: transform);
             //Chunk mapc = (Chunk) gameObject.GetComponent(typeof(Chunk));
 
-            MapGenerator mapGen = new SmoothedNoise();
+            MapGenerator mapGen;
+            switch (SimulationSettings.mapGen)
+            {
+                case 0:
+                    mapGen = new RandomConnectedSpheres();
+                    break;
+                case 1:
+                    mapGen = new SmoothedNoise();
+                    break;
+                default:
+                    Debug.LogError("Something went wrong in map generator selection");
+                    Debug.Break();
+                    return;
+            }
             Map map = (Map)gameObject.GetComponent(typeof(Map));
             map.InitMap(mapGen.GenerateMap());
 

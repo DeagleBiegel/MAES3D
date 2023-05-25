@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
 public class SmoothedNoise : MapGenerator {
-    private int smoothingIterations = 20;
-    private float fillRatio = 0.53f;
+    private int smoothingIterations = SimulationSettings.smoothingIterations;
+    private float fillRatio = SimulationSettings.SN_initialFillRatio/100f;
 
     protected override void PopulateVoxelMap() {
         for (int x = 0; x < SizeX; x++) {

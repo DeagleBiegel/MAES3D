@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7971712903494438092}
   - component: {fileID: 311809683299891413}
   - component: {fileID: 7971712903494438089}
+  - component: {fileID: -5064312398554974863}
   m_Layer: 7
   m_Name: Map
   m_TagString: Untagged
@@ -109,4 +110,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49b0ef44ddc1b4a4590ac1b6d5599301, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  KeepSceneView: 1
+  KeepSceneView: 0
+--- !u!114 &-5064312398554974863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7971712903494438094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3063bc7f120fb84c9e4feecd5e78aaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

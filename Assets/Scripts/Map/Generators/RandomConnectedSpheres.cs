@@ -6,14 +6,15 @@ using UnityEngine;
 
 public class RandomConnectedSpheres : MapGenerator {
 
-    private int minRadius = 3;
-    private int maxRadius = 6;
+    private int minRadius = SimulationSettings.RCS_minRadius;
+    private int maxRadius = SimulationSettings.RCS_maxRadius;
 
-    private int connectionsToMake = 3;
-    private int connectionRadius = 3;
+    private int connectionsToMake = SimulationSettings.RCS_connectionsToMake;
+    private int connectionRadius = SimulationSettings.RCS_minRadius;
 
-    private float ratioToClear = 0.2f;
-    private int smoothingIterations = 2;
+    private float ratioToClear = SimulationSettings.RCS_ratioToClear/100f;
+    private int smoothingIterations = SimulationSettings.RCS_smoothingIterations;
+
 
     protected override void PopulateVoxelMap() {
 
@@ -87,7 +88,7 @@ public class RandomConnectedSpheres : MapGenerator {
             Cell origin = pair.Item1;
             Cell target = pair.Item2;
 
-            Debug.DrawLine(origin.middle, target.middle, UnityEngine.Color.blue, 50);
+            //Debug.DrawLine(origin.middle, target.middle, UnityEngine.Color.blue, 50);
         }
 
         //Make edge solid
