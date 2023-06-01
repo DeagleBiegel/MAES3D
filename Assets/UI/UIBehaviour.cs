@@ -27,20 +27,37 @@ public class UIBehaviour : MonoBehaviour
     private CameraController cameraController;
     
     //CaveUI Interactables
-    private DropdownField dropdownMapGenerators;
-    private Button btnImportMap;
-    private DropdownField dropdownAlgorithm;
+        //General
     private    SliderInt agentCount;
     private    SliderInt duration;
-    private    SliderInt mapHeight;
-    private    SliderInt mapWidth;
-    private    SliderInt mapDepth;
-    private    MinMaxSlider sphereRadius;
+    private DropdownField dropdownAlgorithm;
+    private DropdownField dropdownMapGenerators;
+    private    ProgressBar progBar;
     private    Toggle toggleSeed;
     private    TextField txtSeed;
-    private    ProgressBar progBar;
     private    Button btnStart;
     private    Button btnStop;
+
+        //SmoothedNoise()
+    private SliderInt SN_initialFillRatio;
+    private SliderInt SN_smoothingIterations;
+    private    SliderInt SN_mapHeight;
+    private    SliderInt SN_mapWidth;
+    private    SliderInt SN_mapDepth;
+
+
+        //RandomConnectedSpheres()
+    private SliderInt RCS_fillRatio;
+    private    MinMaxSlider RCS_sphereRadius;
+    private SliderInt RCS_sphereConnections;
+    private SliderInt RCS_smoothingIterations;
+    private    SliderInt RCS_mapHeight;
+    private    SliderInt RCS_mapWidth;
+    private    SliderInt RCS_mapDepth;
+
+
+        //ImportMap()
+    private Button btnImportMap;
     
     //CameraUI Interactable
     private    Button btnPrevCam;
@@ -105,18 +122,18 @@ public class UIBehaviour : MonoBehaviour
         if (mainCamera != null)
         {
             //Debug.Log($"click: agentIndex = {agentIndex}");
-            GameObject chunk = GameObject.Find("Chunk(Clone)");
+            GameObject map = GameObject.Find("Map(Clone)");
 
             if (agentIndex == -1)
             {
                 ChangeToUI(CaveUI);
-                cameraController.SetTargetOffset(chunk.transform);
+                cameraController.SetTargetOffset(map.transform);
             }
             else if (agentIndex > agents.Count-1)
             {
                 agentIndex = -1;
                 ChangeToUI(CaveUI);
-                cameraController.SetTargetOffset(chunk.transform);
+                cameraController.SetTargetOffset(map.transform);
             }
             else if (agentIndex < -1)
             {
@@ -199,50 +216,39 @@ public class UIBehaviour : MonoBehaviour
             VisualElement CaveRoot = CaveUI.rootVisualElement;
 
             //Update References to Interactables
-            dropdownMapGenerators = CaveRoot.Q<DropdownField>("DropdownMapGenerator");
-            btnImportMap = CaveRoot.Q<Button>("ButtonImportMap");
-            btnImportMap.SetEnabled(false);
+            QueryButtons(CaveRoot);
 
-            dropdownAlgorithm = CaveRoot.Q<DropdownField>("DropdownAlgorithm");
-            agentCount = CaveRoot.Q<SliderInt>("AgentCount");
-            duration = CaveRoot.Q<SliderInt>("SimDuration");
-            mapHeight = CaveRoot.Q<SliderInt>("MapHeight");
-            mapWidth = CaveRoot.Q<SliderInt>("MapWidth");
-            mapDepth = CaveRoot.Q<SliderInt>("MapDepth");
-            toggleSeed = CaveRoot.Q<Toggle>("ToggleRandomSeed");
-            txtSeed = CaveRoot.Q<TextField>("TxtSeed");
-            progBar = CaveRoot.Q<ProgressBar>("ProgressBar");
-            btnStart = CaveRoot.Q<Button>("ButtonStart");
-            btnStop = CaveRoot.Q<Button>("ButtonStop");
-
-            GroupBox NewMapGen = CaveRoot.Q<GroupBox>("NewMapGenerator");
-            GroupBox OldMapGen = CaveRoot.Q<GroupBox>("OldMapGenerator");
-            OldMapGen.SetEnabled(false);
-
-            sphereRadius = CaveRoot.Q<MinMaxSlider>("SphereRadius");
+            GroupBox newMapGen = CaveRoot.Q<GroupBox>("NewMapGenerator");
+            GroupBox oldMapGen = CaveRoot.Q<GroupBox>("OldMapGenerator");
+            GroupBox seedGB = CaveRoot.Q<GroupBox>("SeedGroupBox");
+            oldMapGen.SetEnabled(false);
 
             // Fixing TextFieldBugs
             FixVisualBug();
 
             //Update Interactables when interacted with
-            //Advanced Settings
+            //MapGenLayout
             dropdownMapGenerators.RegisterValueChangedCallback(v =>{
+                SimulationSettings.mapGen = dropdownMapGenerators.index;
                 switch (dropdownMapGenerators.index)
                 {
                     case 0:
                         btnImportMap.SetEnabled(false);
-                        NewMapGen.SetEnabled(true);
-                        OldMapGen.SetEnabled(false);
+                        newMapGen.SetEnabled(true);
+                        oldMapGen.SetEnabled(false);
+                        seedGB.SetEnabled(true);
                         break;
                     case 1:
                         btnImportMap.SetEnabled(false);
-                        NewMapGen.SetEnabled(false);
-                        OldMapGen.SetEnabled(true);
+                        newMapGen.SetEnabled(false);
+                        oldMapGen.SetEnabled(true);
+                        seedGB.SetEnabled(true);
                         break;
                     case 2:
                         btnImportMap.SetEnabled(true);
-                        NewMapGen.SetEnabled(false);
-                        OldMapGen.SetEnabled(false);
+                        newMapGen.SetEnabled(false);
+                        oldMapGen.SetEnabled(false);
+                        seedGB.SetEnabled(false);
                         break;
 
                     default:
@@ -265,29 +271,56 @@ public class UIBehaviour : MonoBehaviour
             });
 
             //Map Generator General
-            mapHeight.RegisterValueChangedCallback(v =>{
-                mapHeight.Q<TextField>("unity-text-field").label = mapHeight.value.ToString();
-            });
-            mapWidth.RegisterValueChangedCallback(v =>{
-                mapWidth.Q<TextField>("unity-text-field").label = mapWidth.value.ToString();
-            });
-            mapDepth.RegisterValueChangedCallback(v =>{
-                mapDepth.Q<TextField>("unity-text-field").label = mapDepth.value.ToString();
-            });
             toggleSeed.RegisterValueChangedCallback(v =>{
                 if (txtSeed.focusable = !toggleSeed.value)
                     txtSeed.value = "Insert Seed";
                 else
                     txtSeed.value = "Random Seed";
             });
-            //Map Generator Random Cell Construction
+            //SmoothedNoise()
+            SN_smoothingIterations.RegisterValueChangedCallback(v =>{
+                SN_smoothingIterations.Q<TextField>("unity-text-field").label = SN_smoothingIterations.value.ToString();
+            });
+            SN_initialFillRatio.RegisterValueChangedCallback(v =>{
+                SN_initialFillRatio.Q<TextField>("unity-text-field").label = SN_initialFillRatio.value.ToString();
+            });
+            SN_mapHeight.RegisterValueChangedCallback(v =>{
+                SN_mapHeight.Q<TextField>("unity-text-field").label = SN_mapHeight.value.ToString();
+            });
+            SN_mapWidth.RegisterValueChangedCallback(v =>{
+                SN_mapWidth.Q<TextField>("unity-text-field").label = SN_mapWidth.value.ToString();
+            });
+            SN_mapDepth.RegisterValueChangedCallback(v =>{
+                SN_mapDepth.Q<TextField>("unity-text-field").label = SN_mapDepth.value.ToString();
+            });
 
-            //Map Generator Sphere connection (new)
-            sphereRadius.RegisterValueChangedCallback(v =>{
-                CaveRoot.Q<Label>("MiniMax").text = $"{sphereRadius.minValue.ToString("n0")} - {sphereRadius.maxValue.ToString("n0")}";
+            //RandomConnectedSpheres()
+            RCS_mapHeight.RegisterValueChangedCallback(v =>{
+                RCS_mapHeight.Q<TextField>("unity-text-field").label = RCS_mapHeight.value.ToString();
+            });
+            RCS_mapWidth.RegisterValueChangedCallback(v =>{
+                RCS_mapWidth.Q<TextField>("unity-text-field").label = RCS_mapWidth.value.ToString();
+            });
+            RCS_mapDepth.RegisterValueChangedCallback(v =>{
+                RCS_mapDepth.Q<TextField>("unity-text-field").label = RCS_mapDepth.value.ToString();
+            });
+            RCS_sphereRadius.RegisterValueChangedCallback(v =>{
+                CaveRoot.Q<Label>("MiniMax").text = $"{RCS_sphereRadius.minValue.ToString("n0")} - {RCS_sphereRadius.maxValue.ToString("n0")}";
                 
-                sphereRadius.minValue = (int)sphereRadius.minValue;
-                sphereRadius.maxValue = (int)sphereRadius.maxValue;
+                RCS_sphereRadius.minValue = (int)RCS_sphereRadius.minValue;
+                SimulationSettings.RCS_minRadius = (int)RCS_sphereRadius.minValue;
+                RCS_sphereRadius.maxValue = (int)RCS_sphereRadius.maxValue;
+                SimulationSettings.RCS_maxRadius = (int)RCS_sphereRadius.maxValue;
+            });
+            RCS_smoothingIterations.RegisterValueChangedCallback(v =>{
+                RCS_smoothingIterations.Q<TextField>("unity-text-field").label = RCS_smoothingIterations.value.ToString();
+            });
+
+            RCS_fillRatio.RegisterValueChangedCallback(v =>{
+                RCS_fillRatio.Q<TextField>("unity-text-field").label = RCS_fillRatio.value.ToString();
+            });
+            RCS_sphereConnections.RegisterValueChangedCallback(v =>{
+                RCS_sphereConnections.Q<TextField>("unity-text-field").label = RCS_sphereConnections.value.ToString();
             });
 
             //Simulation Controls
@@ -318,9 +351,33 @@ public class UIBehaviour : MonoBehaviour
                     UnityEngine.Random.InitState(seed);
                     SimulationSettings.seed = seed;
                 }
-                SimulationSettings.Height = mapHeight.value;
-                SimulationSettings.Width = mapWidth.value;
-                SimulationSettings.Depth = mapDepth.value;
+
+
+                switch (dropdownMapGenerators.index)
+                {
+                    case 0:
+                        SimulationSettings.Height = RCS_mapHeight.value;
+                        SimulationSettings.Width = RCS_mapWidth.value;
+                        SimulationSettings.Depth = RCS_mapDepth.value;
+                        SimulationSettings.RCS_smoothingIterations = RCS_smoothingIterations.value;
+                        SimulationSettings.RCS_ratioToClear = RCS_fillRatio.value;
+                        SimulationSettings.RCS_connectionsToMake = RCS_sphereConnections.value;
+                        break;
+                    case 1:
+                        SimulationSettings.SN_initialFillRatio = SN_initialFillRatio.value;
+                        SimulationSettings.smoothingIterations = SN_smoothingIterations.value;
+                        SimulationSettings.Height = SN_mapHeight.value;
+                        SimulationSettings.Width = SN_mapWidth.value;
+                        SimulationSettings.Depth = SN_mapDepth.value;
+                        break;
+                    default:
+                        Debug.LogError("Something went wrong with map generator selection");
+                        return;
+                }
+
+
+
+
                 
                 // Starts the simulation
                 Sim.SetupSimulation(SimulationSettings.duration);
@@ -338,9 +395,9 @@ public class UIBehaviour : MonoBehaviour
                     textWriter.WriteLine("0, 0");
                 textWriter.Close();
 
-                mainCamera.transform.position = new Vector3(-(mapWidth.value * 0.25f), mapHeight.value * 1.25f, -(mapDepth.value * 0.25f));
-                mainCamera.transform.LookAt(new Vector3(mapWidth.value * 0.5f, mapHeight.value * 0.5f, mapDepth.value * 0.5f));
-                mainCamera.transform.Translate(Vector3.right * (Mathf.Sqrt(mapWidth.value ^ 2 * mapDepth.value ^ 2) * 0.2f), Space.Self);
+                mainCamera.transform.position = new Vector3(-(RCS_mapWidth.value * 0.25f), RCS_mapHeight.value * 1.25f, -(RCS_mapDepth.value * 0.25f));
+                mainCamera.transform.LookAt(new Vector3(RCS_mapWidth.value * 0.5f, RCS_mapHeight.value * 0.5f, RCS_mapDepth.value * 0.5f));
+                mainCamera.transform.Translate(Vector3.right * (Mathf.Sqrt(RCS_mapWidth.value ^ 2 * RCS_mapDepth.value ^ 2) * 0.2f), Space.Self);
 
                 agents = new List<SubmarineAgent>(FindObjectsOfType<SubmarineAgent>());
                 agents.Reverse();
@@ -398,9 +455,9 @@ public class UIBehaviour : MonoBehaviour
         dropdownAlgorithm.index = SimulationSettings.algorithm;
         agentCount.value = SimulationSettings.agentCount;
         duration.value = ((int)SimulationSettings.duration / 60);
-        mapHeight.value = SimulationSettings.Height;
-        mapWidth.value = SimulationSettings.Width;
-        mapDepth.value = SimulationSettings.Depth;
+        RCS_mapHeight.value = SimulationSettings.Height;
+        RCS_mapWidth.value = SimulationSettings.Width;
+        RCS_mapDepth.value = SimulationSettings.Depth;
         toggleSeed.value = SimulationSettings.useRandomSeed;
 
         List<VisualElement> textFields = new UQueryBuilder<VisualElement>(CaveUI.rootVisualElement).Name("unity-text-field").ToList();
@@ -421,6 +478,42 @@ public class UIBehaviour : MonoBehaviour
             default:
                 return "No AlgorithmIndex Given";
         }
+    }
+
+    private void QueryButtons(VisualElement root){
+            //General
+            agentCount = root.Q<SliderInt>("AgentCount");
+            duration = root.Q<SliderInt>("SimDuration");
+            dropdownAlgorithm = root.Q<DropdownField>("DropdownAlgorithm");
+            dropdownMapGenerators = root.Q<DropdownField>("DropdownMapGenerator");
+            toggleSeed = root.Q<Toggle>("ToggleRandomSeed");
+            txtSeed = root.Q<TextField>("TxtSeed");
+            progBar = root.Q<ProgressBar>("ProgressBar");
+            btnStart = root.Q<Button>("ButtonStart");
+            btnStop = root.Q<Button>("ButtonStop");
+
+            //SmoothedNoise()
+            SN_initialFillRatio = root.Q<SliderInt>("SN_InitialFillRatio");
+            SN_smoothingIterations = root.Q<SliderInt>("SN_SmoothingIterations");
+            SN_mapHeight = root.Q<SliderInt>("SN_MapHeight");
+            SN_mapWidth = root.Q<SliderInt>("SN_MapWidth");
+            SN_mapDepth = root.Q<SliderInt>("SN_MapDepth");
+
+
+            //RandomConnectedSpheres()
+            RCS_fillRatio = root.Q<SliderInt>("RCS_FillRatio");
+            RCS_sphereRadius = root.Q<MinMaxSlider>("SphereRadius");
+            RCS_sphereConnections = root.Q<SliderInt>("SphereConnections");
+            RCS_smoothingIterations = root.Q<SliderInt>("RCS_SmoothingIterations");
+            RCS_mapHeight = root.Q<SliderInt>("RCS_MapHeight");
+            RCS_mapWidth = root.Q<SliderInt>("RCS_MapWidth");
+            RCS_mapDepth = root.Q<SliderInt>("RCS_MapDepth");
+
+            //ImportMap()
+            btnImportMap = root.Q<Button>("ButtonImportMap");
+            btnImportMap.SetEnabled(false);
+
+
     }
 /*
     private void OpenFileExplorer(){

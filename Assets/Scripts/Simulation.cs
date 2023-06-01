@@ -42,7 +42,24 @@ namespace MAES3D {
 
         public void SetupScenario() {
             GameObject gameObject = Instantiate(MapPrefab, parent: transform);
-            Chunk map = (Chunk) gameObject.GetComponent(typeof(Chunk));
+            //Chunk mapc = (Chunk) gameObject.GetComponent(typeof(Chunk));
+
+            MapGenerator mapGen;
+            switch (SimulationSettings.mapGen)
+            {
+                case 0:
+                    mapGen = new RandomConnectedSpheres();
+                    break;
+                case 1:
+                    mapGen = new SmoothedNoise();
+                    break;
+                default:
+                    Debug.LogError("Something went wrong in map generator selection");
+                    Debug.Break();
+                    return;
+            }
+            Map map = (Map)gameObject.GetComponent(typeof(Map));
+            map.InitMap(mapGen.GenerateMap());
 
             GameObject cameraObject = GameObject.FindWithTag("MainCamera");
             CameraController cameraController;
