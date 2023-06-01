@@ -106,14 +106,12 @@ public class Simulator : MonoBehaviour{
     }
 
     private List<GeneratedSettings> GenerateAutomatedTests() {
-        int[] algos = { 0 };
-        int[] sizes = { 75 };
-        int[] agentCounts = { 5 };
+        int[] algos = { 2 };
+        int[] sizes = { 50, 75, 100 };
+        int[] agentCounts = { 2, 5, 10 };
 
         int[] setSeeds = { 688446, 881082, 715672, 360565, 402211,
-                           781547, 234175, 510916, 902487, 103226,
-                           718267, 140175, 423719, 622131, 278169,
-                           517123, 595283, 415280, 204763, 664104 };
+                           781547, 234175, 510916, 902487, 103226 };
 
         List<int> seeds = new List<int>(setSeeds);
         //int seedAmount = 20;
@@ -121,7 +119,7 @@ public class Simulator : MonoBehaviour{
         //    seeds.Add(Random.Range(100000, 1000000));
         //}
 
-        int duration = 1 * 60;
+        int duration = 30 * 60;
 
         float timeScale = 1f;
 
