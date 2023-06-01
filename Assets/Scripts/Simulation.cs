@@ -20,6 +20,8 @@ namespace MAES3D {
         
         private bool disabled = false;
 
+        public Map Map { get; private set; }
+
         //Perform every LCCM step for each agent in a synchroized manner
         public void ExecuteStep() {
             // Paused
@@ -43,6 +45,7 @@ namespace MAES3D {
         public void SetupScenario() {
             GameObject gameObject = Instantiate(MapPrefab, parent: transform);
             //Chunk mapc = (Chunk) gameObject.GetComponent(typeof(Chunk));
+            Map = (Map) gameObject.GetComponent(typeof(Map));
 
             MapGenerator mapGen;
             switch (SimulationSettings.mapGen)
@@ -96,7 +99,7 @@ namespace MAES3D {
             ExplorationManager = new ExplorationManager();
             CommunicationManager = new CommunicationManager(_agents, 5);
 
-            Instantiate(ExplorationPrefab, parent: transform);
+            //Instantiate(ExplorationPrefab, parent: transform);
         }
 
         private SubmarineAgent SpawnAgent(IAlgorithm algorithm, Vector3 position, int id) {

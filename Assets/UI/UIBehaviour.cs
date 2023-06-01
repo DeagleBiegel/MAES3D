@@ -96,14 +96,12 @@ public class UIBehaviour : MonoBehaviour
                 saveResultTimer += Time.fixedDeltaTime;
             else{
                 saveResultTimer = 0;
-                AddResults((int)(SimulationSettings.duration - timeLeft), (int)SimulationSettings.progress, SimulationSettings.Instance);
             }
         }
         else if (timeLeft == 0)
             timeLeft = 0;
         else{
             timeLeft = 0;
-            AddResults((int)(SimulationSettings.duration - timeLeft), (int)SimulationSettings.progress, SimulationSettings.Instance-1);
         }
     }
 
@@ -380,7 +378,7 @@ public class UIBehaviour : MonoBehaviour
 
                 
                 // Starts the simulation
-                Sim.SetupSimulation(SimulationSettings.duration);
+                //Sim.SetupSimulation(SimulationSettings.duration);
                 timeLeft = SimulationSettings.duration;
 
                 // Start Taking Results
@@ -421,12 +419,6 @@ public class UIBehaviour : MonoBehaviour
             //Debug.LogError("Not Valid UI Selected");
             Debug.Break();
         }
-    }
-
-    private void AddResults(int duration, int progress, int instance){
-        TextWriter tw = new StreamWriter(Application.dataPath + $"/Results/{AlgorithmIndexToString(SimulationSettings.algorithm)}_x{SimulationSettings.Width}y{SimulationSettings.Height}z{SimulationSettings.Depth}_I{SimulationSettings.Instance}.csv", true);
-        tw.WriteLine($"{duration},{progress}");
-        tw.Close();
     }
 
     public void UpdateAgentUI(SubmarineAgent agent)

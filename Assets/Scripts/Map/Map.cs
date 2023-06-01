@@ -15,7 +15,6 @@ public class Map : MonoBehaviour {
     public List<Cell> SpawnPositions => _spawnPositions;
     public int ExplorableTiles => _explorableTiles;
 
-
     private bool[,,] _voxelMap;
 
     private MeshRenderer _meshRenderer;
@@ -48,6 +47,7 @@ public class Map : MonoBehaviour {
         CalculateSpawnPositions();
         CreateMeshData();
         CreateMesh();
+
     }
 
     private int CalculateNumberOfExplorableTiles() {

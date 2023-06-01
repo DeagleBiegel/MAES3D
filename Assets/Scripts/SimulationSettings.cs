@@ -11,8 +11,9 @@ public static class SimulationSettings
     public static float duration = 30 * 60; // in minutes
     public static int algorithm = 0; // 0 = RBW, 1 = LVD, 2 = DSVP
     public static float progress = 0;
-	public static bool useRandomSeed = true;
-	public static int seed = 1; 
+	public static bool useRandomSeed = false;
+	public static int seed = 1;
+    public static float timeScale = 1;
 
     //SmoothedNoise()
     public static int Height = 50;
