@@ -26,8 +26,13 @@ public class UIBehaviour : MonoBehaviour
 
     private CameraController cameraController;
     
-    //CaveUI Interactables
-        //General
+    // CaveUI Interactables
+        // Advanced Settings
+
+    private SliderInt AS_AStarIterations;
+    private SliderInt AS_UnexploredChunkSize;
+
+        // General
     private    SliderInt agentCount;
     private    SliderInt duration;
     private DropdownField dropdownAlgorithm;
@@ -38,7 +43,7 @@ public class UIBehaviour : MonoBehaviour
     private    Button btnStart;
     private    Button btnStop;
 
-        //SmoothedNoise()
+        // SmoothedNoise()
     private SliderInt SN_initialFillRatio;
     private SliderInt SN_smoothingIterations;
     private    SliderInt SN_mapHeight;
@@ -46,7 +51,7 @@ public class UIBehaviour : MonoBehaviour
     private    SliderInt SN_mapDepth;
 
 
-        //RandomConnectedSpheres()
+        // RandomConnectedSpheres()
     private SliderInt RCS_fillRatio;
     private    MinMaxSlider RCS_sphereRadius;
     private SliderInt RCS_sphereConnections;
@@ -56,10 +61,10 @@ public class UIBehaviour : MonoBehaviour
     private    SliderInt RCS_mapDepth;
 
 
-        //ImportMap()
+        // ImportMap()
     private Button btnImportMap;
     
-    //CameraUI Interactable
+    // CameraUI Interactable
     private    Button btnPrevCam;
     private    Button btnCave;
     private    Button btnNextCam;
@@ -87,7 +92,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            //Debug.LogWarning("No UI is enabled");
+            // Debug.LogWarning("No UI is enabled");
         }
 
         if(timeLeft > 0){
@@ -121,7 +126,7 @@ public class UIBehaviour : MonoBehaviour
 
         if (mainCamera != null)
         {
-            //Debug.Log($"click: agentIndex = {agentIndex}");
+            // Debug.Log($"click: agentIndex = {agentIndex}");
             GameObject map = GameObject.Find("Map(Clone)");
 
             if (agentIndex == -1)
@@ -164,7 +169,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            //Debug.LogError("Not Valid UI Selected");
+            // Debug.LogError("Not Valid UI Selected");
             Debug.Break();
         }
     }
@@ -182,7 +187,7 @@ public class UIBehaviour : MonoBehaviour
                 if (cameraController.IsTransitioning())
                     return;
 
-                //Debug.Log("Prev Clicked");
+                // Debug.Log("Prev Clicked");
                 agentIndex--;
                 ChangeCam();
             };
@@ -191,7 +196,7 @@ public class UIBehaviour : MonoBehaviour
             {
                 if (cameraController.IsTransitioning())
                     return;
-                //Debug.Log("Cave Clicked");
+                // Debug.Log("Cave Clicked");
                 agentIndex = -1;
                 ChangeCam();
             };
@@ -200,7 +205,7 @@ public class UIBehaviour : MonoBehaviour
             {
                 if (cameraController.IsTransitioning())
                     return;
-                //Debug.Log("Next Clicked");
+                // Debug.Log("Next Clicked");
                 agentIndex++;
                 ChangeCam();
             };
@@ -212,10 +217,10 @@ public class UIBehaviour : MonoBehaviour
         }
         else if (UIDoc == CaveUI)
         {
-            //Debug.Log("CaveUI Updated");
+            // Debug.Log("CaveUI Updated");
             VisualElement CaveRoot = CaveUI.rootVisualElement;
 
-            //Update References to Interactables
+            // Update References to Interactables
             QueryButtons(CaveRoot);
 
             GroupBox newMapGen = CaveRoot.Q<GroupBox>("NewMapGenerator");
@@ -226,8 +231,18 @@ public class UIBehaviour : MonoBehaviour
             // Fixing TextFieldBugs
             FixVisualBug();
 
-            //Update Interactables when interacted with
-            //MapGenLayout
+            // Update Interactables when interacted with
+            // Advanced Settings
+            AS_AStarIterations.RegisterValueChangedCallback(v =>{
+                AS_AStarIterations.value = AS_AStarIterations.value - AS_AStarIterations.value % 10;
+                AS_AStarIterations.Q<TextField>("unity-text-field").label = AS_AStarIterations.value.ToString();
+            });
+            AS_UnexploredChunkSize.RegisterValueChangedCallback(v =>{
+                AS_UnexploredChunkSize.Q<TextField>("unity-text-field").label = AS_UnexploredChunkSize.value.ToString();
+            });
+
+                        
+            // MapGenLayout
             dropdownMapGenerators.RegisterValueChangedCallback(v =>{
                 SimulationSettings.mapGen = dropdownMapGenerators.index;
                 switch (dropdownMapGenerators.index)
@@ -257,12 +272,12 @@ public class UIBehaviour : MonoBehaviour
                 }
             });
             btnImportMap.clickable.clicked += () => {
-                //OpenFileExplorer();
+                // OpenFileExplorer();
 
             };
 
 
-            //General Settings
+            // General Settings
             agentCount.RegisterValueChangedCallback(v =>{
                 agentCount.Q<TextField>("unity-text-field").label = agentCount.value.ToString();
             });
@@ -270,14 +285,14 @@ public class UIBehaviour : MonoBehaviour
                 duration.Q<TextField>("unity-text-field").label = duration.value.ToString();
             });
 
-            //Map Generator General
+            // Map Generator General
             toggleSeed.RegisterValueChangedCallback(v =>{
                 if (txtSeed.focusable = !toggleSeed.value)
                     txtSeed.value = "Insert Seed";
                 else
                     txtSeed.value = "Random Seed";
             });
-            //SmoothedNoise()
+            // SmoothedNoise()
             SN_smoothingIterations.RegisterValueChangedCallback(v =>{
                 SN_smoothingIterations.Q<TextField>("unity-text-field").label = SN_smoothingIterations.value.ToString();
             });
@@ -294,7 +309,7 @@ public class UIBehaviour : MonoBehaviour
                 SN_mapDepth.Q<TextField>("unity-text-field").label = SN_mapDepth.value.ToString();
             });
 
-            //RandomConnectedSpheres()
+            // RandomConnectedSpheres()
             RCS_mapHeight.RegisterValueChangedCallback(v =>{
                 RCS_mapHeight.Q<TextField>("unity-text-field").label = RCS_mapHeight.value.ToString();
             });
@@ -308,9 +323,8 @@ public class UIBehaviour : MonoBehaviour
                 CaveRoot.Q<Label>("MiniMax").text = $"{RCS_sphereRadius.minValue.ToString("n0")} - {RCS_sphereRadius.maxValue.ToString("n0")}";
                 
                 RCS_sphereRadius.minValue = (int)RCS_sphereRadius.minValue;
-                SimulationSettings.RCS_minRadius = (int)RCS_sphereRadius.minValue;
                 RCS_sphereRadius.maxValue = (int)RCS_sphereRadius.maxValue;
-                SimulationSettings.RCS_maxRadius = (int)RCS_sphereRadius.maxValue;
+
             });
             RCS_smoothingIterations.RegisterValueChangedCallback(v =>{
                 RCS_smoothingIterations.Q<TextField>("unity-text-field").label = RCS_smoothingIterations.value.ToString();
@@ -323,13 +337,13 @@ public class UIBehaviour : MonoBehaviour
                 RCS_sphereConnections.Q<TextField>("unity-text-field").label = RCS_sphereConnections.value.ToString();
             });
 
-            //Simulation Controls
+            // Simulation Controls
             btnStart.clickable.clicked += () => {
-                //Debug.Log("Start Clicked");
+                // Debug.Log("Start Clicked");
 
                 if ((Simulation)FindObjectOfType(typeof(Simulation)) != null)
                 {
-                    //Debug.Log("Tried to start a simulation while another simulation is running.");
+                    // Debug.Log("Tried to start a simulation while another simulation is running.");
                     return;
                 }
                 CameraUI.enabled = true; // Enables the camera controls UI
@@ -337,6 +351,8 @@ public class UIBehaviour : MonoBehaviour
 
 
                 // Adds values from VisualElements to SimulationSettings
+                SimulationSettings.AStarIterations = AS_AStarIterations.value;
+                SimulationSettings.UnexploredChunkSize = AS_UnexploredChunkSize.value;
                 SimulationSettings.algorithm = dropdownAlgorithm.index;
                 SimulationSettings.agentCount = agentCount.value;
                 SimulationSettings.duration = duration.value*60; // in minutes
@@ -359,6 +375,8 @@ public class UIBehaviour : MonoBehaviour
                         SimulationSettings.Height = RCS_mapHeight.value;
                         SimulationSettings.Width = RCS_mapWidth.value;
                         SimulationSettings.Depth = RCS_mapDepth.value;
+                        SimulationSettings.RCS_minRadius = (int)RCS_sphereRadius.minValue;
+                        SimulationSettings.RCS_maxRadius = (int)RCS_sphereRadius.maxValue;
                         SimulationSettings.RCS_smoothingIterations = RCS_smoothingIterations.value;
                         SimulationSettings.RCS_ratioToClear = RCS_fillRatio.value;
                         SimulationSettings.RCS_connectionsToMake = RCS_sphereConnections.value;
@@ -404,8 +422,9 @@ public class UIBehaviour : MonoBehaviour
                 agentIndex = -1;
             };
             btnStop.clickable.clicked += () => {
-                //Debug.Log("Stop Clicked");
+                // Debug.Log("Stop Clicked");
                 CameraUI.enabled = false; // Disables the camera controls UI
+                unexploredMap = null; // Removes the reference to unexplored map mesh
 
                 timeLeft = 0;
                 Sim.DestroySimulation();
@@ -418,7 +437,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            //Debug.LogError("Not Valid UI Selected");
+            // Debug.LogError("Not Valid UI Selected");
             Debug.Break();
         }
     }
@@ -481,7 +500,11 @@ public class UIBehaviour : MonoBehaviour
     }
 
     private void QueryButtons(VisualElement root){
-            //General
+            // Advanced Settings
+            AS_AStarIterations = root.Q<SliderInt>("AS_AStarIterations");
+            AS_UnexploredChunkSize = root.Q<SliderInt>("AS_UnexploredChunkSize");
+            
+            // General
             agentCount = root.Q<SliderInt>("AgentCount");
             duration = root.Q<SliderInt>("SimDuration");
             dropdownAlgorithm = root.Q<DropdownField>("DropdownAlgorithm");
@@ -492,7 +515,7 @@ public class UIBehaviour : MonoBehaviour
             btnStart = root.Q<Button>("ButtonStart");
             btnStop = root.Q<Button>("ButtonStop");
 
-            //SmoothedNoise()
+            // SmoothedNoise()
             SN_initialFillRatio = root.Q<SliderInt>("SN_InitialFillRatio");
             SN_smoothingIterations = root.Q<SliderInt>("SN_SmoothingIterations");
             SN_mapHeight = root.Q<SliderInt>("SN_MapHeight");
@@ -500,7 +523,7 @@ public class UIBehaviour : MonoBehaviour
             SN_mapDepth = root.Q<SliderInt>("SN_MapDepth");
 
 
-            //RandomConnectedSpheres()
+            // RandomConnectedSpheres()
             RCS_fillRatio = root.Q<SliderInt>("RCS_FillRatio");
             RCS_sphereRadius = root.Q<MinMaxSlider>("SphereRadius");
             RCS_sphereConnections = root.Q<SliderInt>("SphereConnections");
@@ -509,7 +532,7 @@ public class UIBehaviour : MonoBehaviour
             RCS_mapWidth = root.Q<SliderInt>("RCS_MapWidth");
             RCS_mapDepth = root.Q<SliderInt>("RCS_MapDepth");
 
-            //ImportMap()
+            // ImportMap()
             btnImportMap = root.Q<Button>("ButtonImportMap");
             btnImportMap.SetEnabled(false);
 
@@ -522,7 +545,7 @@ public class UIBehaviour : MonoBehaviour
         StartCoroutine(GetMap(path));
     }
     IEnumerator GetMap(string paths){
-        UnityWebRequest www = UnityWebRequest.Get("file:///" + paths);
+        UnityWebRequest www = UnityWebRequest.Get("file:// /" + paths);
 
         yield return www.SendWebRequest();
 
@@ -533,7 +556,7 @@ public class UIBehaviour : MonoBehaviour
         else
         {
             var myMap = ((DownloadHandlerFile)www.downloadHandler);
-            //use myMap here
+            // use myMap here
         }
     }
 */
