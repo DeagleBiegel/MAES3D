@@ -11,7 +11,7 @@ public class Explored : MonoBehaviour
 
     private GameObject[,,] chunks;
 
-    public const int CHUNK_SIZE = 32;
+    public static int CHUNK_SIZE => SimulationSettings.UnexploredChunkSize; 
 
     private int delay = 0;
 

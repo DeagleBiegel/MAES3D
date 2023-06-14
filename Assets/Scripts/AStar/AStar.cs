@@ -8,7 +8,7 @@ namespace MAES3D
 {
     public class AStar
     {
-        private const int MAX_ITERATIONS = 100;
+        private static int MAX_ITERATIONS => SimulationSettings.AStarIterations;
 
         // Find the shortest path from start to target in a 3D grid
         public static List<Cell> FindPath(Vector3 start, Vector3 target, CellStatus[,,] grid)

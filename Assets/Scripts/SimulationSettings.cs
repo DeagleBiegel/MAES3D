@@ -4,6 +4,9 @@ using UnityEngine;
 
 public static class SimulationSettings
 {
+    //Advanced Settings
+    public static int AStarIterations = 100;
+    public static int UnexploredChunkSize = 50;
     //Base Settings
     public static int mapGen = 0; //0 = RandomConnectedSpheres(), 1 = SmoothedNoise()
     public static int Instance = 0;
