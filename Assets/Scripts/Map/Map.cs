@@ -50,6 +50,10 @@ public class Map : MonoBehaviour {
         CreateMesh();
     }
 
+    public void ExportMap() {
+
+    }
+
     private int CalculateNumberOfExplorableTiles() {
         int explorableTiles = 0;
 
