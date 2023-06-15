@@ -53,6 +53,9 @@ namespace MAES3D {
                 case 1:
                     mapGen = new SmoothedNoise();
                     break;
+                case 2:
+                    mapGen = new MapImporter();
+                    break;
                 default:
                     Debug.LogError("Something went wrong in map generator selection");
                     Debug.Break();
@@ -60,6 +63,10 @@ namespace MAES3D {
             }
             Map map = (Map)gameObject.GetComponent(typeof(Map));
             map.InitMap(mapGen.GenerateMap());
+
+            if (!(mapGen is MapImporter)) {
+                map.ExportMap();
+            }
 
             GameObject cameraObject = GameObject.FindWithTag("MainCamera");
             CameraController cameraController;

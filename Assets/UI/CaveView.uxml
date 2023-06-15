@@ -17,7 +17,6 @@
                 <ui:Label text="Map Generator" display-tooltip-when-elided="true" name="Title" class="secTitle" style="align-items: auto;" />
                 <ui:GroupBox style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; align-items: center;">
                     <ui:DropdownField index="0" choices="Random Connected Spheres,Smoothed Noise, Import Map" name="DropdownMapGenerator" focusable="false" class="property" style="align-items: flex-start; margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-top: 0; padding-bottom: 0; padding-left: 0; padding-right: 0;" />
-                    <ui:Button text="Import Map" display-tooltip-when-elided="true" name="ButtonImportMap" class="button" style="margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; width: 90%;" />
                 </ui:GroupBox>
                 <ui:GroupBox name="NewMapGenerator" class="smallContainer" style="align-items: stretch; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 5%;">
                     <ui:SliderInt picking-mode="Ignore" label="Fill Ratio" value="20" high-value="30" show-input-field="true" direction="Horizontal" inverted="false" name="RCS_FillRatio" low-value="1" focusable="false" class="property" />

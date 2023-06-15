@@ -5,7 +5,7 @@ using System.IO;
 using UnityEngine;
 
 
-public class BitReader {
+public class M3DMReader {
     private byte[] buffer = new byte[1];
     private int bitOffset = 0;
     private FileStream fileStream;
@@ -16,6 +16,9 @@ public class BitReader {
             return true;
         }
         catch {
+            Exception e = new Exception("There is no map.m3dm in the maps folder");
+            Debug.LogException(e);
+            Debug.Break();
             return false;
         }
     }
@@ -116,6 +119,10 @@ public class BitReader {
         }
 
         return result;
+    }
+
+    public int GetLength() {
+        return (int)fileStream.Length;
     }
 }
 

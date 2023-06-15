@@ -5,133 +5,61 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Networking;
 using System;
+using System.Drawing;
 
 public class MapImporter : MapGenerator {
 
-    string filePath;
-
-    public void selectFile() {
-        //filePath = EditorUtility.OpenFilePanel("Open M3DM file", "", "M3DM");
-    }
-
-
+    string filePath = "maps/map.m3dm";
 
     protected override void PopulateVoxelMap() {
-        throw new System.NotImplementedException();
-    }
 
-    internal class BitReader {
-        private byte[] buffer = new byte[1];
-        private int bitOffset = 0;
-        private FileStream fileStream;
+        M3DMReader fileReader = new M3DMReader();
+        fileReader.OpenFile(filePath);
 
-        public bool OpenFile(string filePath) {
-            try {
-                fileStream = new FileStream(filePath, FileMode.Open);
-                return true;
-            }
-            catch {
-                return false;
-            }
+        SimulationSettings.Width = fileReader.ReadBitsAsInt(7);
+        SimulationSettings.Height = fileReader.ReadBitsAsInt(7);
+        SimulationSettings.Depth = fileReader.ReadBitsAsInt(7);
+
+        int width = SimulationSettings.Width;
+        int height = SimulationSettings.Height;
+        int depth = SimulationSettings.Depth;
+
+        if (width < 30 || width > 100 || height < 30 || height > 100 || depth < 30 || depth > 100) {
+            Exception e = new Exception("File indicates incompatible map size");
+            Debug.LogException(e);
+            Debug.Break();
         }
 
-        public void CloseFile() {
-            if (fileStream != null) {
-                fileStream.Close();
-                fileStream = null;
-            }
+        int offset = fileReader.ReadBitsAsInt(3);
+
+        int dataLength = fileReader.GetLength() - 3;
+        int expectedDataLength = (width * height * depth) + offset;
+
+        if (expectedDataLength % 8 != 0) {
+            Exception e = new Exception("File header indicates an uneven amount of bytes.");
+            Debug.LogException(e);
+            Debug.Break();
         }
 
-        public bool[] ReadBits(int numBits) {
-            if (fileStream == null) {
-                throw new InvalidOperationException("No file is open.");
-            }
-
-            bool[] bits = new bool[numBits];
-            int bitsRead = 0;
-
-            while (bitsRead < numBits) {
-                if (bitOffset == 0) {
-                    int bytesRead = fileStream.Read(buffer, 0, buffer.Length);
-
-                    if (bytesRead == 0) {
-                        break; // End of file
-                    }
-                }
-
-                bits[bitsRead] = ((buffer[0] >> (7 - bitOffset)) & 1) == 1;
-                bitOffset = (bitOffset + 1) % 8;
-                bitsRead++;
-            }
-
-            return bits;
+        if ((expectedDataLength / 8) != fileReader.GetLength() - 3) {
+            Exception e = new Exception($"File header indicates a wrong amount of data bytes. Expected: {dataLength}. Actual: {expectedDataLength / 8}");
+            Debug.LogException(e);
+            Debug.Break();
         }
 
-        public void SkipBits(int numBits) {
-            if (fileStream == null) {
-                throw new InvalidOperationException("No file is open.");
-            }
-            int bitsRead = 0;
+        fileReader.SkipBits(offset);
+        bool[] dataArray = fileReader.ReadBits(dataLength * 8 - offset);
 
-            while (bitsRead < numBits) {
-                if (bitOffset == 0) {
-                    int bytesRead = fileStream.Read(buffer, 0, buffer.Length);
+        fileReader.CloseFile();
 
-                    if (bytesRead == 0) {
-                        break; // End of file
-                    }
-                }
+        voxelMap = new bool[SimulationSettings.Width, SimulationSettings.Height, SimulationSettings.Depth];
 
-                bitOffset = (bitOffset + 1) % 8;
-                bitsRead++;
-            }
-        }
+        for (int i = 0; i < dataArray.Length; i++) {
+            int x = i / (width * height);
+            int y = (i % (width * height)) / width;
+            int z = (i % (width * height)) % width;
 
-        public bool[] ReadRemainingBits() {
-            if (fileStream == null) {
-                throw new InvalidOperationException("No file is open.");
-            }
-
-            const int bufferSize = 4096; // Adjust the buffer size as needed
-            byte[] buffer = new byte[bufferSize];
-            bool[] bits = new bool[bufferSize * 8];
-            int bitsRead = 0;
-
-            while (true) {
-                int bytesRead = fileStream.Read(buffer, 0, buffer.Length);
-
-                if (bytesRead == 0) {
-                    break; // End of file
-                }
-
-                for (int i = 0; i < bytesRead; i++) {
-                    for (int j = 7; j >= 0; j--) {
-                        bits[bitsRead] = ((buffer[i] >> j) & 1) == 1;
-                        bitsRead++;
-
-                        if (bitsRead >= bits.Length) {
-                            return bits; // Return the bits if the array is full
-                        }
-                    }
-                }
-            }
-
-            // Trim the bits array to remove unused elements
-            Array.Resize(ref bits, bitsRead);
-
-            return bits;
-        }
-
-        public int ReadBitsAsInt(int numBits) {
-            bool[] bits = ReadBits(numBits);
-            int result = 0;
-
-            foreach (bool bit in bits) {
-                result = result * 2 + (bit ? 1 : 0);
-            }
-
-            return result;
+            voxelMap[x, y, z] = dataArray[i];
         }
     }
-
 }

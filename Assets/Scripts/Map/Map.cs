@@ -2,6 +2,7 @@ using MAES3D;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Map : MonoBehaviour {
@@ -51,7 +52,16 @@ public class Map : MonoBehaviour {
     }
 
     public void ExportMap() {
-
+        Debug.Log($"Saving map to file {SimulationSettings.seed}.m3dm");
+        M3DMWriter fileWriter = new M3DMWriter();
+        fileWriter.WriteInt(SizeX, 7);
+        fileWriter.WriteInt(SizeY, 7);
+        fileWriter.WriteInt(SizeZ, 7);
+        int offset = (8 - SizeX * SizeY * SizeZ) % 8;
+        fileWriter.WriteInt(offset, 3);
+        fileWriter.WriteInt(0, offset);
+        fileWriter.WriteBools(_voxelMap.Cast<bool>().ToList());
+        fileWriter.CommitToFile($"maps/{SimulationSettings.seed}.m3dm");
     }
 
     private int CalculateNumberOfExplorableTiles() {

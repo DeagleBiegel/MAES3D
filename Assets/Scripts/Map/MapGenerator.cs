@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
 public abstract class MapGenerator {
@@ -18,8 +20,6 @@ public abstract class MapGenerator {
     public bool[,,] GenerateMap() {
 
         PopulateVoxelMap();
-
-        RemovePockets();
 
         return voxelMap;
     }
@@ -74,7 +74,7 @@ public abstract class MapGenerator {
         voxelMap = tempMap;
     }
 
-    private void RemovePockets() {
+    protected void RemovePockets() {
         int[,,] group = new int[voxelMap.GetLength(0), voxelMap.GetLength(1), voxelMap.GetLength(2)];
         int currentGroup = 0;
 

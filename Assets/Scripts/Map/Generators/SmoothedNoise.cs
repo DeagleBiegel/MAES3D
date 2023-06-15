@@ -25,5 +25,6 @@ public class SmoothedNoise : MapGenerator {
 
         SmoothenMap(smoothingIterations);
 
+        RemovePockets();
     }
 }

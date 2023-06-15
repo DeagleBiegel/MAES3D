@@ -59,10 +59,6 @@ public class UIBehaviour : MonoBehaviour
     private    SliderInt RCS_mapHeight;
     private    SliderInt RCS_mapWidth;
     private    SliderInt RCS_mapDepth;
-
-
-        // ImportMap()
-    private Button btnImportMap;
     
     // CameraUI Interactable
     private    Button btnPrevCam;
@@ -248,19 +244,16 @@ public class UIBehaviour : MonoBehaviour
                 switch (dropdownMapGenerators.index)
                 {
                     case 0:
-                        btnImportMap.SetEnabled(false);
                         newMapGen.SetEnabled(true);
                         oldMapGen.SetEnabled(false);
                         seedGB.SetEnabled(true);
                         break;
                     case 1:
-                        btnImportMap.SetEnabled(false);
                         newMapGen.SetEnabled(false);
                         oldMapGen.SetEnabled(true);
                         seedGB.SetEnabled(true);
                         break;
                     case 2:
-                        btnImportMap.SetEnabled(true);
                         newMapGen.SetEnabled(false);
                         oldMapGen.SetEnabled(false);
                         seedGB.SetEnabled(false);
@@ -271,11 +264,6 @@ public class UIBehaviour : MonoBehaviour
                         break;
                 }
             });
-            btnImportMap.clickable.clicked += () => {
-                // OpenFileExplorer();
-
-            };
-
 
             // General Settings
             agentCount.RegisterValueChangedCallback(v =>{
@@ -387,6 +375,11 @@ public class UIBehaviour : MonoBehaviour
                         SimulationSettings.Height = SN_mapHeight.value;
                         SimulationSettings.Width = SN_mapWidth.value;
                         SimulationSettings.Depth = SN_mapDepth.value;
+                        break;
+                    case 2:
+                        SimulationSettings.Height = 1;
+                        SimulationSettings.Width = 1;
+                        SimulationSettings.Depth = 1;
                         break;
                     default:
                         Debug.LogError("Something went wrong with map generator selection");
@@ -531,10 +524,6 @@ public class UIBehaviour : MonoBehaviour
             RCS_mapHeight = root.Q<SliderInt>("RCS_MapHeight");
             RCS_mapWidth = root.Q<SliderInt>("RCS_MapWidth");
             RCS_mapDepth = root.Q<SliderInt>("RCS_MapDepth");
-
-            // ImportMap()
-            btnImportMap = root.Q<Button>("ButtonImportMap");
-            btnImportMap.SetEnabled(false);
 
 
     }

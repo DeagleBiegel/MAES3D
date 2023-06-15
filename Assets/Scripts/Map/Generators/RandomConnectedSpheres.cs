@@ -106,6 +106,7 @@ public class RandomConnectedSpheres : MapGenerator {
 
         SmoothenMap(smoothingIterations);
 
+        RemovePockets();
     }
 
     private void FreeVoxelsAlongLine(Cell start, Cell end, int distance) {
