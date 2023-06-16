@@ -28,7 +28,6 @@ public class UIBehaviour : MonoBehaviour
     
     // CaveUI Interactables
         // Advanced Settings
-
     private SliderInt AS_AStarIterations;
     private SliderInt AS_UnexploredChunkSize;
 
@@ -88,7 +87,8 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            // Debug.LogWarning("No UI is enabled");
+            Debug.LogError("No UI is enabled");
+            Debug.Break();
         }
 
         if(timeLeft > 0){
@@ -122,7 +122,6 @@ public class UIBehaviour : MonoBehaviour
 
         if (mainCamera != null)
         {
-            // Debug.Log($"click: agentIndex = {agentIndex}");
             GameObject map = GameObject.Find("Map(Clone)");
 
             if (agentIndex == -1)
@@ -165,7 +164,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            // Debug.LogError("Not Valid UI Selected");
+            Debug.LogError("Not Valid UI Selected");
             Debug.Break();
         }
     }
@@ -183,7 +182,6 @@ public class UIBehaviour : MonoBehaviour
                 if (cameraController.IsTransitioning())
                     return;
 
-                // Debug.Log("Prev Clicked");
                 agentIndex--;
                 ChangeCam();
             };
@@ -192,7 +190,6 @@ public class UIBehaviour : MonoBehaviour
             {
                 if (cameraController.IsTransitioning())
                     return;
-                // Debug.Log("Cave Clicked");
                 agentIndex = -1;
                 ChangeCam();
             };
@@ -201,7 +198,6 @@ public class UIBehaviour : MonoBehaviour
             {
                 if (cameraController.IsTransitioning())
                     return;
-                // Debug.Log("Next Clicked");
                 agentIndex++;
                 ChangeCam();
             };
@@ -213,7 +209,6 @@ public class UIBehaviour : MonoBehaviour
         }
         else if (UIDoc == CaveUI)
         {
-            // Debug.Log("CaveUI Updated");
             VisualElement CaveRoot = CaveUI.rootVisualElement;
 
             // Update References to Interactables
@@ -261,6 +256,7 @@ public class UIBehaviour : MonoBehaviour
 
                     default:
                         Debug.LogError("Dropdown Out of Range");
+                        Debug.Break();
                         break;
                 }
             });
@@ -327,11 +323,9 @@ public class UIBehaviour : MonoBehaviour
 
             // Simulation Controls
             btnStart.clickable.clicked += () => {
-                // Debug.Log("Start Clicked");
 
                 if ((Simulation)FindObjectOfType(typeof(Simulation)) != null)
                 {
-                    // Debug.Log("Tried to start a simulation while another simulation is running.");
                     return;
                 }
                 CameraUI.enabled = true; // Enables the camera controls UI
@@ -383,6 +377,7 @@ public class UIBehaviour : MonoBehaviour
                         break;
                     default:
                         Debug.LogError("Something went wrong with map generator selection");
+                        Debug.Break();
                         return;
                 }
 
@@ -415,7 +410,6 @@ public class UIBehaviour : MonoBehaviour
                 agentIndex = -1;
             };
             btnStop.clickable.clicked += () => {
-                // Debug.Log("Stop Clicked");
                 CameraUI.enabled = false; // Disables the camera controls UI
                 unexploredMap = null; // Removes the reference to unexplored map mesh
 
@@ -430,7 +424,7 @@ public class UIBehaviour : MonoBehaviour
         }
         else
         {
-            // Debug.LogError("Not Valid UI Selected");
+            Debug.LogError("Not Valid UI Selected");
             Debug.Break();
         }
     }
@@ -527,26 +521,4 @@ public class UIBehaviour : MonoBehaviour
 
 
     }
-/*
-    private void OpenFileExplorer(){
-        string path;
-        path = EditorUtility.OpenFilePanel("Select a Voxel-Map", "", "vmap");
-        StartCoroutine(GetMap(path));
-    }
-    IEnumerator GetMap(string paths){
-        UnityWebRequest www = UnityWebRequest.Get("file:// /" + paths);
-
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.LogWarning(www.error);
-        }
-        else
-        {
-            var myMap = ((DownloadHandlerFile)www.downloadHandler);
-            // use myMap here
-        }
-    }
-*/
 }

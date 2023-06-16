@@ -235,8 +235,6 @@ namespace MAES3D.Agent {
         {
             var position = GetPosition();
 
-            Debug.DrawLine(position, targetCell.middle, Color.red);
-
             //Check if target cell is explored
             if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
                 Debug.LogWarning($"An wants to move to the cell {targetCell} but it is unexplored\n" +
@@ -303,8 +301,6 @@ namespace MAES3D.Agent {
         }
 
         public void MoveToCell(Cell targetCell) {
-
-            Debug.DrawLine(GetPosition(), targetCell.middle, Color.red);
 
             //Check if target cell is explored
             if (ExplorationMap.GetCellStatus(targetCell) == CellStatus.unexplored) {
