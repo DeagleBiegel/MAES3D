@@ -461,6 +461,19 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
             return $"Destination: ({Utility.CoordinateToCell(_destination.position).middle.x.ToString("n2")}, {Utility.CoordinateToCell(_destination.position).middle.y.ToString("n2")}, {Utility.CoordinateToCell(_destination.position).middle.z.ToString("n2")})\n\nCurrent Stage: {_stage}";
         }
+
+        public void Communicate(SubmarineAgent agent) {
+
+            DualStageViewpointPlanner agentAlgo = agent.Algorithm as DualStageViewpointPlanner;
+
+            agentAlgo.UpdateGlobalFrontiers();
+
+            foreach (Cell cell in agentAlgo.globalFrontiers) {
+                if (!globalFrontiers.Contains(cell)) {
+                    globalFrontiers.Add(cell);
+                }
+            }
+        }
     }
 
     public class RRTnode{

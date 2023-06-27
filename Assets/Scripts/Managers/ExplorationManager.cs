@@ -54,7 +54,7 @@ namespace MAES3D.Agent {
             }
         }
 
-        private void UpdateMap(SubmarineAgent agent) 
+        public void UpdateMap(SubmarineAgent agent) 
         {
             agent.Controller.ExplorationMap.ResetCurrentView();
             Vector3 agentPosition = agent.Controller.GetPosition();
@@ -138,13 +138,17 @@ namespace MAES3D.Agent {
 
                         if (_exploredMap[cell.x, cell.y, cell.z] == false) 
                         {
+                            agent.Controller.ExplorationMap.newExploredCells.Add(cell);
                             NewlyExplored.Add(new Vector3Int(cell.x, cell.y, cell.z));
                             _exploredMap[cell.x, cell.y, cell.z] = true;
                             _exploredTiles++;
                         }
                     }
 
+
+
                     _hasBeenSeen[cell.x, cell.y, cell.z] = true;
+
                 }
             }
         }

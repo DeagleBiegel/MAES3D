@@ -39,5 +39,9 @@ namespace MAES3D.Algorithm.RandomBalisticWalk {
         public string GetInformation(){
             return "This algorithm does not contain additional information.";
         }
+
+        public void Communicate(SubmarineAgent agent) {
+            return;
+        }
     }
 }

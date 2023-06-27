@@ -8,5 +8,7 @@ namespace MAES3D.Algorithm {
         public void UpdateLogic();
 
         public string GetInformation();
+
+        public void Communicate(SubmarineAgent agent);
     }
 }

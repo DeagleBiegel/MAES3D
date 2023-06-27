@@ -359,5 +359,9 @@ namespace MAES3D.Algorithm.LocalVoronoiDecomposition
         public string GetInformation(){
             return $"Destination: ({_destination.middle.x.ToString("n2")}, {_destination.middle.y.ToString("n2")}, {_destination.middle.z.ToString("n2")})\n\nSearch Mode: {_searchMode}";
         }
+
+        public void Communicate(SubmarineAgent agent) {
+            return;
+        }
     }
 }

@@ -18,6 +18,9 @@ namespace MAES3D.Agent {
         private List<Vector3> _visibleAgentPositions;
         private List<SubmarineAgent> _visibleAgents;
 
+        public List<Cell> newExploredCells { get; set; }
+
+
         public ExplorationMap(int mapSizeX, int mapSizeY, int mapSizeZ) {
 
             _blankMap = new CellStatus[mapSizeX, mapSizeY, mapSizeZ];
@@ -34,6 +37,7 @@ namespace MAES3D.Agent {
             _visibleCells = new List<Cell>();
             _visibleAgentPositions = new List<Vector3>();
             _visibleAgents = new List<SubmarineAgent>();
+            newExploredCells = new List<Cell>();
         }
 
         public CellStatus[,,] GetMap() {

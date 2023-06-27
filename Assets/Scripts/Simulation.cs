@@ -5,6 +5,7 @@ using MAES3D.Algorithm.LocalVoronoiDecomposition;
 using MAES3D.Algorithm.DualStageViewpointPlanner;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor.PackageManager;
 
 namespace MAES3D {
     public class Simulation : MonoBehaviour {
@@ -14,7 +15,7 @@ namespace MAES3D {
         public GameObject ExplorationPrefab;
 
         public ExplorationManager ExplorationManager;
-        public CommunicationManager CommunicationManager;
+        public NewCommunicationManager CommunicationManager;
 
         private List<SubmarineAgent> _agents;
         
@@ -33,7 +34,7 @@ namespace MAES3D {
                 agent.LogicUpdate();
 
             //Communicate
-            CommunicationManager.ShareMaps(_agents);
+            CommunicationManager.ShareMaps();
 
             //Move
             foreach (SubmarineAgent agent in _agents)
@@ -101,7 +102,7 @@ namespace MAES3D {
             }
 
             ExplorationManager = new ExplorationManager();
-            CommunicationManager = new CommunicationManager(_agents, 5);
+            CommunicationManager = new NewCommunicationManager(_agents);
 
             Instantiate(ExplorationPrefab, parent: transform);
         }
