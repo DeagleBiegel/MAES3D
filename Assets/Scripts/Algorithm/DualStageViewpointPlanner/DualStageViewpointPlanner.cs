@@ -16,7 +16,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
 
         public List<Cell> localFrontiers = new List<Cell>();
         
-        public List<Cell> globalFrontiers = new List<Cell>();
+        public HashSet<Cell> globalFrontiers = new HashSet<Cell>();
 
         public Vector3 lastExplorationDirection = new Vector3(0,0,1);
 
@@ -48,7 +48,8 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         public void UpdateLogic()
-        {               
+        {
+
             if (done && globalFrontiers.Count == 0)
             {
                 return;
@@ -84,6 +85,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             
             if (_controller.GetCurrentStatus() == Status.Idle)
             {
+
                 _destination = ExplorationStage(location, relocated);
 
                 if (location != _destination && localFrontiers.Count != 0)
@@ -171,13 +173,10 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         public void UpdateGlobalFrontiers(){
-            for (int i = globalFrontiers.Count-1; i >= 0; i--)
-            {
-                if (!ValidFrontier(globalFrontiers[i]))
-                {
-                    globalFrontiers.RemoveAt(i);
-                }
-            }
+            Debug.Log("========");
+            Debug.Log(globalFrontiers.Count);
+            globalFrontiers.RemoveWhere(delegate(Cell c) { return !ValidFrontier(c); });
+            Debug.Log(globalFrontiers.Count);
         }
 
         private RRTnode CalculateBestDestination(){
@@ -469,9 +468,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
             agentAlgo.UpdateGlobalFrontiers();
 
             foreach (Cell cell in agentAlgo.globalFrontiers) {
-                if (!globalFrontiers.Contains(cell)) {
-                    globalFrontiers.Add(cell);
-                }
+                globalFrontiers.Add(cell);
             }
         }
     }

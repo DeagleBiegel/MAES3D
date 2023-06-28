@@ -19,7 +19,7 @@ namespace MAES3D.Agent {
 
         public NewCommunicationManager(List<SubmarineAgent> managedAgents, float algoCommInterval = 5) {
 
-            _algoCommInterval = _algoCommInterval / Time.fixedDeltaTime;
+            _algoCommInterval = algoCommInterval / Time.fixedDeltaTime;
             _algoCommTick = 0;
 
             _managedAgents = managedAgents;
@@ -101,8 +101,6 @@ namespace MAES3D.Agent {
             }
 
         }
-
-
 
 
         private void EvaluateSharedMaps() {
