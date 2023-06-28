@@ -30,6 +30,7 @@ public class UIBehaviour : MonoBehaviour
         // Advanced Settings
     private SliderInt AS_AStarIterations;
     private SliderInt AS_UnexploredChunkSize;
+    private SliderInt AS_CommunicationRange;
 
         // General
     private    SliderInt agentCount;
@@ -231,6 +232,9 @@ public class UIBehaviour : MonoBehaviour
             AS_UnexploredChunkSize.RegisterValueChangedCallback(v =>{
                 AS_UnexploredChunkSize.Q<TextField>("unity-text-field").label = AS_UnexploredChunkSize.value.ToString();
             });
+            AS_CommunicationRange.RegisterValueChangedCallback(v =>{
+                AS_CommunicationRange.Q<TextField>("unity-text-field").label = AS_CommunicationRange.value.ToString();
+            });
 
                         
             // MapGenLayout
@@ -335,6 +339,7 @@ public class UIBehaviour : MonoBehaviour
                 // Adds values from VisualElements to SimulationSettings
                 SimulationSettings.AStarIterations = AS_AStarIterations.value;
                 SimulationSettings.UnexploredChunkSize = AS_UnexploredChunkSize.value;
+                SimulationSettings.CommunicationRange = AS_CommunicationRange.value;
                 SimulationSettings.algorithm = dropdownAlgorithm.index;
                 SimulationSettings.agentCount = agentCount.value;
                 SimulationSettings.duration = duration.value*60; // in minutes
@@ -490,6 +495,7 @@ public class UIBehaviour : MonoBehaviour
             // Advanced Settings
             AS_AStarIterations = root.Q<SliderInt>("AS_AStarIterations");
             AS_UnexploredChunkSize = root.Q<SliderInt>("AS_UnexploredChunkSize");
+            AS_CommunicationRange = root.Q<SliderInt>("AS_CommunicationRange");
             
             // General
             agentCount = root.Q<SliderInt>("AgentCount");
