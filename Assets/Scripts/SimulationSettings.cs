@@ -8,6 +8,7 @@ public static class SimulationSettings
     public static int AStarIterations = 100;
     public static int UnexploredChunkSize = 32;
     public static int CommunicationRange = 50;
+    public static int SensingFOV = 360;
     //Base Settings
     public static int mapGen = 0; //0 = RandomConnectedSpheres(), 1 = SmoothedNoise()
     public static int Instance = 0;

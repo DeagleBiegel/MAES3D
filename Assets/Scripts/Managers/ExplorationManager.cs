@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using TMPro;
@@ -62,6 +63,16 @@ namespace MAES3D.Agent {
 
             foreach (ObservationLine observationLine in _observationLines) 
             {
+                if(SimulationSettings.SensingFOV < 360){
+                    float cutoff = SimulationSettings.SensingFOV / 2;
+                    float angle = Vector3.Angle(agent.transform.forward, observationLine.dir);
+                    if (angle < cutoff || angle > 360 - cutoff) {
+                        Debug.DrawRay(agentPosition, observationLine.dir, Color.red, 0.2f);
+                    }
+                    else {
+                        continue;
+                    }
+                }
                 UpdateCells(agentPosition, observationLine, agent);
             }
 
@@ -442,8 +453,12 @@ namespace MAES3D.Agent {
         public readonly Vector3 tMaxPart = new Vector3();
 
         public readonly Cell targetCellOffset;
+        public readonly Vector3 dir;
 
         public ObservationLine(Vector3 ray) {
+            //Keep the original direction of the ray
+            dir = ray.normalized;
+
             //Caluclate the vectors that are required to pass one gridline on each axis
             Vector3 Xscaler = Vector3.one * 1 / (ray.x == 0 ? ray.x + 0.0001f : ray.x);
             Vector3 Yscaler = Vector3.one * 1 / (ray.y == 0 ? ray.y + 0.0001f : ray.y);
