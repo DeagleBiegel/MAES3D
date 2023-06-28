@@ -71,12 +71,17 @@ namespace MAES3D.Agent {
             otherAgents.Remove(self);
 
             foreach (SubmarineAgent otherAgent in otherAgents) {
+                Vector3 ownPosition = self.Controller.GetPosition();
                 Vector3 otherAgentPosition = otherAgent.Controller.GetPosition();
 
-                if (!Physics.Linecast(self.Controller.GetPosition(), otherAgentPosition, LayerMask.GetMask("Map"))) {
-                    _visibleAgentPositions.Add(otherAgent.Controller.GetPosition());
-                    _visibleAgents.Add(otherAgent);
+                //If agent are not to far from each other and they are in line of sight
+                if(Vector3.Distance(ownPosition, otherAgentPosition) < SimulationSettings.CommunicationRange) {
+                    if (!Physics.Linecast(self.Controller.GetPosition(), otherAgentPosition, LayerMask.GetMask("Map"))) {
+                        _visibleAgentPositions.Add(otherAgent.Controller.GetPosition());
+                        _visibleAgents.Add(otherAgent);
+                    }
                 }
+
             }
         }
 
