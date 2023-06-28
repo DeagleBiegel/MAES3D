@@ -173,10 +173,7 @@ namespace MAES3D.Algorithm.DualStageViewpointPlanner {
         }
 
         public void UpdateGlobalFrontiers(){
-            Debug.Log("========");
-            Debug.Log(globalFrontiers.Count);
             globalFrontiers.RemoveWhere(delegate(Cell c) { return !ValidFrontier(c); });
-            Debug.Log(globalFrontiers.Count);
         }
 
         private RRTnode CalculateBestDestination(){
