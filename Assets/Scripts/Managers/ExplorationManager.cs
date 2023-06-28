@@ -66,10 +66,7 @@ namespace MAES3D.Agent {
                 if(SimulationSettings.SensingFOV < 360){
                     float cutoff = SimulationSettings.SensingFOV / 2;
                     float angle = Vector3.Angle(agent.transform.forward, observationLine.dir);
-                    if (angle < cutoff || angle > 360 - cutoff) {
-                        Debug.DrawRay(agentPosition, observationLine.dir, Color.red, 0.2f);
-                    }
-                    else {
+                    if (!(angle < cutoff || angle > 360 - cutoff)) {
                         continue;
                     }
                 }
