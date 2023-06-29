@@ -7,6 +7,7 @@
                 <ui:SliderInt picking-mode="Ignore" label="A* Corutine Iterations" value="100" high-value="250" name="AS_AStarIterations" show-input-field="true" low-value="10" focusable="false" class="property" />
                 <ui:SliderInt label="Chunk Size" value="32" high-value="100" name="AS_UnexploredChunkSize" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
                 <ui:SliderInt label="Communication Range" value="50" high-value="100" name="AS_CommunicationRange" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
+                <ui:SliderInt label="Sensing FOV" value="360" high-value="360" name="AS_SensingFOV" show-input-field="true" low-value="1" direction="Horizontal" focusable="false" class="property TextField" style="flex-direction: column;" />
             </ui:Foldout>
             <ui:GroupBox name="Simulation" class="smallContainer" style="margin-left: 0; margin-right: 0; margin-top: 5px; margin-bottom: 5px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;">
                 <ui:Label text="Simulation" display-tooltip-when-elided="true" name="Title" enable-rich-text="false" class="secTitle" style="-unity-text-align: upper-center; height: 22px;" />

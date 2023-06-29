@@ -31,6 +31,7 @@ public class UIBehaviour : MonoBehaviour
     private SliderInt AS_AStarIterations;
     private SliderInt AS_UnexploredChunkSize;
     private SliderInt AS_CommunicationRange;
+    private SliderInt AS_SensingFOV;
 
         // General
     private    SliderInt agentCount;
@@ -235,6 +236,9 @@ public class UIBehaviour : MonoBehaviour
             AS_CommunicationRange.RegisterValueChangedCallback(v =>{
                 AS_CommunicationRange.Q<TextField>("unity-text-field").label = AS_CommunicationRange.value.ToString();
             });
+            AS_SensingFOV.RegisterValueChangedCallback(v =>{
+                AS_SensingFOV.Q<TextField>("unity-text-field").label = AS_SensingFOV.value.ToString();
+            });
 
                         
             // MapGenLayout
@@ -340,6 +344,7 @@ public class UIBehaviour : MonoBehaviour
                 SimulationSettings.AStarIterations = AS_AStarIterations.value;
                 SimulationSettings.UnexploredChunkSize = AS_UnexploredChunkSize.value;
                 SimulationSettings.CommunicationRange = AS_CommunicationRange.value;
+                SimulationSettings.SensingFOV = AS_SensingFOV.value;
                 SimulationSettings.algorithm = dropdownAlgorithm.index;
                 SimulationSettings.agentCount = agentCount.value;
                 SimulationSettings.duration = duration.value*60; // in minutes
@@ -496,6 +501,7 @@ public class UIBehaviour : MonoBehaviour
             AS_AStarIterations = root.Q<SliderInt>("AS_AStarIterations");
             AS_UnexploredChunkSize = root.Q<SliderInt>("AS_UnexploredChunkSize");
             AS_CommunicationRange = root.Q<SliderInt>("AS_CommunicationRange");
+            AS_SensingFOV = root.Q<SliderInt>("AS_SensingFOV");
             
             // General
             agentCount = root.Q<SliderInt>("AgentCount");
